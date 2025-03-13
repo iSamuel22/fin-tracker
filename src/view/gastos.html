@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adicionar Gastos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/src/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">FinTracker</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="dashboard.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="gastos.html">Gastos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="receitas.html">Receitas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="metas.html">Metas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="relatorio.html">Relatório</a>
+                    </li>
+                    <li class="nav-item dropdown ms-auto">
+                        <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle"></i> Minha Conta
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                            <li><a class="dropdown-item" href="#" id="logout-button"><i class="fas fa-sign-out-alt"></i>
+                                    Sair</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item text-danger" href="#" id="delete-account-button"><i
+                                        class="fas fa-trash"></i> Excluir Conta</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <br>
+
+    <div class="container">
+        <h1>Adicionar Gastos</h1>
+
+        <div class="form-container">
+            <form id="expenseForm">
+                <div class="mb-3">
+                    <label for="description" class="form-label">Descrição</label>
+                    <input type="text" class="form-control" id="description" required>
+                </div>
+                <div class="mb-3">
+                    <label for="amount" class="form-label">Valor</label>
+                    <div class="input-group">
+                        <span class="input-group-text">R$</span>
+                        <input type="number" class="form-control" id="amount" min="0" step="0.01" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="category" class="form-label">Categoria</label>
+                    <select class="form-select" id="category" required>
+                        <option value="">Selecione</option>
+                        <option value="Alimentacao">Alimentação</option>
+                        <option value="Transporte">Transporte</option>
+                        <option value="Lazer">Lazer</option>
+                        <option value="Moradia">Moradia</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+                <div class="mb-3" id="newCategoryField" style="display: none;">
+                    <label for="newCategoryName" class="form-label">Nome da Nova Categoria</label>
+                    <input type="text" class="form-control" id="newCategoryName">
+                </div>
+                <div class="mb-3">
+                    <label for="date" class="form-label">Data</label>
+                    <input type="date" class="form-control" id="date" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Adicionar</button>
+            </form>
+        </div>
+
+        <div class="expense-list">
+            <h2>Lista de Gastos</h2>
+            <div id="expensesList">
+                <!-- a lista de gastos será exibida aqui -->
+            </div>
+        </div>
+
+        <!-- modal de edição -->
+        <div id="editModal" class="modal">
+            <div class="modal-content">
+                <span class="close">×</span>
+                <h2>Editar Gasto</h2>
+                <form id="editExpenseForm">
+                    <div class="mb-3">
+                        <label for="editDescription" class="form-label">Descrição</label>
+                        <input type="text" class="form-control" id="editDescription" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editAmount" class="form-label">Valor</label>
+                        <div class="input-group">
+                            <span class="input-group-text">R$</span>
+                            <input type="number" class="form-control" id="editAmount" min="0" step="0.01" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editCategory" class="form-label">Categoria</label>
+                        <select class="form-select" id="editCategory" required>
+                            <option value="">Selecione</option>
+                            <option value="Alimentacao">Alimentação</option>
+                            <option value="Transporte">Transporte</option>
+                            <option value="Lazer">Lazer</option>
+                            <option value="Moradia">Moradia</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="editNewCategoryField" style="display: none;">
+                        <label for="editNewCategoryField" class="form-label">Nome da Nova Categoria</label>
+                        <input type="text" class="form-control" id="editNewCategoryField">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editDate" class="form-label">Data</label>
+                        <input type="date" class="form-control" id="editDate" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    <button type="button" class="btn btn-secondary" onclick="fecharModalEdicao()">Cancelar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+    <script type="module" src="/src/controller/gastos.js"></script>
+</body>
+
+</html>

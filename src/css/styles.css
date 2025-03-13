@@ -1,0 +1,453 @@
+/* cores em variáveis */
+:root {
+    --primary-color: #29ABE2;
+    --secondary-color: #777777;
+    --success-color: #2ECC71;
+    --danger-color: #E74C3C;
+    --light-color: #ECF0F1;
+    --dark-color: #2C3E50;
+    --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* geral */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--light-color);
+    color: var(--dark-color);
+    line-height: 1.6;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+}
+
+/* tela de introdução (index.html) */
+.intro-container {
+    max-width: 700px;
+    margin: auto;
+    padding: 60px;
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: var(--box-shadow);
+    text-align: center;
+}
+
+.intro-container h1 {
+    color: var(--dark-color);
+    font-size: 3em;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.intro-container p {
+    color: var(--secondary-color);
+    font-size: 1.3em;
+    margin-bottom: 40px;
+}
+
+/* botões */
+.btn {
+    font-size: 1.1em;
+    padding: 12px 30px;
+    border-radius: 30px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: var(--box-shadow);
+    cursor: pointer;
+    border: none;
+    outline: none;
+    margin: 5px;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #1B82B0;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    color: #fff;
+}
+
+.btn-secondary:hover {
+    background-color: #555555;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* barra de navegação */
+.navbar {
+    background-color: var(--dark-color);
+    padding: 20px;
+    /* removida a especificação '0' */
+    box-shadow: var(--box-shadow);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    /* espaçamento entre elementos */
+    align-items: center;
+}
+
+.navbar-brand {
+    color: #fff;
+    font-size: 2em;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.navbar-brand:hover {
+    color: var(--primary-color);
+}
+
+.navbar-toggler {
+    border: none;
+    background-color: transparent;
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3e%3cpath stroke='rgba(255, 255, 255, 0.7)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+.navbar-nav {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    /* links para a direita */
+}
+
+.navbar-nav .nav-link {
+    color: #fff;
+    font-size: 1.2em;
+    padding: 15px 20px;
+    border-radius: 50px;
+    margin: 0 8px;
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--primary-color);
+    transform: translateY(-3px);
+    box-shadow: var(--box-shadow);
+}
+
+.navbar-nav .nav-link.active {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+/* botão de sair */
+.logout-button {
+    background-color: var(--danger-color);
+    color: #fff;
+    font-size: 1.1em;
+    padding: 12px 20px;
+    border-radius: 50px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: var(--box-shadow);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.logout-button:hover {
+    background-color: #C62828;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.logout-button i {
+    margin-right: 8px;
+}
+
+/* container do gráfico */
+.chart-container {
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: var(--box-shadow);
+    padding: 40px;
+    margin-bottom: 40px;
+}
+
+.chart-container h2 {
+    font-size: 2.5em;
+    color: var(--dark-color);
+    margin-bottom: 30px;
+    text-align: center;
+    font-weight: 600;
+}
+
+/* formulários de login e registro */
+.login-container, .register-container {
+    max-width: 600px;
+    margin: 60px auto;
+    padding: 50px;
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: var(--box-shadow);
+}
+
+.login-container h2, .register-container h2 {
+    color: var(--primary-color);
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 2.2em;
+    font-weight: 600;
+}
+
+.form-label {
+    color: var(--dark-color);
+    font-weight: 500;
+    margin-bottom: 8px;
+    font-size: 1.1em;
+}
+
+.form-control {
+    border-radius: 10px;
+    border: 2px solid #ced4da;
+    padding: 15px;
+    font-size: 1em;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(41, 171, 226, 0.25);
+}
+
+.input-group-text {
+    background-color: var(--light-color);
+    color: var(--secondary-color);
+    border: 2px solid #ced4da;
+    border-radius: 10px 0 0 10px;
+    padding: 15px 20px;
+}
+
+.form-text {
+    color: var(--secondary-color);
+    margin-top: 8px;
+    font-size: 0.9em;
+}
+
+.text-danger {
+    color: var(--danger-color) !important;
+    font-size: 0.9em;
+}
+
+.text-info {
+    color: var(--primary-color) !important;
+    font-size: 0.9em;
+}
+
+footer {
+    background-color: var(--dark-color);
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+    margin-top: auto;
+    box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* *** gastos *** */
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+/* lista de gastos */
+.expense-list {
+    margin-top: 20px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: var(--box-shadow);
+    padding: 20px;
+}
+
+.expense-item {
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.expense-item:last-child {
+    border-bottom: none;
+}
+
+/* metas */
+.goal-list {
+    margin-top: 20px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: var(--box-shadow);
+    padding: 20px;
+}
+
+.goal-item {
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.goal-item:last-child {
+    border-bottom: none;
+}
+
+/* botões de editar e excluir */
+.btn-edit,
+.btn-delete {
+    padding: 8px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border: none;
+    outline: none;
+    margin-left: 5px;
+}
+
+.btn-edit {
+    background-color: #29ABE2;
+    color: white;
+}
+
+.btn-edit:hover {
+    background-color: #1B82B0;
+}
+
+.btn-delete {
+    background-color: #E74C3C;
+    color: white;
+}
+
+.btn-delete:hover {
+    background-color: #C62828;
+}
+
+/* formulário */
+.form-container {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: var(--box-shadow);
+    padding: 30px;
+    margin-bottom: 30px;
+}
+
+/* modal de edição */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 12px;
+    box-shadow: var(--box-shadow);
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* dashboard */
+
+/* Adicionar ao seu CSS existente */
+.card {
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-title {
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+#totalReceitas, #totalGastos, #saldoTotal {
+    font-weight: 700;
+    margin-top: 0.5rem;
+}
+
+.chart-container {
+    position: relative;
+    margin: auto;
+    height: 300px;
+    width: 100%;
+}
+
+/* Adicionar ao seu CSS existente */
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.badge {
+    padding: 0.5em 0.75em;
+    font-weight: 500;
+}
+
+.form-select, .form-control {
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    padding: 0.5rem 1rem;
+}
+
+.form-select:focus, .form-control:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+.table-responsive {
+    border-radius: 8px;
+    overflow: hidden;
+}
