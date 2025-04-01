@@ -7,13 +7,31 @@ if (!Auth.isAuthenticated()) {
 
 // Configure user account buttons
 function setupUserAccountActions() {
-    // Função de logout
     const logoutButton = document.getElementById('logout-button');
     if (logoutButton) {
         logoutButton.addEventListener('click', (e) => {
             e.preventDefault();
-            Auth.logout();
+            console.log("Logout button clicked");
+            try {
+                // Verificar se temos o usuário antes de sair
+                const user = Auth.getLoggedInUser();
+                console.log("Current user before logout:", user);
+
+                // Chamada explícita para limpar local storage
+                localStorage.removeItem('loggedInUser');
+                console.log("Removed user from localStorage");
+
+                // Forçar redirecionamento para a página de login
+                console.log("Redirecting to login page...");
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Erro ao fazer logout:', error);
+                alert('Ocorreu um erro ao sair da conta: ' + (error.message || 'Tente novamente mais tarde'));
+            }
         });
+        console.log("Logout button event listener added");
+    } else {
+        console.error("Logout button not found in the DOM");
     }
 
     // Função de excluir conta
@@ -48,7 +66,6 @@ function showDeleteAccountConfirmation() {
                         <li>Gastos</li>
                         <li>Receitas</li>
                         <li>Metas</li>
-                        <li>Configurações</li>
                     </ul>
                 </div>
                 <div class="modal-footer">

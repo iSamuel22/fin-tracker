@@ -14,13 +14,31 @@ let categorias = ['Salário', 'Investimentos', 'Freelance', 'Presentes'];
 
 // Configure user account buttons
 function setupUserAccountActions() {
-    // Função de logout
     const logoutButton = document.getElementById('logout-button');
     if (logoutButton) {
         logoutButton.addEventListener('click', (e) => {
             e.preventDefault();
-            Auth.logout();
+            console.log("Logout button clicked");
+            try {
+                // Verificar se temos o usuário antes de sair
+                const user = Auth.getLoggedInUser();
+                console.log("Current user before logout:", user);
+
+                // Chamada explícita para limpar local storage
+                localStorage.removeItem('loggedInUser');
+                console.log("Removed user from localStorage");
+
+                // Forçar redirecionamento para a página de login
+                console.log("Redirecting to login page...");
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Erro ao fazer logout:', error);
+                alert('Ocorreu um erro ao sair da conta: ' + (error.message || 'Tente novamente mais tarde'));
+            }
         });
+        console.log("Logout button event listener added");
+    } else {
+        console.error("Logout button not found in the DOM");
     }
 
     // Função de excluir conta
@@ -55,7 +73,6 @@ function showDeleteAccountConfirmation() {
                         <li>Gastos</li>
                         <li>Receitas</li>
                         <li>Metas</li>
-                        <li>Configurações</li>
                     </ul>
                 </div>
                 <div class="modal-footer">
@@ -365,32 +382,52 @@ function exibirReceitas() {
     listaReceitas.innerHTML = '';
 
     if (receitas.length === 0) {
-        listaReceitas.innerHTML = '<p>Nenhuma receita adicionada ainda.</p>';
+        listaReceitas.innerHTML = '<div class="alert alert-info">Nenhuma receita adicionada ainda.</div>';
         return;
     }
+
+    // Criar tabela para exibir as receitas
+    const table = document.createElement('table');
+    table.className = 'table table-striped table-hover';
+    table.innerHTML = `
+        <thead>
+            <tr>
+                <th>Descrição</th>
+                <th>Valor</th>
+                <th>Categoria</th>
+                <th>Data</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    `;
+
+    const tbody = table.querySelector('tbody');
 
     // Ordenar receitas por data (mais recente primeiro)
     const receitasOrdenadas = [...receitas].sort((a, b) => new Date(b.data) - new Date(a.data));
 
     receitasOrdenadas.forEach((receita, index) => {
-        const itemReceita = document.createElement('div');
-        itemReceita.classList.add('expense-item');
-        itemReceita.style.border = "1px solid #ccc";
-        itemReceita.style.margin = "5px 0";
-        itemReceita.style.padding = "10px";
-
-        itemReceita.innerHTML = `
-            <span>${receita.descricao}</span>
-            <span>R$ ${parseFloat(receita.valor).toFixed(2)}</span>
-            <span>${receita.categoria}</span>
-            <span>${new Date(receita.data).toLocaleDateString()}</span>
-            <div>
-                <button class="btn btn-edit" onclick="window.abrirModalEdicao(${index})">Editar</button>
-                <button class="btn btn-delete" onclick="window.excluirReceita(${index})">Excluir</button>
-            </div>
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${receita.descricao}</td>
+            <td>R$ ${parseFloat(receita.valor).toFixed(2)}</td>
+            <td>${receita.categoria}</td>
+            <td>${new Date(receita.data).toLocaleDateString()}</td>
+            <td>
+                <button class="btn btn-sm btn-outline-primary" onclick="window.abrirModalEdicao(${index})">
+                    <i class="fas fa-edit"></i> Editar
+                </button>
+                <button class="btn btn-sm btn-outline-danger ms-1" onclick="window.excluirReceita(${index})">
+                    <i class="fas fa-trash"></i> Excluir
+                </button>
+            </td>
         `;
-        listaReceitas.appendChild(itemReceita);
+        tbody.appendChild(tr);
     });
+
+    listaReceitas.appendChild(table);
 }
 
 // Função para adicionar uma nova receita

@@ -14,13 +14,31 @@ let categorias = ['Alimentação', 'Transporte', 'Lazer', 'Moradia'];
 
 // Configure user account buttons
 function setupUserAccountActions() {
-    // Função de logout
     const logoutButton = document.getElementById('logout-button');
     if (logoutButton) {
         logoutButton.addEventListener('click', (e) => {
             e.preventDefault();
-            Auth.logout();
+            console.log("Logout button clicked");
+            try {
+                // Verificar se temos o usuário antes de sair
+                const user = Auth.getLoggedInUser();
+                console.log("Current user before logout:", user);
+
+                // Chamada explícita para limpar local storage
+                localStorage.removeItem('loggedInUser');
+                console.log("Removed user from localStorage");
+
+                // Forçar redirecionamento para a página de login
+                console.log("Redirecting to login page...");
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Erro ao fazer logout:', error);
+                alert('Ocorreu um erro ao sair da conta: ' + (error.message || 'Tente novamente mais tarde'));
+            }
         });
+        console.log("Logout button event listener added");
+    } else {
+        console.error("Logout button not found in the DOM");
     }
 
     // Função de excluir conta
@@ -55,7 +73,6 @@ function showDeleteAccountConfirmation() {
                         <li>Gastos</li>
                         <li>Receitas</li>
                         <li>Metas</li>
-                        <li>Configurações</li>
                     </ul>
                 </div>
                 <div class="modal-footer">
@@ -365,32 +382,52 @@ function exibirGastos() {
     listaGastos.innerHTML = '';
 
     if (gastos.length === 0) {
-        listaGastos.innerHTML = '<p>Nenhum gasto adicionado ainda.</p>';
+        listaGastos.innerHTML = '<div class="alert alert-info">Nenhum gasto adicionado ainda.</div>';
         return;
     }
+
+    // Criar tabela para exibir os gastos
+    const table = document.createElement('table');
+    table.className = 'table table-striped table-hover';
+    table.innerHTML = `
+        <thead>
+            <tr>
+                <th>Descrição</th>
+                <th>Valor</th>
+                <th>Categoria</th>
+                <th>Data</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    `;
+
+    const tbody = table.querySelector('tbody');
 
     // Ordenar gastos por data (mais recente primeiro)
     const gastosOrdenados = [...gastos].sort((a, b) => new Date(b.data) - new Date(a.data));
 
     gastosOrdenados.forEach((gasto, index) => {
-        const itemGasto = document.createElement('div');
-        itemGasto.classList.add('expense-item');
-        itemGasto.style.border = "1px solid #ccc";
-        itemGasto.style.margin = "5px 0";
-        itemGasto.style.padding = "10px";
-
-        itemGasto.innerHTML = `
-            <span>${gasto.descricao}</span>
-            <span>R$ ${parseFloat(gasto.valor).toFixed(2)}</span>
-            <span>${gasto.categoria}</span>
-            <span>${new Date(gasto.data).toLocaleDateString()}</span>
-            <div>
-                <button class="btn btn-edit" onclick="window.abrirModalEdicao(${index})">Editar</button>
-                <button class="btn btn-delete" onclick="window.excluirGasto(${index})">Excluir</button>
-            </div>
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${gasto.descricao}</td>
+            <td>R$ ${parseFloat(gasto.valor).toFixed(2)}</td>
+            <td>${gasto.categoria}</td>
+            <td>${new Date(gasto.data).toLocaleDateString()}</td>
+            <td>
+                <button class="btn btn-sm btn-outline-primary" onclick="window.abrirModalEdicao(${index})">
+                    <i class="fas fa-edit"></i> Editar
+                </button>
+                <button class="btn btn-sm btn-outline-danger ms-1" onclick="window.excluirGasto(${index})">
+                    <i class="fas fa-trash"></i> Excluir
+                </button>
+            </td>
         `;
-        listaGastos.appendChild(itemGasto);
+        tbody.appendChild(tr);
     });
+
+    listaGastos.appendChild(table);
 }
 
 // Função para adicionar um novo gasto
