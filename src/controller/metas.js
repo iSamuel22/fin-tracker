@@ -1,6 +1,7 @@
 import { Meta } from "../model/Meta.js";
 import { Auth } from "../services/Auth.js";
 import { FirestoreService } from "../services/FirestoreService.js";
+import Swal from 'https://cdn.jsdelivr.net/npm/sweetalert2@11/+esm';
 
 // Verificar autenticação
 if (!Auth.isAuthenticated()) {
@@ -24,11 +25,11 @@ function setupUserAccountActions() {
                 // Verificar se temos o usuário antes de sair
                 const user = Auth.getLoggedInUser();
                 console.log("Current user before logout:", user);
-                
+
                 // Chamada explícita para limpar local storage
                 localStorage.removeItem('loggedInUser');
                 console.log("Removed user from localStorage");
-                
+
                 // Forçar redirecionamento para a página de login
                 console.log("Redirecting to login page...");
                 window.location.href = 'login.html';
@@ -574,6 +575,16 @@ function salvarEdicaoMeta(evento) {
         setTimeout(() => {
             calcularEstimativas();
         }, 100);
+
+        // mensagem de sucesso com SweetAlert
+        Swal.fire({
+            title: 'Sucesso!',
+            text: 'A meta foi editada com sucesso.',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false
+        });
+
     } catch (erro) {
         alert(erro.message);
     }
@@ -581,14 +592,33 @@ function salvarEdicaoMeta(evento) {
 
 // excluir uma meta existente
 function excluirMeta(indice) {
-    if (confirm('Tem certeza de que deseja excluir esta meta?')) {
-        metas.splice(indice, 1);
-        salvarDados();
-        exibirMetas();
-        setTimeout(() => {
-            calcularEstimativas();
-        }, 100);
-    }
+    Swal.fire({
+        title: 'Tem certeza?',
+        text: "Você não poderá reverter esta ação!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sim, excluir!',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            metas.splice(indice, 1);
+            salvarDados();
+            exibirMetas();
+            setTimeout(() => {
+                calcularEstimativas();
+            }, 100);
+
+            Swal.fire({
+                title: 'Excluído!',
+                text: 'Sua meta foi excluída com sucesso',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+    });
 }
 
 // inicialização
