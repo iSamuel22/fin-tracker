@@ -5,7 +5,7 @@ import { firebaseConfig } from "../config/firebase.js";
 import Swal from 'https://cdn.jsdelivr.net/npm/sweetalert2@11/+esm';
 import { FirestoreService } from "../services/FirestoreService.js";
 
-// Initialize Firebase
+// inicializa firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -131,13 +131,13 @@ function iniciarRegistro() {
             try {
                 console.log("Tentando criar usuário:", emailInputRegister.value);
 
-                // Criar usuário no Firebase Authentication
+                // cria usuário no Firebase Authentication
                 const userCredential = await createUserWithEmailAndPassword(auth, emailInputRegister.value, passwordInputRegister.value);
                 const user = userCredential.user;
 
                 console.log("Usuário criado com sucesso:", user.uid);
 
-                // Verificar se a coleção users existe e criá-la se necessário
+                // verifica se a coleção users existe e criá-la se necessário
                 const userData = {
                     name: nameInput.value,
                     email: emailInputRegister.value,
@@ -146,13 +146,13 @@ function iniciarRegistro() {
 
                 console.log("Tentando criar documento do usuário:", userData);
 
-                // Usar setDoc com doc específico para garantir a criação
+                // usa setDoc com doc específico para garantir a criação
                 try {
-                    // Certifique-se de que a coleção existe primeiro
+                    // certificando de que a coleção existe primeiro
                     const usersCollectionRef = collection(db, "users");
                     console.log("Referência da coleção users:", usersCollectionRef);
 
-                    // Criar o documento do usuário
+                    // aqui cria o documento do usuário
                     const userDocRef = doc(db, "users", user.uid);
                     console.log("Referência do documento do usuário:", userDocRef);
 
@@ -175,7 +175,7 @@ function iniciarRegistro() {
                 console.error("Erro completo no registro:", error);
 
                 if (error.code === 'auth/email-already-in-use') {
-                    // Substituir por SweetAlert
+                    // substitui por SweetAlert
                     Swal.fire({
                         title: 'Email já cadastrado',
                         html: `
@@ -185,7 +185,7 @@ function iniciarRegistro() {
                         confirmButtonText: 'OK'
                     });
                 } else {
-                    // Outros erros com SweetAlert
+                    // outros erros com SweetAlert
                     Swal.fire({
                         title: 'Erro ao registrar',
                         text: error.message || error,
@@ -204,7 +204,7 @@ function validandoEmail(email) {
     return emailRegex.test(email);
 }
 
-// Inicialização
+// inicialização
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Página carregada, inicializando funções de login e registro");
     iniciarLogin();

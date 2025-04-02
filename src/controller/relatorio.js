@@ -1,11 +1,11 @@
 import { Auth } from "../services/Auth.js";
 
-// Verificar autenticação
+// verifica autenticação
 if (!Auth.isAuthenticated()) {
     window.location.href = 'login.html';
 }
 
-// Configure user account buttons
+// menu usuário
 function setupUserAccountActions() {
     const logoutButton = document.getElementById('logout-button');
     if (logoutButton) {
@@ -13,15 +13,13 @@ function setupUserAccountActions() {
             e.preventDefault();
             console.log("Logout button clicked");
             try {
-                // Verificar se temos o usuário antes de sair
+
                 const user = Auth.getLoggedInUser();
                 console.log("Current user before logout:", user);
 
-                // Chamada explícita para limpar local storage
                 localStorage.removeItem('loggedInUser');
                 console.log("Removed user from localStorage");
 
-                // Forçar redirecionamento para a página de login
                 console.log("Redirecting to login page...");
                 window.location.href = 'login.html';
             } catch (error) {
@@ -34,7 +32,7 @@ function setupUserAccountActions() {
         console.error("Logout button not found in the DOM");
     }
 
-    // Função de excluir conta
+    // exclui conta
     const deleteAccountButton = document.getElementById('delete-account-button');
     if (deleteAccountButton) {
         deleteAccountButton.addEventListener('click', (e) => {
@@ -44,9 +42,8 @@ function setupUserAccountActions() {
     }
 }
 
-// Mostrar confirmação antes de excluir a conta
+// mostra confirmação antes de excluir a conta
 function showDeleteAccountConfirmation() {
-    // Criar modal de confirmação
     const modal = document.createElement('div');
     modal.className = 'modal fade show';
     modal.style.display = 'block';
@@ -81,7 +78,6 @@ function showDeleteAccountConfirmation() {
     document.body.appendChild(modal);
     document.body.classList.add('modal-open');
 
-    // Event listeners para botões do modal
     document.getElementById('close-delete-modal').addEventListener('click', () => {
         closeDeleteModal(modal);
     });
@@ -92,25 +88,22 @@ function showDeleteAccountConfirmation() {
 
     document.getElementById('confirm-delete-account').addEventListener('click', async () => {
         try {
-            // Show loading state
+
             const confirmButton = document.getElementById('confirm-delete-account');
             const originalText = confirmButton.innerHTML;
             confirmButton.disabled = true;
             confirmButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processando...';
 
-            // Delete the account
             await deleteUserAccount();
 
-            // Show success message
             alert('Sua conta foi excluída com sucesso.');
 
-            // Redirect to login page
+            // redirecionamento
             window.location.href = 'login.html';
         } catch (error) {
             console.error('Erro ao excluir conta:', error);
             alert('Ocorreu um erro ao excluir sua conta: ' + (error.message || 'Tente novamente mais tarde'));
 
-            // Reset button state
             const confirmButton = document.getElementById('confirm-delete-account');
             confirmButton.disabled = false;
             confirmButton.innerHTML = originalText;
@@ -120,13 +113,13 @@ function showDeleteAccountConfirmation() {
     });
 }
 
-// Fechar modal de confirmação
+// fecha modal de confirmação
 function closeDeleteModal(modal) {
     document.body.removeChild(modal);
     document.body.classList.remove('modal-open');
 }
 
-// Excluir conta do usuário com cascata
+// exclui conta do usuário com cascata
 async function deleteUserAccount() {
     const user = Auth.getLoggedInUser();
     if (!user || !user.uid) {
@@ -136,19 +129,15 @@ async function deleteUserAccount() {
     try {
         console.log("Iniciando processo de exclusão de conta");
 
-        // Step 1: Get user data before we delete anything
         const userId = user.uid;
         const userEmail = user.email;
 
-        // Step 2: Delete user from Firebase Authentication
         console.log("Excluindo usuário do Firebase Authentication");
         await Auth.deleteUserAccount();
 
-        // Step 3: Delete user data from Firestore
         console.log("Excluindo dados do Firestore");
         await FirestoreService.deleteUserData(userId);
 
-        // Step 4: Clean up localStorage
         console.log("Limpando dados do localStorage");
         cleanupLocalStorage(userEmail);
 
@@ -160,23 +149,20 @@ async function deleteUserAccount() {
     }
 }
 
-// Helper function to clean localStorage
+// limpar resíduos no localStorage
 function cleanupLocalStorage(userEmail) {
     if (!userEmail) return;
 
-    // List of prefixes to check
     const prefixes = ['gastos_', 'receitas_', 'metas_', 'configuracoes_'];
 
-    // Remove items with these prefixes
     prefixes.forEach(prefix => {
         localStorage.removeItem(`${prefix}${userEmail}`);
     });
 
-    // Finally remove the user
     localStorage.removeItem('loggedInUser');
 }
 
-// Função para formatar valores monetários
+// formata valores monetários
 function formatarMoeda(valor) {
     return valor.toLocaleString('pt-BR', {
         style: 'currency',
@@ -184,12 +170,12 @@ function formatarMoeda(valor) {
     });
 }
 
-// Função para formatar data
+// formata data
 function formatarData(data) {
     return new Date(data).toLocaleDateString('pt-BR');
 }
 
-// Função para obter dados do localStorage
+// obtém dados do localStorage
 function obterDados() {
     const user = Auth.getLoggedInUser();
     const gastos = JSON.parse(localStorage.getItem(`gastos_${user.email}`)) || [];
@@ -197,36 +183,51 @@ function obterDados() {
     return { gastos, receitas };
 }
 
-// Função para filtrar dados por período
+// filtra dados por período
 function filtrarDadosPorPeriodo(dados, dataInicio, dataFim) {
+    // opção para não aplicar filtro de data
+    if (!dataInicio || !dataFim) {
+        return dados;
+    }
+    
     return dados.filter(item => {
         const data = new Date(item.data);
         return data >= dataInicio && data <= dataFim;
     });
 }
 
-// Função para calcular totais do período
+// calcula totais do período
 function calcularTotaisPeriodo(dataInicio, dataFim) {
     const { gastos, receitas } = obterDados();
-
-    const gastosFiltrados = filtrarDadosPorPeriodo(gastos, dataInicio, dataFim);
-    const receitasFiltradas = filtrarDadosPorPeriodo(receitas, dataInicio, dataFim);
+    
+    // se não houver restrição de datas, usar todos os dados
+    const useAllData = !dataInicio || !dataFim;
+    
+    // se usar todos os dados, não filtrar
+    const gastosFiltrados = useAllData ? gastos : filtrarDadosPorPeriodo(gastos, dataInicio, dataFim);
+    const receitasFiltradas = useAllData ? receitas : filtrarDadosPorPeriodo(receitas, dataInicio, dataFim);
 
     const totalGastos = gastosFiltrados.reduce((total, gasto) => total + parseFloat(gasto.valor), 0);
     const totalReceitas = receitasFiltradas.reduce((total, receita) => total + parseFloat(receita.valor), 0);
     const saldo = totalReceitas - totalGastos;
 
-    // Calcular economia média mensal
-    const meses = Math.max(1, Math.ceil((dataFim - dataInicio) / (1000 * 60 * 60 * 24 * 30)));
-    const economiaMedia = saldo / meses;
+    // calcula economia média mensal
+    // se não tiver período definido, considerar a média simples
+    let economiaMedia;
+    if (useAllData || dataInicio >= dataFim) {
+        economiaMedia = saldo;
+    } else {
+        const meses = Math.max(1, Math.ceil((dataFim - dataInicio) / (1000 * 60 * 60 * 24 * 30)));
+        economiaMedia = saldo / meses;
+    }
 
-    // Atualizar elementos HTML
+    // atualiza elementos html
     document.getElementById('totalGastos').textContent = formatarMoeda(totalGastos);
     document.getElementById('totalReceitas').textContent = formatarMoeda(totalReceitas);
     document.getElementById('saldoTotal').textContent = formatarMoeda(saldo);
     document.getElementById('economiaMedia').textContent = formatarMoeda(economiaMedia);
 
-    return { totalGastos, totalReceitas, saldo, economiaMedia };
+    return { totalGastos, totalReceitas, saldo, economiaMedia, gastosFiltrados, receitasFiltradas };
 }
 
 let evolucaoFinanceiraChart;
@@ -234,20 +235,78 @@ let topCategoriasChart;
 let tendenciasChart;
 let comparativoMensalChart;
 
-// Função para criar gráfico de evolução financeira
+// cria gráfico de evolução financeira
 function criarGraficoEvolucaoFinanceira(dataInicio, dataFim) {
     const { gastos, receitas } = obterDados();
     const ctx = document.getElementById('evolucaoFinanceiraChart').getContext('2d');
 
-    // Criar array de datas para o período
-    const datas = [];
-    let dataAtual = new Date(dataInicio);
-    while (dataAtual <= dataFim) {
-        datas.push(new Date(dataAtual));
-        dataAtual.setDate(dataAtual.getDate() + 1);
+    // determinar se devemos usar todas as datas
+    const useAllData = !dataInicio || !dataFim;
+    
+    // definir o intervalo de datas
+    let datas = [];
+    
+    if (useAllData) {
+        // se não há restrição de datas, encontrar a data mais antiga e a mais recente
+        const todasDatas = [...gastos, ...receitas].map(item => new Date(item.data));
+        if (todasDatas.length > 0) {
+            const dataMinima = new Date(Math.min(...todasDatas));
+            const dataMaxima = new Date(Math.max(...todasDatas));
+            
+            // ajustar para garantir um período razoável
+            const umAnoAtras = new Date();
+            umAnoAtras.setFullYear(umAnoAtras.getFullYear() - 1);
+            
+            // usar o que for mais recente: data mínima ou um ano atrás
+            const dataInicial = dataMinima < umAnoAtras ? umAnoAtras : dataMinima;
+            
+            // criar array de datas
+            let dataAtual = new Date(dataInicial);
+            while (dataAtual <= dataMaxima) {
+                datas.push(new Date(dataAtual));
+                dataAtual.setDate(dataAtual.getDate() + 7); // incrementar por semana para reduzir pontos
+            }
+        }
+    } else {
+        // usar o período especificado
+        let dataAtual = new Date(dataInicio);
+        while (dataAtual <= dataFim) {
+            datas.push(new Date(dataAtual));
+            
+            // incremento depende do tamanho do intervalo
+            const diasNoIntervalo = Math.ceil((dataFim - dataInicio) / (1000 * 60 * 60 * 24));
+            if (diasNoIntervalo > 60) {
+                dataAtual.setDate(dataAtual.getDate() + 7); // semanal para períodos longos
+            } else {
+                dataAtual.setDate(dataAtual.getDate() + 1); // diário para períodos curtos
+            }
+        }
     }
 
-    // Calcular saldo acumulado para cada data
+    // adicionar mensagem informativa se não houver restrição de data
+    const infoElement = document.getElementById('data-info');
+    if (infoElement) {
+        if (useAllData) {
+            infoElement.textContent = "Mostrando todos os dados disponíveis sem restrição de data.";
+            infoElement.style.display = "block";
+        } else {
+            infoElement.style.display = "none";
+        }
+    } else if (useAllData) {
+        // criar o elemento de info se não existir
+        const newInfoElement = document.createElement('div');
+        newInfoElement.id = 'data-info';
+        newInfoElement.className = 'alert alert-info';
+        newInfoElement.textContent = "Mostrando todos os dados disponíveis sem restrição de data.";
+        
+        // inserir antes do primeiro gráfico
+        const chartContainer = document.querySelector('.chart-container');
+        if (chartContainer) {
+            chartContainer.parentNode.insertBefore(newInfoElement, chartContainer);
+        }
+    }
+
+    // calcular saldo acumulado para cada data
     const saldos = datas.map(data => {
         const gastosAte = gastos.filter(g => new Date(g.data) <= data)
             .reduce((total, g) => total + parseFloat(g.valor), 0);
@@ -260,10 +319,18 @@ function criarGraficoEvolucaoFinanceira(dataInicio, dataFim) {
         evolucaoFinanceiraChart.destroy();
     }
 
+    // formatar datas de acordo com o período
+    const formatarLabel = (data) => {
+        if (datas.length > 30) {
+            return data.toLocaleString('pt-BR', { day: '2-digit', month: 'short' });
+        }
+        return data.toLocaleDateString('pt-BR');
+    };
+
     evolucaoFinanceiraChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: datas.map(data => data.toLocaleDateString('pt-BR')),
+            labels: datas.map(formatarLabel),
             datasets: [{
                 label: 'Saldo Acumulado',
                 data: saldos,
@@ -275,7 +342,7 @@ function criarGraficoEvolucaoFinanceira(dataInicio, dataFim) {
             responsive: true,
             scales: {
                 y: {
-                    beginAtZero: true,
+                    beginAtZero: false, // permitir valores negativos
                     ticks: {
                         callback: value => formatarMoeda(value)
                     }
@@ -292,12 +359,16 @@ function criarGraficoEvolucaoFinanceira(dataInicio, dataFim) {
     });
 }
 
-// Função para criar gráfico de top categorias
+// cria gráfico de top categorias
 function criarGraficoTopCategorias(dataInicio, dataFim) {
     const { gastos } = obterDados();
-    const gastosFiltrados = filtrarDadosPorPeriodo(gastos, dataInicio, dataFim);
+    
+    // determinar se devemos usar todas as datas
+    const useAllData = !dataInicio || !dataFim;
+    
+    const gastosFiltrados = useAllData ? gastos : filtrarDadosPorPeriodo(gastos, dataInicio, dataFim);
 
-    // Agrupar por categoria
+    // agrupa por categoria
     const categorias = {};
     gastosFiltrados.forEach(gasto => {
         if (!categorias[gasto.categoria]) {
@@ -306,10 +377,10 @@ function criarGraficoTopCategorias(dataInicio, dataFim) {
         categorias[gasto.categoria] += parseFloat(gasto.valor);
     });
 
-    // Ordenar categorias por valor
+    // ordena categorias por valor
     const categoriasOrdenadas = Object.entries(categorias)
         .sort(([, a], [, b]) => b - a)
-        .slice(0, 5); // Top 5 categorias
+        .slice(0, 5); // top 5 categorias
 
     const ctx = document.getElementById('topCategoriasChart').getContext('2d');
 
@@ -345,12 +416,19 @@ function criarGraficoTopCategorias(dataInicio, dataFim) {
     });
 }
 
-// Função para criar gráfico de tendências
+// cria gráfico de tendências
 function criarGraficoTendencias(dataInicio, dataFim) {
     const { gastos, receitas } = obterDados();
     const ctx = document.getElementById('tendenciasChart').getContext('2d');
+    
+    // determinar se devemos usar todas as datas
+    const useAllData = !dataInicio || !dataFim;
+    
+    // filtrar dados se necessário
+    const gastosFiltrados = useAllData ? gastos : filtrarDadosPorPeriodo(gastos, dataInicio, dataFim);
+    const receitasFiltradas = useAllData ? receitas : filtrarDadosPorPeriodo(receitas, dataInicio, dataFim);
 
-    // Agrupar por mês
+    // agrupa por mês
     const dadosPorMes = {};
 
     function agruparPorMes(dados, tipo) {
@@ -366,10 +444,10 @@ function criarGraficoTendencias(dataInicio, dataFim) {
         });
     }
 
-    agruparPorMes(gastos, 'gastos');
-    agruparPorMes(receitas, 'receitas');
+    agruparPorMes(gastosFiltrados, 'gastos');
+    agruparPorMes(receitasFiltradas, 'receitas');
 
-    // Ordenar meses
+    // ordena meses
     const mesesOrdenados = Object.keys(dadosPorMes).sort();
 
     if (tendenciasChart) {
@@ -419,16 +497,22 @@ function criarGraficoTendencias(dataInicio, dataFim) {
     });
 }
 
-// Função para criar gráfico comparativo mensal
+// cria gráfico comparativo mensal
 function criarGraficoComparativoMensal(dataInicio, dataFim) {
     const { gastos } = obterDados();
     const ctx = document.getElementById('comparativoMensalChart').getContext('2d');
+    
+    // determinar se devemos usar todas as datas
+    const useAllData = !dataInicio || !dataFim;
+    
+    // filtrar dados se necessário
+    const gastosFiltrados = useAllData ? gastos : filtrarDadosPorPeriodo(gastos, dataInicio, dataFim);
 
-    // Agrupar gastos por categoria e mês
+    // agrupa gastos por categoria e mês
     const dadosPorCategoria = {};
-    gastos.forEach(gasto => {
+    gastosFiltrados.forEach(gasto => {
         const data = new Date(gasto.data);
-        const mes = data.toLocaleString('pt-BR', { month: 'short' });
+        const mes = data.toLocaleString('pt-BR', { month: 'short', year: 'numeric' });
 
         if (!dadosPorCategoria[gasto.categoria]) {
             dadosPorCategoria[gasto.categoria] = {};
@@ -441,11 +525,23 @@ function criarGraficoComparativoMensal(dataInicio, dataFim) {
         dadosPorCategoria[gasto.categoria][mes] += parseFloat(gasto.valor);
     });
 
-    // Preparar dados para o gráfico
+    // prepara dados para o gráfico
     const categorias = Object.keys(dadosPorCategoria);
-    const meses = [...new Set(gastos.map(g =>
-        new Date(g.data).toLocaleString('pt-BR', { month: 'short' })
-    ))].sort();
+    
+    // usar meses únicos e ordená-los
+    const mesesSet = new Set();
+    gastosFiltrados.forEach(g => {
+        const data = new Date(g.data);
+        mesesSet.add(`${data.getFullYear()}-${data.getMonth()}`);
+    });
+    
+    // ordenar os meses cronologicamente
+    const mesesOrdenados = Array.from(mesesSet)
+        .sort()
+        .map(mesKey => {
+            const [ano, mes] = mesKey.split('-');
+            return new Date(parseInt(ano), parseInt(mes)).toLocaleString('pt-BR', { month: 'short', year: 'numeric' });
+        });
 
     if (comparativoMensalChart) {
         comparativoMensalChart.destroy();
@@ -454,10 +550,10 @@ function criarGraficoComparativoMensal(dataInicio, dataFim) {
     comparativoMensalChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: meses,
+            labels: mesesOrdenados,
             datasets: categorias.map((categoria, index) => ({
                 label: categoria,
-                data: meses.map(mes => dadosPorCategoria[categoria][mes] || 0),
+                data: mesesOrdenados.map(mes => dadosPorCategoria[categoria][mes] || 0),
                 backgroundColor: `hsl(${(index * 360) / categorias.length}, 70%, 50%)`
             }))
         },
@@ -485,27 +581,36 @@ function criarGraficoComparativoMensal(dataInicio, dataFim) {
     });
 }
 
-// Função para atualizar tabela de transações
+// atualiza tabela de transações
 function atualizarTabelaTransacoes(dataInicio, dataFim) {
     const { gastos, receitas } = obterDados();
     const tbody = document.getElementById('tabelaTransacoes');
+    
+    // determinar se devemos usar todas as datas
+    const useAllData = !dataInicio || !dataFim;
 
-    // Combinar e ordenar transações
+    // combina e ordena transações
     const transacoes = [
         ...gastos.map(g => ({ ...g, tipo: 'Gasto' })),
         ...receitas.map(r => ({ ...r, tipo: 'Receita' }))
-    ]
-        .filter(t => {
+    ];
+    
+    // filtrar se necessário
+    const transacoesFiltradas = useAllData 
+        ? transacoes 
+        : transacoes.filter(t => {
             const data = new Date(t.data);
             return data >= dataInicio && data <= dataFim;
-        })
-        .sort((a, b) => new Date(b.data) - new Date(a.data));
+        });
+        
+    // ordenar por data (mais recente primeiro)
+    transacoesFiltradas.sort((a, b) => new Date(b.data) - new Date(a.data));
 
-    // Limpar tabela
+    // limpar a tabela
     tbody.innerHTML = '';
 
-    // Preencher tabela
-    transacoes.forEach(transacao => {
+    // preenche tabela
+    transacoesFiltradas.forEach(transacao => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${formatarData(transacao.data)}</td>
@@ -516,19 +621,47 @@ function atualizarTabelaTransacoes(dataInicio, dataFim) {
         `;
         tbody.appendChild(tr);
     });
+    
+    // se a tabela estiver vazia, mostrar mensagem
+    if (transacoesFiltradas.length === 0) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td colspan="5" class="text-center">Nenhuma transação encontrada${useAllData ? '' : ' no período selecionado'}.</td>
+        `;
+        tbody.appendChild(tr);
+    }
 }
 
-// Função para atualizar todos os relatórios
+// função para atualizar todos os relatórios
 function atualizarRelatorios() {
     const periodoSelect = document.getElementById('periodoSelect');
     const dataInicio = document.getElementById('dataInicio');
     const dataFim = document.getElementById('dataFim');
+    
+    // opção para remover restrição de data
+    if (periodoSelect.value === 'semrestrição') {
+        dataInicio.disabled = true;
+        dataFim.disabled = true;
+        
+        // chamar funções sem passar datas (null)
+        calcularTotaisPeriodo(null, null);
+        criarGraficoEvolucaoFinanceira(null, null);
+        criarGraficoTopCategorias(null, null);
+        criarGraficoTendencias(null, null);
+        criarGraficoComparativoMensal(null, null);
+        atualizarTabelaTransacoes(null, null);
+        
+        return;
+    }
 
-    // Se período personalizado não estiver selecionado, calcular datas
+    // se período personalizado não estiver selecionado, calcular datas
     if (periodoSelect.value !== 'personalizado') {
         const dias = parseInt(periodoSelect.value);
         const hoje = new Date();
-        dataFim.valueAsDate = hoje;
+
+        const futuro = new Date();
+        futuro.setDate(hoje.getDate() + 365); // válido para 1 ano
+        dataFim.valueAsDate = futuro;
         const inicio = new Date();
         inicio.setDate(hoje.getDate() - dias);
         dataInicio.valueAsDate = inicio;
@@ -547,7 +680,7 @@ function atualizarRelatorios() {
 
 // função para criar um evento personalizado de atualização
 function configurarAtualizacaoAutomatica() {
-    // substitui o getItem e setItem padrão do localStorage para interceptar mudanças
+    // substitui o getitem e setitem padrão do localstorage para interceptar mudanças
     const originalSetItem = localStorage.setItem;
     localStorage.setItem = function (key, value) {
         // chama o método original
@@ -579,15 +712,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const periodoSelect = document.getElementById('periodoSelect');
     const dataInicio = document.getElementById('dataInicio');
     const dataFim = document.getElementById('dataFim');
+    
+    // adicionar opção "sem restrição de data"
+    const semRestricaoOption = document.createElement('option');
+    semRestricaoOption.value = 'semrestrição';
+    semRestricaoOption.textContent = 'Todos os dados (sem restrição de data)';
+    periodoSelect.insertBefore(semRestricaoOption, periodoSelect.firstChild);
 
     // configurar data inicial como hoje menos 180 dias (6 meses)
     const hoje = new Date();
-    dataFim.valueAsDate = hoje;
+    // adicionar alguns dias para incluir transações futuras (ex: +30 dias)
+    const futuro = new Date();
+    futuro.setDate(hoje.getDate() + 365);
+    dataFim.valueAsDate = futuro;
     const inicio = new Date();
     inicio.setDate(hoje.getDate() - 180);
     dataInicio.valueAsDate = inicio;
 
-    // Eventos
+    // eventos
     periodoSelect.addEventListener('change', () => {
         if (periodoSelect.value === 'personalizado') {
             dataInicio.disabled = false;
@@ -601,6 +743,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     dataInicio.addEventListener('change', atualizarRelatorios);
     dataFim.addEventListener('change', atualizarRelatorios);
+
+    // selecionar a opção "sem restrição de data" por padrão
+    periodoSelect.value = 'semrestrição';
 
     // inicializa relatórios
     atualizarRelatorios();

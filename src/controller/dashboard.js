@@ -1,12 +1,12 @@
 import { Auth } from "../services/Auth.js";
 import { FirestoreService } from "../services/FirestoreService.js";
 
-// Verificar autenticação
+// verifica autenticação
 if (!Auth.isAuthenticated()) {
     window.location.href = 'login.html';
 }
 
-// Configure user account buttons
+// menu user
 function setupUserAccountActions() {
     const logoutButton = document.getElementById('logout-button');
     if (logoutButton) {
@@ -14,13 +14,11 @@ function setupUserAccountActions() {
             e.preventDefault();
             console.log("Logout button clicked");
             try {
-                // Verificar se temos o usuário antes de sair
+                // verficia se temos o usuário antes de sair
                 const user = Auth.getLoggedInUser();
 
-                // Chamada explícita para limpar local storage
                 localStorage.removeItem('loggedInUser');
 
-                // Forçar redirecionamento para a página de login
                 window.location.href = 'login.html';
             } catch (error) {
                 console.error('Erro ao fazer logout:', error);
@@ -31,7 +29,7 @@ function setupUserAccountActions() {
         console.error("Logout button not found in the DOM");
     }
 
-    // Função de excluir conta
+    // excluir conta
     const deleteAccountButton = document.getElementById('delete-account-button');
     if (deleteAccountButton) {
         deleteAccountButton.addEventListener('click', (e) => {
@@ -41,9 +39,9 @@ function setupUserAccountActions() {
     }
 }
 
-// Mostrar confirmação antes de excluir a conta
+// mostra confirmação antes de excluir a conta
 function showDeleteAccountConfirmation() {
-    // Criar modal de confirmação
+    // cria modal de confirmação
     const modal = document.createElement('div');
     modal.className = 'modal fade show';
     modal.style.display = 'block';
@@ -78,7 +76,7 @@ function showDeleteAccountConfirmation() {
     document.body.appendChild(modal);
     document.body.classList.add('modal-open');
 
-    // Event listeners para botões do modal
+    // event listeners para botões do modal
     document.getElementById('close-delete-modal').addEventListener('click', () => {
         closeDeleteModal(modal);
     });
@@ -89,25 +87,20 @@ function showDeleteAccountConfirmation() {
 
     document.getElementById('confirm-delete-account').addEventListener('click', async () => {
         try {
-            // Show loading state
             const confirmButton = document.getElementById('confirm-delete-account');
             const originalText = confirmButton.innerHTML;
             confirmButton.disabled = true;
             confirmButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processando...';
 
-            // Delete the account
             await deleteUserAccount();
 
-            // Show success message
             alert('Sua conta foi excluída com sucesso.');
 
-            // Redirect to login page
             window.location.href = 'login.html';
         } catch (error) {
             console.error('Erro ao excluir conta:', error);
             alert('Ocorreu um erro ao excluir sua conta: ' + (error.message || 'Tente novamente mais tarde'));
 
-            // Reset button state
             const confirmButton = document.getElementById('confirm-delete-account');
             confirmButton.disabled = false;
             confirmButton.innerHTML = originalText;
@@ -117,13 +110,13 @@ function showDeleteAccountConfirmation() {
     });
 }
 
-// Fechar modal de confirmação
+// fecha modal de confirmação
 function closeDeleteModal(modal) {
     document.body.removeChild(modal);
     document.body.classList.remove('modal-open');
 }
 
-// Excluir conta do usuário com cascata
+// exclui conta do usuário com cascata
 async function deleteUserAccount() {
     const user = Auth.getLoggedInUser();
     if (!user || !user.uid) {
@@ -133,19 +126,15 @@ async function deleteUserAccount() {
     try {
         console.log("Iniciando processo de exclusão de conta");
 
-        // Step 1: Get user data before we delete anything
         const userId = user.uid;
         const userEmail = user.email;
 
-        // Step 2: Delete user from Firebase Authentication
         console.log("Excluindo usuário do Firebase Authentication");
         await Auth.deleteUserAccount();
 
-        // Step 3: Delete user data from Firestore
         console.log("Excluindo dados do Firestore");
         await FirestoreService.deleteUserData(userId);
 
-        // Step 4: Clean up localStorage
         console.log("Limpando dados do localStorage");
         cleanupLocalStorage(userEmail);
 
@@ -156,24 +145,20 @@ async function deleteUserAccount() {
         throw error;
     }
 }
-
-// Helper function to clean localStorage
+// clean no localStorage
 function cleanupLocalStorage(userEmail) {
     if (!userEmail) return;
 
-    // List of prefixes to check
     const prefixes = ['gastos_', 'receitas_', 'metas_', 'configuracoes_'];
 
-    // Remove items with these prefixes
     prefixes.forEach(prefix => {
         localStorage.removeItem(`${prefix}${userEmail}`);
     });
 
-    // Finally remove the user
     localStorage.removeItem('loggedInUser');
 }
 
-// Função para formatar valores monetários
+// formata valores monetários
 function formatarMoeda(valor) {
     return valor.toLocaleString('pt-BR', {
         style: 'currency',
@@ -181,7 +166,7 @@ function formatarMoeda(valor) {
     });
 }
 
-// Função para obter dados do localStorage
+// obtém dados do localStorage
 function obterDados() {
     const user = Auth.getLoggedInUser();
     const gastos = JSON.parse(localStorage.getItem(`gastos_${user.email}`)) || [];
@@ -189,7 +174,7 @@ function obterDados() {
     return { gastos, receitas };
 }
 
-// Função para calcular totais
+// calcula totais
 function calcularTotais() {
     const { gastos, receitas } = obterDados();
 
@@ -197,7 +182,7 @@ function calcularTotais() {
     const totalReceitas = receitas.reduce((total, receita) => total + parseFloat(receita.valor), 0);
     const saldo = totalReceitas - totalGastos;
 
-    // Atualizar elementos HTML
+    // atualiza elementos HTML
     document.getElementById('totalGastos').textContent = formatarMoeda(totalGastos);
     document.getElementById('totalReceitas').textContent = formatarMoeda(totalReceitas);
     document.getElementById('saldoTotal').textContent = formatarMoeda(saldo);
@@ -205,7 +190,7 @@ function calcularTotais() {
     return { totalGastos, totalReceitas, saldo };
 }
 
-// Função para carregar metas do localStorage
+// carrega metas do localStorage
 function carregarMetas() {
     const user = Auth.getLoggedInUser();
     if (!user || !user.email) {
@@ -225,7 +210,7 @@ function carregarMetas() {
     return [];
 }
 
-// Função para exibir as metas no dashboard
+// exibe as metas no dashboard
 function exibirMetasNoDashboard() {
     const metas = carregarMetas();
     const container = document.getElementById('metas-container');
@@ -233,10 +218,10 @@ function exibirMetasNoDashboard() {
 
     if (!container) return;
 
-    // Limpar o container atual
+    // limpa o container atual
     container.innerHTML = '';
 
-    // Se não há metas
+    // se não há metas
     if (metas.length === 0) {
         if (placeholder) placeholder.style.display = 'block';
         return;
@@ -244,18 +229,18 @@ function exibirMetasNoDashboard() {
         if (placeholder) placeholder.style.display = 'none';
     }
 
-    // Calcular o saldo mensal para estimativas
+    // calcula o saldo mensal para estimativas
     const { totalReceitas, totalGastos } = calcularTotais();
     const saldoMensal = totalReceitas - totalGastos;
 
-    // Exibir apenas as 3 metas mais recentes
+    // exibe apenas as 3 metas mais recentes
     const metasRecentes = metas.slice(0, 3);
 
     metasRecentes.forEach(meta => {
         const card = document.createElement('div');
         card.className = 'card mb-2 border-0 bg-light';
 
-        // Calcular estimativa
+        // calcula estimativa
         let textoEstimativa = 'Calcular estimativa';
         let classeEstimativa = 'text-muted';
 
@@ -284,11 +269,11 @@ function exibirMetasNoDashboard() {
             classeEstimativa = 'text-danger';
         }
 
-        // Calcular a porcentagem de progresso
+        // calcula a porcentagem de progresso
         const porcentagemMensal = saldoMensal > 0 ? (saldoMensal / meta.valor) * 100 : 0;
         const porcentagemProgress = Math.min(100, porcentagemMensal);
 
-        // Determinar a classe de cor para a barra de progresso
+        // determinaa a classe de cor para a barra de progresso
         let progressClass = 'progress-bar';
         if (porcentagemMensal < 5) {
             progressClass += ' bg-danger';
@@ -322,7 +307,7 @@ function exibirMetasNoDashboard() {
         container.appendChild(card);
     });
 
-    // Se há mais metas do que as exibidas
+    // se há mais metas do que as exibidas
     if (metas.length > 3) {
         const maisMetasText = document.createElement('p');
         maisMetasText.className = 'text-center small text-muted mt-2';
@@ -331,45 +316,63 @@ function exibirMetasNoDashboard() {
     }
 }
 
-// Função para agrupar dados por mês
+// agrupa dados por mês
 function agruparPorMes(dados) {
     const hoje = new Date();
+    const futuro = new Date(hoje.getFullYear() + 1, hoje.getMonth(), hoje.getDate()); // data limite: um ano no futuro
     const ultimosMeses = {};
 
-    // Inicializar os últimos 6 meses com zero
+    // inicializar os últimos 6 meses com zero
     for (let i = 5; i >= 0; i--) {
         const data = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
         const chave = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`;
         ultimosMeses[chave] = 0;
     }
 
-    // Somar valores por mês
+    // somar valores por mês, incluindo dados futuros (até um ano)
     dados.forEach(item => {
         const data = new Date(item.data);
-        const chave = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`;
-        if (chave in ultimosMeses) {
-            ultimosMeses[chave] += parseFloat(item.valor);
+
+        // verifica se a data está dentro do intervalo permitido (até um ano no futuro)
+        if (data <= futuro) {
+            const chave = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`;
+
+            // se a chave já existe no objeto ultimosMeses, adicione o valor
+            if (chave in ultimosMeses) {
+                ultimosMeses[chave] += parseFloat(item.valor);
+            }
+            // caso contrário, se for uma data futura (dentro do próximo ano), crie a chave
+            else if (data > hoje && data <= futuro) {
+                ultimosMeses[chave] = parseFloat(item.valor);
+            }
         }
     });
 
     return Object.values(ultimosMeses);
 }
 
-// Função para agrupar gastos por categoria
+// agrupa gastos por categoria
 function agruparGastosPorCategoria(gastos) {
     const categorias = {};
+    const hoje = new Date();
+    const futuro = new Date(hoje.getFullYear() + 1, hoje.getMonth(), hoje.getDate()); // Data limite: um ano no futuro
 
     gastos.forEach(gasto => {
-        if (!categorias[gasto.categoria]) {
-            categorias[gasto.categoria] = 0;
+        const data = new Date(gasto.data);
+
+        // verifica se a data do gasto está dentro do intervalo permitido (até um ano no futuro)
+        if (data <= futuro) {
+            if (!categorias[gasto.categoria]) {
+                categorias[gasto.categoria] = 0;
+            }
+            categorias[gasto.categoria] += parseFloat(gasto.valor);
         }
-        categorias[gasto.categoria] += parseFloat(gasto.valor);
     });
 
     return categorias;
 }
 
-// Função para gerar cores aleatórias
+// gera cores aleatórias
 function gerarCores(quantidade) {
     const cores = [];
     for (let i = 0; i < quantidade; i++) {
@@ -379,11 +382,11 @@ function gerarCores(quantidade) {
     return cores;
 }
 
-// Variáveis para armazenar as instâncias dos gráficos
+// variáveis para armazenar as instâncias dos gráficos
 let gastosReceitasChart = null;
 let gastosPorCategoriaChart = null;
 
-// Função para criar ou atualizar o gráfico de barras (Gastos vs Receitas)
+// cria ou atualizar o gráfico de barras (Gastos vs Receitas)
 function criarGraficoGastosReceitas() {
     const { gastos, receitas } = obterDados();
     const gastosporMes = agruparPorMes(gastos);
@@ -391,15 +394,17 @@ function criarGraficoGastosReceitas() {
 
     const ctx = document.getElementById('gastosReceitasChart').getContext('2d');
 
-    // Gerar labels para os últimos 6 meses
+    // gera labels para os últimos 6 meses e próximos 6 meses
     const labels = [];
     const hoje = new Date();
+
+    // últimos 5 meses mais o mês atual
     for (let i = 5; i >= 0; i--) {
         const data = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
-        labels.push(data.toLocaleString('pt-BR', { month: 'short' }));
+        labels.push(data.toLocaleString('pt-BR', { month: 'short', year: 'numeric' }));
     }
 
-    // Destruir o gráfico existente se houver
+    // destrói o gráfico existente se houver
     if (gastosReceitasChart) {
         gastosReceitasChart.destroy();
     }
@@ -450,7 +455,7 @@ function criarGraficoGastosReceitas() {
     });
 }
 
-// Função para criar ou atualizar o gráfico de pizza (Distribuição de Gastos)
+// cria ou atualiza o gráfico de pizza (distribuição de gastos)
 function criarGraficoGastosPorCategoria() {
     const { gastos } = obterDados();
     const gastosPorCategoria = agruparGastosPorCategoria(gastos);
@@ -461,7 +466,7 @@ function criarGraficoGastosPorCategoria() {
 
     const ctx = document.getElementById('gastosPorCategoriaChart').getContext('2d');
 
-    // Destruir o gráfico existente se houver
+    // destrói o gráfico existente se houver
     if (gastosPorCategoriaChart) {
         gastosPorCategoriaChart.destroy();
     }
@@ -493,7 +498,7 @@ function criarGraficoGastosPorCategoria() {
     });
 }
 
-// Função para atualizar todos os dados do dashboard
+// atualiza todos os dados do dashboard
 function atualizarDashboard() {
     calcularTotais();
     criarGraficoGastosReceitas();
@@ -501,23 +506,22 @@ function atualizarDashboard() {
     exibirMetasNoDashboard();
 }
 
-// Função para criar um evento personalizado de atualização
+// cria um evento personalizado de atualização
 function configurarAtualizacaoAutomatica() {
-    // Substitui o getItem e setItem padrão do localStorage para interceptar mudanças
+    // substitui o getItem e setItem padrão do localStorage para interceptar mudanças
     const originalSetItem = localStorage.setItem;
     localStorage.setItem = function (key, value) {
-        // Chama o método original
+        // chama o método original
         originalSetItem.call(this, key, value);
 
-        // Verifica se a chave é relacionada a gastos ou receitas ou metas
+        // verifica se a chave é relacionada a gastos ou receitas ou metas
         const user = Auth.getLoggedInUser();
         if (user && (key === `gastos_${user.email}` || key === `receitas_${user.email}` || key === `metas_${user.email}`)) {
-            // Atualiza o dashboard
             atualizarDashboard();
         }
     };
 
-    // Verifica por mudanças de outras abas também
+    // verifica por mudanças de outras abas também
     window.addEventListener('storage', (event) => {
         const user = Auth.getLoggedInUser();
         if (user && (event.key === `gastos_${user.email}` || event.key === `receitas_${user.email}` || event.key === `metas_${user.email}`)) {
@@ -526,17 +530,17 @@ function configurarAtualizacaoAutomatica() {
     });
 }
 
-// Inicialização
+// inicializa
 document.addEventListener('DOMContentLoaded', () => {
-    // Configura botões de gerenciamento de conta
+    // configura botões de gerenciamento de conta
     setupUserAccountActions();
 
-    // Configura a atualização automática
+    // configura a atualização automática
     configurarAtualizacaoAutomatica();
 
-    // Inicializa o dashboard
+    // inicializa o dashboard
     atualizarDashboard();
 
-    // Atualiza a cada minuto para garantir dados atualizados
+    // atualiza a cada minuto para garantir dados atualizados
     setInterval(atualizarDashboard, 60000);
 });

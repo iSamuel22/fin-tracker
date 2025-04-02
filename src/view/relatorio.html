@@ -43,14 +43,22 @@
                             data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-user-circle"></i> Minha Conta
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-                            <li><a class="dropdown-item" href="#" id="logout-button"><i class="fas fa-sign-out-alt"></i>
-                                    Sair</a></li>
+                        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenu">
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center" href="#" id="logout-button">
+                                    <i class="fas fa-sign-out-alt me-2 text-primary"></i>
+                                    <span>Sair</span>
+                                </a>
+                            </li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item text-danger" href="#" id="delete-account-button"><i
-                                        class="fas fa-trash"></i> Excluir Conta</a></li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center text-danger" href="#" id="delete-account-button">
+                                    <i class="fas fa-trash me-2"></i>
+                                    <span>Excluir Conta</span>
+                                </a>
+                            </li>
                         </ul>
                     </li>
                 </ul>
@@ -59,7 +67,7 @@
     </nav>
 
     <div class="container mt-4">
-        <!-- Filtros de Período -->
+        <!-- filtros de Período -->
         <div class="card mb-4">
             <div class="card-body">
                 <h5 class="card-title">Filtros</h5>
@@ -86,7 +94,7 @@
             </div>
         </div>
 
-        <!-- Resumo Financeiro -->
+        <!-- resumo Financeiro -->
         <div class="row mb-4">
             <div class="col-md-3">
                 <div class="card">
@@ -122,9 +130,9 @@
             </div>
         </div>
 
-        <!-- Gráficos -->
+        <!-- gráficos -->
         <div class="row">
-            <!-- Evolução Financeira -->
+            <!-- evolução financeira -->
             <div class="col-md-8 mb-4">
                 <div class="card">
                     <div class="card-body">
@@ -134,7 +142,7 @@
                 </div>
             </div>
 
-            <!-- Top Categorias de Gastos -->
+            <!-- top categorias de gastos -->
             <div class="col-md-4 mb-4">
                 <div class="card">
                     <div class="card-body">
@@ -144,7 +152,7 @@
                 </div>
             </div>
 
-            <!-- Análise de Tendências -->
+            <!-- análise de tendências -->
             <div class="col-md-6 mb-4">
                 <div class="card">
                     <div class="card-body">
@@ -154,7 +162,7 @@
                 </div>
             </div>
 
-            <!-- Comparativo Mensal -->
+            <!-- comparativo mensal -->
             <div class="col-md-6 mb-4">
                 <div class="card">
                     <div class="card-body">
@@ -165,7 +173,7 @@
             </div>
         </div>
 
-        <!-- Tabela de Transações -->
+        <!-- tabela de transações -->
         <div class="card mb-4">
             <div class="card-body">
                 <h5 class="card-title">Transações do Período</h5>
@@ -181,7 +189,7 @@
                             </tr>
                         </thead>
                         <tbody id="tabelaTransacoes">
-                            <!-- Preenchido via JavaScript -->
+                            <!-- preenchido via JavaScript -->
                         </tbody>
                     </table>
                 </div>
@@ -193,6 +201,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+    
     <script type="module" src="/src/controller/relatorio.js"></script>
 </body>
 

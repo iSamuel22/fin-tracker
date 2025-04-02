@@ -4,7 +4,7 @@ import { Auth } from "../services/Auth.js";
 import { FirestoreService } from "../services/FirestoreService.js";
 import Swal from 'https://cdn.jsdelivr.net/npm/sweetalert2@11/+esm';
 
-// Verificar autenticação
+// verifica autenticação
 if (!Auth.isAuthenticated()) {
     window.location.href = 'login.html';
 }
@@ -12,7 +12,7 @@ if (!Auth.isAuthenticated()) {
 let receitas = [];
 let categorias = ['Salário', 'Investimentos', 'Freelance', 'Presentes'];
 
-// Configure user account buttons
+// menu user
 function setupUserAccountActions() {
     const logoutButton = document.getElementById('logout-button');
     if (logoutButton) {
@@ -20,15 +20,13 @@ function setupUserAccountActions() {
             e.preventDefault();
             console.log("Logout button clicked");
             try {
-                // Verificar se temos o usuário antes de sair
+                // verifica se temos o usuário antes de sair
                 const user = Auth.getLoggedInUser();
                 console.log("Current user before logout:", user);
 
-                // Chamada explícita para limpar local storage
                 localStorage.removeItem('loggedInUser');
                 console.log("Removed user from localStorage");
 
-                // Forçar redirecionamento para a página de login
                 console.log("Redirecting to login page...");
                 window.location.href = 'login.html';
             } catch (error) {
@@ -41,7 +39,7 @@ function setupUserAccountActions() {
         console.error("Logout button not found in the DOM");
     }
 
-    // Função de excluir conta
+    // exclui conta
     const deleteAccountButton = document.getElementById('delete-account-button');
     if (deleteAccountButton) {
         deleteAccountButton.addEventListener('click', (e) => {
@@ -51,9 +49,9 @@ function setupUserAccountActions() {
     }
 }
 
-// Mostrar confirmação antes de excluir a conta
+// mostra confirmação antes de excluir a conta
 function showDeleteAccountConfirmation() {
-    // Criar modal de confirmação
+    // cria modal de confirmação
     const modal = document.createElement('div');
     modal.className = 'modal fade show';
     modal.style.display = 'block';
@@ -88,7 +86,7 @@ function showDeleteAccountConfirmation() {
     document.body.appendChild(modal);
     document.body.classList.add('modal-open');
 
-    // Event listeners para botões do modal
+    // event listeners para botões do modal
     document.getElementById('close-delete-modal').addEventListener('click', () => {
         closeDeleteModal(modal);
     });
@@ -99,25 +97,21 @@ function showDeleteAccountConfirmation() {
 
     document.getElementById('confirm-delete-account').addEventListener('click', async () => {
         try {
-            // Show loading state
             const confirmButton = document.getElementById('confirm-delete-account');
             const originalText = confirmButton.innerHTML;
             confirmButton.disabled = true;
             confirmButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processando...';
 
-            // Delete the account
+            // deleta conta do usuário
             await deleteUserAccount();
 
-            // Show success message
             alert('Sua conta foi excluída com sucesso.');
 
-            // Redirect to login page
             window.location.href = 'login.html';
         } catch (error) {
             console.error('Erro ao excluir conta:', error);
             alert('Ocorreu um erro ao excluir sua conta: ' + (error.message || 'Tente novamente mais tarde'));
 
-            // Reset button state
             const confirmButton = document.getElementById('confirm-delete-account');
             confirmButton.disabled = false;
             confirmButton.innerHTML = originalText;
@@ -127,13 +121,13 @@ function showDeleteAccountConfirmation() {
     });
 }
 
-// Fechar modal de confirmação
+// fecha modal de confirmação
 function closeDeleteModal(modal) {
     document.body.removeChild(modal);
     document.body.classList.remove('modal-open');
 }
 
-// Excluir conta do usuário com cascata
+// exclui conta do usuário com cascata
 async function deleteUserAccount() {
     const user = Auth.getLoggedInUser();
     if (!user || !user.uid) {
@@ -143,19 +137,15 @@ async function deleteUserAccount() {
     try {
         console.log("Iniciando processo de exclusão de conta");
 
-        // Step 1: Get user data before we delete anything
         const userId = user.uid;
         const userEmail = user.email;
 
-        // Step 2: Delete user from Firebase Authentication
         console.log("Excluindo usuário do Firebase Authentication");
         await Auth.deleteUserAccount();
 
-        // Step 3: Delete user data from Firestore
         console.log("Excluindo dados do Firestore");
         await FirestoreService.deleteUserData(userId);
 
-        // Step 4: Clean up localStorage
         console.log("Limpando dados do localStorage");
         cleanupLocalStorage(userEmail);
 
@@ -167,23 +157,20 @@ async function deleteUserAccount() {
     }
 }
 
-// Helper function to clean localStorage
+// clear no localStorage
 function cleanupLocalStorage(userEmail) {
     if (!userEmail) return;
 
-    // List of prefixes to check
     const prefixes = ['gastos_', 'receitas_', 'metas_', 'configuracoes_'];
 
-    // Remove items with these prefixes
     prefixes.forEach(prefix => {
         localStorage.removeItem(`${prefix}${userEmail}`);
     });
 
-    // Finally remove the user
     localStorage.removeItem('loggedInUser');
 }
 
-// Função para salvar receitas no localStorage
+// Fsalva receitas no localStorage
 function salvarReceitasLocalStorage() {
     const user = Auth.getLoggedInUser();
     if (user) {
@@ -199,7 +186,7 @@ function salvarReceitasLocalStorage() {
     }
 }
 
-// Função para carregar receitas do localStorage
+// carrega receitas do localStorage
 function carregarReceitasLocalStorage() {
     const user = Auth.getLoggedInUser();
     if (user) {
@@ -227,7 +214,7 @@ function carregarReceitasLocalStorage() {
     return false;
 }
 
-// Carregar receitas e categorias do Firestore
+// carrega receitas e categorias do Firestore
 async function carregarDados() {
     try {
         console.log("Iniciando carregamento de dados...");
@@ -238,50 +225,50 @@ async function carregarDados() {
             return;
         }
 
-        // Primeiro carregar categorias do localStorage
+        // primeiro carregar categorias do localStorage
         const categoriasReceitasStorage = localStorage.getItem(`categorias_receitas_${user.email}`);
         if (categoriasReceitasStorage) {
             categorias = JSON.parse(categoriasReceitasStorage);
             console.log("Categorias carregadas do localStorage:", categorias);
         }
 
-        // Depois carregar receitas do localStorage para exibição rápida
+        // depois carregar receitas do localStorage para exibição rápida
         const dadosCarregadosDoLocal = carregarReceitasLocalStorage();
 
         if (dadosCarregadosDoLocal) {
             console.log("Exibindo dados do localStorage enquanto carrega do Firestore");
-            // Atualizar a interface com os dados do localStorage
+            // atualiza a interface com os dados do localStorage
             atualizarSelectCategorias();
             exibirReceitas();
-            // Disparar evento para atualizar relatórios
+            // dispara evento para atualizar relatórios
             notificarAlteracoesDados();
         }
 
-        // Inicializar coleções e carregar dados do Firestore
+        // inicializa coleções e carregar dados do Firestore
         await FirestoreService.inicializarColecoes();
         const receitasData = await FirestoreService.getReceitas();
 
         console.log("Receitas carregadas do Firestore:", receitasData);
 
-        // Filtrar documentos que não são de inicialização do sistema
+        // fiktra documentos que não são de inicialização do sistema
         receitas = receitasData
             .filter(data => !data.isSystemGenerated)
             .map(data => {
-                // Converter timestamp para Date se necessário
+                // converte timestamp para Date se necessário
                 const data_formatada = data.data instanceof Date ? data.data : new Date(data.data);
 
-                // Criar nova instância de Receita com ID do Firestore
+                // cria nova instância de Receita com ID do Firestore
                 const receita = new Receita(
                     data.descricao,
                     parseFloat(data.valor),
                     data_formatada,
                     data.categoria
                 );
-                receita.id = data.id; // Armazenar o ID do Firestore
+                receita.id = data.id; // armazena o ID do Firestore
                 return receita;
             });
 
-        // Extrair categorias únicas das receitas para atualizar a lista
+        // extrai categorias únicas das receitas para atualizar a lista
         const categoriasFromReceitas = [...new Set(receitas.map(r => r.categoria))];
         categoriasFromReceitas.forEach(cat => {
             if (!categorias.includes(cat) && cat) {
@@ -289,11 +276,11 @@ async function carregarDados() {
             }
         });
 
-        // Salvar os dados atualizados no localStorage
+        // salva os dados atualizados no localStorage
         salvarReceitasLocalStorage();
         salvarCategorias();
 
-        // Atualizar a interface
+        // atualiza a interface
         atualizarSelectCategorias();
         exibirReceitas();
 
@@ -301,14 +288,14 @@ async function carregarDados() {
     } catch (error) {
         console.error("Erro ao carregar dados:", error);
 
-        // Verificar se é realmente um erro ou apenas falta de dados
+        // verifica se é realmente um erro ou apenas falta de dados
         const isNetworkError = error instanceof TypeError && error.message.includes('network');
         const isPermissionError = error.code === 'permission-denied';
         const isAuthError = error.code === 'unauthenticated';
 
-        // Para usuários novos ou sem dados, não mostrar erro
+        // para usuários novos ou sem dados, não mostrar erro
         if (isNetworkError || isPermissionError || isAuthError) {
-            // Mostrar erro apenas para problemas reais de conexão ou permissão
+            // mostra erro apenas para problemas reais de conexão ou permissão
             Swal.fire({
                 title: 'Erro ao carregar dados',
                 text: 'Ocorreu um erro de conexão. Por favor, verifique sua internet e tente novamente.',
@@ -316,7 +303,7 @@ async function carregarDados() {
                 confirmButtonText: 'OK'
             });
         } else {
-            // Para outros casos (incluindo quando não há dados), apenas exibir a interface vazia
+            // para outros casos (incluindo quando não há dados), apenas exibir a interface vazia
             console.log("Sem dados ou erro não crítico, exibindo interface vazia");
             exibirReceitas(); // Isso vai mostrar "Nenhuma receita adicionada ainda."
             notificarAlteracoesDados();
@@ -324,7 +311,7 @@ async function carregarDados() {
     }
 }
 
-// Salvar apenas categorias no localStorage
+// salva apenas categorias no localStorage
 function salvarCategorias() {
     const user = Auth.getLoggedInUser();
     if (user) {
@@ -333,7 +320,7 @@ function salvarCategorias() {
     }
 }
 
-// Atualizar o select de categorias
+// atualiza o select de categorias
 function atualizarSelectCategorias() {
     const selects = [
         document.getElementById('category'),
@@ -342,13 +329,13 @@ function atualizarSelectCategorias() {
 
     selects.forEach(select => {
         if (select) {
-            // Salvar valor atual para preservar a seleção após a atualização
+            // salva valor atual para preservar a seleção após a atualização
             const valorAtual = select.value;
 
-            // Limpar opções existentes
+            // limpa opções existentes
             select.innerHTML = '<option value="">Selecione</option>';
 
-            // Adicionar categorias
+            // add categorias
             categorias.forEach(categoria => {
                 const option = document.createElement('option');
                 option.value = categoria;
@@ -356,13 +343,13 @@ function atualizarSelectCategorias() {
                 select.appendChild(option);
             });
 
-            // Adicionar opção "Outros"
+            // add opção "Outros"
             const outrosOption = document.createElement('option');
             outrosOption.value = 'Outros';
             outrosOption.textContent = 'Outros';
             select.appendChild(outrosOption);
 
-            // Restaurar valor selecionado se existia anteriormente
+            // restaura valor selecionado se existia anteriormente
             if (valorAtual && select.querySelector(`option[value="${valorAtual}"]`)) {
                 select.value = valorAtual;
             }
@@ -370,7 +357,7 @@ function atualizarSelectCategorias() {
     });
 }
 
-// Exibir as receitas na lista
+// exibe as receitas na lista
 function exibirReceitas() {
     const listaReceitas = document.getElementById('expensesList');
 
@@ -386,7 +373,7 @@ function exibirReceitas() {
         return;
     }
 
-    // Criar tabela para exibir as receitas
+    // cria tabela para exibir as receitas
     const table = document.createElement('table');
     table.className = 'table table-striped table-hover';
     table.innerHTML = `
@@ -405,7 +392,7 @@ function exibirReceitas() {
 
     const tbody = table.querySelector('tbody');
 
-    // Ordenar receitas por data (mais recente primeiro)
+    // ordena receitas por data (mais recente primeiro)
     const receitasOrdenadas = [...receitas].sort((a, b) => new Date(b.data) - new Date(a.data));
 
     receitasOrdenadas.forEach((receita, index) => {
@@ -430,7 +417,7 @@ function exibirReceitas() {
     listaReceitas.appendChild(table);
 }
 
-// Função para adicionar uma nova receita
+// add uma nova receita
 async function adicionarReceita(evento) {
     evento.preventDefault();
 
@@ -442,7 +429,7 @@ async function adicionarReceita(evento) {
 
         let categoria = selecaoCategoria.value;
 
-        // Validar os campos
+        // valida os campos
         if (!descricaoInput.value.trim()) {
             throw new Error('Por favor, insira uma descrição.');
         }
@@ -456,18 +443,18 @@ async function adicionarReceita(evento) {
             throw new Error('Por favor, selecione uma data.');
         }
 
-        // Se a categoria for "Outros", pega o valor do campo de nova categoria
+        // se a categoria for "Outros", pega o valor do campo de nova categoria
         if (categoria === 'Outros') {
             const novoNomeCategoria = document.getElementById('newCategoryName').value.trim();
             if (!novoNomeCategoria) {
                 throw new Error('Por favor, insira o nome da nova categoria.');
             }
 
-            // Criar nova categoria
+            // cria nova categoria
             const novaCategoria = new CategoriaReceita(novoNomeCategoria);
             categoria = novaCategoria.nome;
 
-            // Adicionar a nova categoria à lista se não existir
+            // add a nova categoria à lista se não existir
             if (!categorias.includes(categoria)) {
                 categorias.push(categoria);
                 salvarCategorias();
@@ -475,7 +462,6 @@ async function adicionarReceita(evento) {
             }
         }
 
-        // Mostrar loader
         Swal.fire({
             title: 'Salvando...',
             text: 'Aguarde enquanto salvamos sua receita',
@@ -485,7 +471,7 @@ async function adicionarReceita(evento) {
             }
         });
 
-        // Criar nova instância de receita
+        // cria nova instância de receita
         const receita = new Receita(
             descricaoInput.value,
             parseFloat(valorInput.value),
@@ -493,7 +479,7 @@ async function adicionarReceita(evento) {
             categoria
         );
 
-        // Salvar no Firestore
+        // salva no firestore
         const receitaData = {
             descricao: receita.descricao,
             valor: receita.valor,
@@ -506,10 +492,9 @@ async function adicionarReceita(evento) {
         receitas.push(receita);
         salvarReceitasLocalStorage();
 
-        // Fechar o loader
         Swal.close();
 
-        // Limpar formulário
+        // clear no formulário
         descricaoInput.value = '';
         valorInput.value = '';
         selecaoCategoria.value = '';
@@ -517,7 +502,6 @@ async function adicionarReceita(evento) {
         document.getElementById('newCategoryField').style.display = 'none';
         dataInput.value = '';
 
-        // Exibir mensagem de sucesso
         Swal.fire({
             title: 'Sucesso!',
             text: 'Receita adicionada com sucesso',
@@ -543,7 +527,7 @@ function notificarAlteracoesDados() {
     document.dispatchEvent(new CustomEvent('dadosReceitasAtualizados'));
 }
 
-// Referências ao modal
+// ref. ao modal
 const modalEdicao = document.getElementById('editModal');
 const inputDescricaoEdicao = document.getElementById('editDescription');
 const inputValorEdicao = document.getElementById('editAmount');
@@ -553,7 +537,7 @@ const formularioEdicaoReceita = document.getElementById('editExpenseForm');
 
 let indiceReceitaAtual = -1;
 
-// Abrir o modal de edição
+// abre o modal de edição
 function abrirModalEdicao(indice) {
     indiceReceitaAtual = indice;
     const receita = receitas[indice];
@@ -561,16 +545,16 @@ function abrirModalEdicao(indice) {
     inputDescricaoEdicao.value = receita.descricao;
     inputValorEdicao.value = receita.valor;
 
-    // Garantir que o select está atualizado antes de definir o valor
+    // garante que o select está atualizado antes de definir o valor
     atualizarSelectCategorias();
 
-    // Definir a categoria correta no select
+    // define a categoria correta no select
     selecaoCategoriaEdicao.value = receita.categoria;
 
-    // Verificar se precisamos mostrar o campo de nova categoria
+    // verifica se precisamos mostrar o campo de nova categoria
     alternarCampoNovaCategoriaEdicao();
 
-    // Formatar data para o formato esperado pelo input date (YYYY-MM-DD)
+    // formata data para o formato esperado pelo input date (YYYY-MM-DD)
     const data = new Date(receita.data);
     const dataFormatada = data.toISOString().split('T')[0];
     inputDataEdicao.value = dataFormatada;
@@ -578,16 +562,16 @@ function abrirModalEdicao(indice) {
     modalEdicao.style.display = "block";
 }
 
-// Fechar o modal
+// fecha o modal
 function fecharModalEdicao() {
     modalEdicao.style.display = "none";
 }
 
-// Alternar campo de nova categoria no modal de edição
+// alterna campo de nova categoria no modal de edição
 function alternarCampoNovaCategoriaEdicao() {
     let campoNovaCategoria = document.getElementById('editNewCategoryField');
 
-    // Se o campo não existir, criá-lo dinamicamente
+    // se o campo não existir, criá-lo dinamicamente
     if (!campoNovaCategoria && selecaoCategoriaEdicao.value === 'Outros') {
         const editCategorySelect = document.getElementById('editCategory');
         if (editCategorySelect) {
@@ -601,16 +585,16 @@ function alternarCampoNovaCategoriaEdicao() {
         }
     }
 
-    // Agora podemos verificar novamente e manipular o campo
+    // agora podemos verificar novamente e manipular o campo
     if (campoNovaCategoria) {
         campoNovaCategoria.style.display = selecaoCategoriaEdicao.value === 'Outros' ? 'block' : 'none';
 
-        // Se estiver mostrando o campo, limpar o valor anterior e focar no input
+        // se estiver mostrando o campo, limpar o valor anterior e focar no input
         if (selecaoCategoriaEdicao.value === 'Outros') {
             const inputNovaCategoria = document.getElementById('editNewCategoryName');
             if (inputNovaCategoria) {
                 inputNovaCategoria.value = '';
-                // Focar o campo após um pequeno delay para garantir que o campo esteja visível
+                // foca o campo após um pequeno delay para garantir que o campo esteja visível
                 setTimeout(() => {
                     inputNovaCategoria.focus();
                 }, 100);
@@ -619,16 +603,16 @@ function alternarCampoNovaCategoriaEdicao() {
     }
 }
 
-// Salvar as alterações da receita
+// salva as alterações da receita
 async function salvarEdicaoReceita(evento) {
     evento.preventDefault();
 
     try {
         let categoria = selecaoCategoriaEdicao.value;
 
-        // Se a categoria for "Outros", pega o valor do campo de nova categoria usando apenas o SweetAlert
+        // se a categoria for "Outros", pega o valor do campo de nova categoria usando apenas o SweetAlert
         if (categoria === 'Outros') {
-            // Usando apenas o SweetAlert para obter o nome da nova categoria
+            // usando apenas o SweetAlert para obter o nome da nova categoria
             const { value: novoNomeCategoria, isConfirmed } = await Swal.fire({
                 title: 'Nova Categoria',
                 input: 'text',
@@ -648,11 +632,11 @@ async function salvarEdicaoReceita(evento) {
                 throw new Error('Operação cancelada pelo usuário');
             }
 
-            // Criar nova categoria
+            // cria nova categoria
             const novaCategoria = new CategoriaReceita(novoNomeCategoria);
             categoria = novaCategoria.nome;
 
-            // Adicionar a nova categoria à lista se não existir
+            // add a nova categoria à lista se não existir
             if (!categorias.includes(categoria)) {
                 categorias.push(categoria);
                 salvarCategorias();
@@ -660,8 +644,6 @@ async function salvarEdicaoReceita(evento) {
             }
         }
 
-        // Restante do código para salvar a receita
-        // Mostrar loader
         Swal.fire({
             title: 'Atualizando...',
             text: 'Aguarde enquanto atualizamos sua receita',
@@ -678,11 +660,11 @@ async function salvarEdicaoReceita(evento) {
             categoria
         );
 
-        // Obter o ID do Firestore da receita atual
+        // obtém o ID do firestore da receita atual
         const receitaAtual = receitas[indiceReceitaAtual];
         receita.id = receitaAtual.id;
 
-        // Atualizar no Firestore
+        // atualiza no firestore
         const receitaData = {
             descricao: receita.descricao,
             valor: receita.valor,
@@ -694,10 +676,8 @@ async function salvarEdicaoReceita(evento) {
         receitas[indiceReceitaAtual] = receita;
         salvarReceitasLocalStorage();
 
-        // Fechar o loader
         Swal.close();
 
-        // Exibir mensagem de sucesso
         Swal.fire({
             title: 'Sucesso!',
             text: 'Receita atualizada com sucesso',
@@ -720,7 +700,7 @@ async function salvarEdicaoReceita(evento) {
     }
 }
 
-// Excluir uma receita existente
+// exclui uma receita existente
 async function excluirReceita(indice) {
     const confirmarExclusao = await Swal.fire({
         title: 'Tem certeza?',
@@ -735,7 +715,7 @@ async function excluirReceita(indice) {
 
     if (confirmarExclusao.isConfirmed) {
         try {
-            // Mostrar loader
+            // mostra loader
             Swal.fire({
                 title: 'Excluindo...',
                 text: 'Aguarde enquanto excluímos sua receita',
@@ -750,10 +730,10 @@ async function excluirReceita(indice) {
             receitas.splice(indice, 1);
             salvarReceitasLocalStorage();
 
-            // Fechar o loader
+            // fecha o loader
             Swal.close();
 
-            // Mensagem de sucesso
+            // msg de sucesso
             Swal.fire({
                 title: 'Excluído!',
                 text: 'Sua receita foi excluída com sucesso',
@@ -782,12 +762,12 @@ function alternarCampoNovaCategoria() {
     if (campoNovaCategoria) {
         campoNovaCategoria.style.display = selecaoCategoria.value === 'Outros' ? 'block' : 'none';
 
-        // Se estiver mostrando o campo, limpar o valor anterior e focar no input
+        // se estiver mostrando o campo, limpar o valor anterior e focar no input
         if (selecaoCategoria.value === 'Outros') {
             const inputNovaCategoria = document.getElementById('newCategoryName');
             if (inputNovaCategoria) {
                 inputNovaCategoria.value = '';
-                // Focar o campo após um pequeno delay para garantir que o campo esteja visível
+                // foca o campo após um pequeno delay para garantir que o campo esteja visível
                 setTimeout(() => {
                     inputNovaCategoria.focus();
                 }, 100);
@@ -796,15 +776,15 @@ function alternarCampoNovaCategoria() {
     }
 }
 
-// Inicialização
+// inicialização
 document.addEventListener('DOMContentLoaded', async () => {
     setupUserAccountActions();
     try {
         await carregarDados();
         exibirReceitas();
 
-        // Verificar se os elementos de nova categoria existem, caso contrário, criar
-        // Criar campo para nova categoria no formulário principal se não existir
+        // verifica se os elementos de nova categoria existem, caso contrário, cria
+        // cria campo para nova categoria no formulário principal se não existir
         if (!document.getElementById('newCategoryField')) {
             const categorySelect = document.getElementById('category');
             if (categorySelect) {
@@ -819,7 +799,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        // Criar campo para nova categoria no formulário de edição se não existir
+        // cria campo para nova categoria no formulário de edição se não existir
         if (!document.getElementById('editNewCategoryField')) {
             const editCategorySelect = document.getElementById('editCategory');
             if (editCategorySelect) {
@@ -834,7 +814,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        // Eventos
+        // eventos
         const formularioReceita = document.getElementById('expenseForm');
         if (formularioReceita) {
             formularioReceita.addEventListener('submit', adicionarReceita);
@@ -851,7 +831,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
-        // Eventos para campos de nova categoria
+        // eventos para campos de nova categoria
         const categorySelect = document.getElementById('category');
         const editCategorySelect = document.getElementById('editCategory');
 
@@ -867,7 +847,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             formularioEdicaoReceita.addEventListener('submit', salvarEdicaoReceita);
         }
 
-        // Expor funções necessárias globalmente
+        // expor funções necessárias globalmente
         window.abrirModalEdicao = abrirModalEdicao;
         window.excluirReceita = excluirReceita;
         window.fecharModalEdicao = fecharModalEdicao;

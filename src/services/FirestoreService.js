@@ -14,7 +14,7 @@ import { db } from "../config/firebase.js";
 import { Auth } from "./Auth.js";
 
 class FirestoreService {
-    // Gastos methods
+    // métodos para gastos
     static async getGastos() {
         const user = Auth.getLoggedInUser();
         if (!user) return [];
@@ -56,7 +56,7 @@ class FirestoreService {
         await deleteDoc(gastoRef);
     }
 
-    // Receitas methods
+    // métodos para receitas
     static async getReceitas() {
         const user = Auth.getLoggedInUser();
         if (!user) return [];
@@ -97,7 +97,7 @@ class FirestoreService {
         await deleteDoc(receitaRef);
     }
 
-    // Metas methods
+    // métodos para metas
     static async getMetas() {
         const user = Auth.getLoggedInUser();
         if (!user) return [];
@@ -138,11 +138,11 @@ class FirestoreService {
         await deleteDoc(metaRef);
     }
 
-    // Enhanced User account methods with more comprehensive cascade deletion
+    // métodos para configurações de usuário no Firestore
     static async deleteUserDocument(userId) {
         try {
             const userRef = doc(db, "users", userId);
-            // Check if user exists before deleting
+            // checa se o documento existe antes de tentar excluí-lo
             const userDoc = await getDoc(userRef);
             if (userDoc.exists()) {
                 await deleteDoc(userRef);
@@ -157,11 +157,11 @@ class FirestoreService {
 
     static async deleteUserData(userId) {
         try {
-            // Use batch for atomic operations
+            // com batch, podemos excluir vários documentos em uma única operação
             const batch = writeBatch(db);
             let totalDeleted = 0;
             
-            // Collections to clean up (add more if needed)
+            // lista de coleções a serem processadas
             const collections = [
                 "gastos", 
                 "receitas", 
@@ -172,7 +172,7 @@ class FirestoreService {
                 "notificacoes"
             ];
             
-            // Process each collection to delete user data
+            // itera sobre cada coleção e excluir documentos
             for (const collectionName of collections) {
                 try {
                     const collectionRef = collection(db, collectionName);
@@ -187,12 +187,12 @@ class FirestoreService {
                         console.log(`Encontrados ${snapshot.size} documentos em ${collectionName} para exclusão`);
                     }
                 } catch (err) {
-                    // If a collection doesn't exist, just skip it
+                    // se a coleção não existir ou estiver vazia, apenas ignore
                     console.log(`Coleção ${collectionName} não encontrada ou vazia`);
                 }
             }
             
-            // Execute batch deletion if we have documents to delete
+            // executa o batch de exclusão se houver documentos a serem excluídos
             if (totalDeleted > 0) {
                 await batch.commit();
                 console.log(`${totalDeleted} documentos excluídos em cascata`);
@@ -211,7 +211,7 @@ class FirestoreService {
         }
     }
 
-    // Method to be called from the UI for account deletion
+    // método para excluir conta do usuário
     static async deleteUserAccount() {
         const user = Auth.getLoggedInUser();
         if (!user || !user.uid) {
@@ -219,10 +219,10 @@ class FirestoreService {
         }
         
         try {
-            // Perform cascade deletion
+            // exclui os dados do usuário
             const result = await this.deleteUserData(user.uid);
             
-            // Log the user out after successful deletion
+            // se a exclusão dos dados for bem-sucedida, exclui o usuário
             if (result.success) {
                 Auth.logout();
                 return true;

@@ -65,32 +65,31 @@ class Auth {
         }
     }
 
-    // Add this new method for account deletion
+    // método para deletar a conta do usuário
     static async deleteUserAccount() {
         try {
-            // Get current Firebase user
+            // verifica se o usuário está autenticado
             const currentUser = auth.currentUser;
-            
+
             if (!currentUser) {
                 console.error("No authenticated user found");
                 return false;
             }
-            
+
             console.log("Deleting user from Firebase Authentication:", currentUser.uid);
-            
-            // Delete the user from Firebase Authentication
+
+            // deleta o usuário do Firebase Authentication
             await deleteUser(currentUser);
-            console.log("User deleted from Firebase Authentication");
-            
+
             return true;
         } catch (error) {
             console.error("Error deleting account:", error);
-            
+
             if (error.code === 'auth/requires-recent-login') {
                 alert("Por razões de segurança, você precisa fazer login novamente antes de excluir sua conta.");
                 this.logout();
             }
-            
+
             throw error;
         }
     }
@@ -106,7 +105,6 @@ class Auth {
     static onAuthStateChange(callback) {
         return onAuthStateChanged(auth, callback);
     }
-
 
 }
 

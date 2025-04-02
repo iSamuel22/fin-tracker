@@ -3,35 +3,29 @@ import { Auth } from "../services/Auth.js";
 import { FirestoreService } from "../services/FirestoreService.js";
 import Swal from 'https://cdn.jsdelivr.net/npm/sweetalert2@11/+esm';
 
-// Verificar autenticação
+// verifica autenticação
 if (!Auth.isAuthenticated()) {
     window.location.href = 'login.html';
 }
 
-// Configure user account buttons
+// menu user
 function setupUserAccountActions() {
-    // Debug para verificar Auth module
     console.log("Auth module loaded:", Auth);
     console.log("Auth.logout exists:", typeof Auth.logout === 'function');
     console.log("Auth.isAuthenticated exists:", typeof Auth.isAuthenticated === 'function');
 
-    // Função de logout
+    // função de logout
     const logoutButton = document.getElementById('logout-button');
     if (logoutButton) {
         logoutButton.addEventListener('click', (e) => {
             e.preventDefault();
             console.log("Logout button clicked");
             try {
-                // Verificar se temos o usuário antes de sair
+                // verifica se temos o usuário antes de sair
                 const user = Auth.getLoggedInUser();
-                console.log("Current user before logout:", user);
 
-                // Chamada explícita para limpar local storage
                 localStorage.removeItem('loggedInUser');
-                console.log("Removed user from localStorage");
 
-                // Forçar redirecionamento para a página de login
-                console.log("Redirecting to login page...");
                 window.location.href = 'login.html';
             } catch (error) {
                 console.error('Erro ao fazer logout:', error);
@@ -43,7 +37,7 @@ function setupUserAccountActions() {
         console.error("Logout button not found in the DOM");
     }
 
-    // Função de excluir conta
+    // exclui conta
     const deleteAccountButton = document.getElementById('delete-account-button');
     if (deleteAccountButton) {
         deleteAccountButton.addEventListener('click', (e) => {
@@ -56,9 +50,9 @@ function setupUserAccountActions() {
     }
 }
 
-// Mostrar confirmação antes de excluir a conta
+// mostra confirmação antes de excluir a conta
 function showDeleteAccountConfirmation() {
-    // Criar modal de confirmação
+    // cria modal de confirmação
     const modal = document.createElement('div');
     modal.className = 'modal fade show';
     modal.style.display = 'block';
@@ -93,7 +87,7 @@ function showDeleteAccountConfirmation() {
     document.body.appendChild(modal);
     document.body.classList.add('modal-open');
 
-    // Event listeners para botões do modal
+    // event listeners para botões do modal
     document.getElementById('close-delete-modal').addEventListener('click', () => {
         closeDeleteModal(modal);
     });
@@ -104,25 +98,20 @@ function showDeleteAccountConfirmation() {
 
     document.getElementById('confirm-delete-account').addEventListener('click', async () => {
         try {
-            // Show loading state
             const confirmButton = document.getElementById('confirm-delete-account');
             const originalText = confirmButton.innerHTML;
             confirmButton.disabled = true;
             confirmButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processando...';
 
-            // Delete the account
             await deleteUserAccount();
 
-            // Show success message
             alert('Sua conta foi excluída com sucesso.');
 
-            // Redirect to login page
             window.location.href = 'login.html';
         } catch (error) {
             console.error('Erro ao excluir conta:', error);
             alert('Ocorreu um erro ao excluir sua conta: ' + (error.message || 'Tente novamente mais tarde'));
 
-            // Reset button state
             const confirmButton = document.getElementById('confirm-delete-account');
             confirmButton.disabled = false;
             confirmButton.innerHTML = originalText;
@@ -132,13 +121,13 @@ function showDeleteAccountConfirmation() {
     });
 }
 
-// Fechar modal de confirmação
+// fecha modal de confirmação
 function closeDeleteModal(modal) {
     document.body.removeChild(modal);
     document.body.classList.remove('modal-open');
 }
 
-// Excluir conta do usuário com cascata
+// exclui conta do usuário com cascata
 async function deleteUserAccount() {
     const user = Auth.getLoggedInUser();
     if (!user || !user.uid) {
@@ -148,19 +137,15 @@ async function deleteUserAccount() {
     try {
         console.log("Iniciando processo de exclusão de conta");
 
-        // Step 1: Get user data before we delete anything
         const userId = user.uid;
         const userEmail = user.email;
 
-        // Step 2: Delete user from Firebase Authentication
         console.log("Excluindo usuário do Firebase Authentication");
         await Auth.deleteUserAccount();
 
-        // Step 3: Delete user data from Firestore
         console.log("Excluindo dados do Firestore");
         await FirestoreService.deleteUserData(userId);
 
-        // Step 4: Clean up localStorage
         console.log("Limpando dados do localStorage");
         cleanupLocalStorage(userEmail);
 
@@ -172,30 +157,28 @@ async function deleteUserAccount() {
     }
 }
 
-// Helper function to clean localStorage
+// clear no localStorage
 function cleanupLocalStorage(userEmail) {
     if (!userEmail) return;
 
-    // List of prefixes to check
     const prefixes = ['gastos_', 'receitas_', 'metas_', 'configuracoes_'];
 
-    // Remove items with these prefixes
     prefixes.forEach(prefix => {
         localStorage.removeItem(`${prefix}${userEmail}`);
     });
 
-    // Finally remove the user
     localStorage.removeItem('loggedInUser');
 }
 
 // array para armazenar as metas
 let metas = [];
-// Variáveis para armazenar dados financeiros
+
+// variaveis para armazenar dados financeiros
 let saldoMensal = 0;
 let receitasMensais = 0;
 let gastosMensais = 0;
 
-// carregar metas do localStorage
+// carrega metas do localStorage
 function carregarDados() {
     const user = Auth.getLoggedInUser();
     if (!user || !user.email) {
@@ -217,7 +200,7 @@ function carregarDados() {
         }).filter(meta => meta !== null);
     }
 
-    // Carregar receitas
+    // carrega receitas
     const receitasStorage = localStorage.getItem(`receitas_${user.email}`);
     if (receitasStorage) {
         try {
@@ -229,7 +212,7 @@ function carregarDados() {
         }
     }
 
-    // Carregar gastos
+    // carrega gastos
     const gastosStorage = localStorage.getItem(`gastos_${user.email}`);
     if (gastosStorage) {
         try {
@@ -241,12 +224,12 @@ function carregarDados() {
         }
     }
 
-    // Calcular saldo mensal
+    // calcula saldo mensal
     saldoMensal = receitasMensais - gastosMensais;
     atualizarSaldoMensal();
 }
 
-// Função para calcular a média mensal de receitas ou gastos
+// calcula a média mensal de receitas ou gastos
 function calcularMediaMensal(items) {
     if (!items || items.length === 0) return 0;
 
@@ -254,19 +237,19 @@ function calcularMediaMensal(items) {
     const mesAtual = hoje.getMonth();
     const anoAtual = hoje.getFullYear();
 
-    // Filtrar itens do mês atual
+    // filtra itens do mês atual
     const itensMesAtual = items.filter(item => {
         const dataItem = new Date(item.data);
         return dataItem.getMonth() === mesAtual && dataItem.getFullYear() === anoAtual;
     });
 
-    // Somar valores
+    // soma valores
     const total = itensMesAtual.reduce((soma, item) => soma + parseFloat(item.valor), 0);
 
     return total;
 }
 
-// Atualizar o elemento de interface com o saldo mensal
+// atualiza o elemento de interface com o saldo mensal
 function atualizarSaldoMensal() {
     const saldoValorElement = document.getElementById('saldo-valor');
     const saldoBadgeElement = document.getElementById('saldo-badge');
@@ -292,27 +275,27 @@ function atualizarSaldoMensal() {
     }
 }
 
-// Calcular e exibir estimativas para as metas
+// calcula e exibir estimativas para as metas
 function calcularEstimativas() {
     const container = document.getElementById('estimativas-container');
     const placeholder = document.getElementById('estimativas-placeholder');
 
-    // Verificar se os elementos existem antes de prosseguir
+    // verifica se os elementos existem antes de prosseguir
     if (!container) {
         console.error('Elemento estimativas-container não encontrado');
         return;
     }
 
-    // Limpar container atual
+    // limpa container atual
     container.innerHTML = '';
 
-    // Se não há metas ou saldo mensal é zero ou negativo
+    // se não há metas ou saldo mensal é zero ou negativo
     if (metas.length === 0) {
-        // Verificar se o placeholder existe antes de modificar sua propriedade style
+        // verifica se o placeholder existe antes de modificar sua propriedade style
         if (placeholder) {
             placeholder.style.display = 'block';
         } else {
-            // Se não existir, criar um placeholder alternativo
+            // se não existir, criar um placeholder alternativo
             const noGoalsMessage = document.createElement('div');
             noGoalsMessage.className = 'alert alert-info';
             noGoalsMessage.textContent = 'Nenhuma meta adicionada ainda.';
@@ -323,7 +306,7 @@ function calcularEstimativas() {
         placeholder.style.display = 'none';
     }
 
-    // Se o saldo mensal for zero ou negativo, mostrar um alerta
+    // se o saldo mensal for zero ou negativo, mostrar um alerta
     if (saldoMensal <= 0) {
         const alertElement = document.createElement('div');
         alertElement.className = 'alert alert-warning';
@@ -337,7 +320,7 @@ function calcularEstimativas() {
         return;
     }
 
-    // Criar uma tabela para as estimativas
+    // cria uma tabela para as estimativas
     const table = document.createElement('table');
     table.className = 'table table-striped table-hover';
     table.innerHTML = `
@@ -355,11 +338,11 @@ function calcularEstimativas() {
 
     const tbody = table.querySelector('tbody');
 
-    // Adicionar cada meta à tabela
+    // add cada meta à tabela
     metas.forEach(meta => {
         const tr = document.createElement('tr');
 
-        // Calcular meses necessários
+        // calcula meses necessários
         const mesesNecessarios = meta.valor / saldoMensal;
         let textoEstimativa;
         let classeEstimativa;
@@ -382,11 +365,11 @@ function calcularEstimativas() {
             classeEstimativa = mesesNecessarios > 60 ? 'text-danger' : 'text-warning';
         }
 
-        // Calcular a porcentagem de progresso com base na proporção do saldo mensal para o valor total
+        // calcula a porcentagem de progresso com base na proporção do saldo mensal para o valor total
         const porcentagemMensal = (saldoMensal / meta.valor) * 100;
         const porcentagemProgress = Math.min(100, porcentagemMensal); // Limitar a 100%
 
-        // Determinar a classe de cor para a barra de progresso
+        // determina a classe de cor para a barra de progresso
         let progressClass = 'progress-bar-striped';
         if (porcentagemMensal < 5) {
             progressClass += ' bg-danger';
@@ -419,7 +402,7 @@ function calcularEstimativas() {
     container.appendChild(table);
 }
 
-// salvar metas no localStorage
+// salva metas no localStorage
 function salvarDados() {
     const user = Auth.getLoggedInUser();
     if (!user || !user.email) {
@@ -429,7 +412,7 @@ function salvarDados() {
     localStorage.setItem(`metas_${user.email}`, JSON.stringify(metas));
 }
 
-// exibir as metas na lista
+// exibe as metas na lista
 function exibirMetas() {
     const listaMetas = document.getElementById('goalsList');
     if (!listaMetas) return;
@@ -441,7 +424,7 @@ function exibirMetas() {
         return;
     }
 
-    // Criar tabela para exibir as metas
+    // cria tabela para exibir as metas
     const table = document.createElement('table');
     table.className = 'table table-striped table-hover';
     table.innerHTML = `
@@ -482,7 +465,7 @@ function exibirMetas() {
     listaMetas.appendChild(table);
 }
 
-// função para adicionar uma nova meta
+// add uma nova meta
 function adicionarMeta(evento) {
     evento.preventDefault();
 
@@ -506,10 +489,10 @@ function adicionarMeta(evento) {
         valorInput.value = '';
 
         exibirMetas();
-        // Chamar explicitamente calcularEstimativas após adicionar uma meta
+        // chama explicitamente calcularEstimativas após adicionar uma meta
         calcularEstimativas();
 
-        // Mostrar mensagem de sucesso
+        // mostra mensagem de sucesso
         const alertElement = document.createElement('div');
         alertElement.className = 'alert alert-success alert-dismissible fade show';
         alertElement.innerHTML = `
@@ -517,7 +500,7 @@ function adicionarMeta(evento) {
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         `;
 
-        // Inserir alerta após o formulário
+        // insere alerta após o formulário
         const formContainer = document.querySelector('.form-container');
         formContainer.appendChild(alertElement);
 
@@ -531,7 +514,7 @@ function adicionarMeta(evento) {
     }
 }
 
-// referências ao modal
+// ref. ao modal
 const modalEdicao = document.getElementById('editModal');
 const inputNomeEdicao = document.getElementById('editName');
 const inputDescricaoEdicao = document.getElementById('editDescription');
@@ -540,7 +523,7 @@ const formularioEdicaoMeta = document.getElementById('editGoalForm');
 
 let indiceMetaAtual = -1;
 
-// abrir o modal de edição
+// abre o modal de edição
 function abrirModalEdicao(indice) {
     indiceMetaAtual = indice;
     const meta = metas[indice];
@@ -552,12 +535,12 @@ function abrirModalEdicao(indice) {
     modalEdicao.style.display = "block";
 }
 
-// fechar o modal
+// fecha o modal
 function fecharModalEdicao() {
     modalEdicao.style.display = "none";
 }
 
-// salvar as alterações da meta
+// salva as alterações da meta
 function salvarEdicaoMeta(evento) {
     evento.preventDefault();
 
@@ -576,7 +559,7 @@ function salvarEdicaoMeta(evento) {
             calcularEstimativas();
         }, 100);
 
-        // mensagem de sucesso com SweetAlert
+        // msg de sucesso com SweetAlert
         Swal.fire({
             title: 'Sucesso!',
             text: 'A meta foi editada com sucesso.',
