@@ -183,21 +183,41 @@ let saldoMensal = 0;
 let receitasMensais = 0;
 let gastosMensais = 0;
 
-// carrega metas do localStorage
-function carregarDados() {
+// carrega metas do localStorage e Firestore
+async function carregarDados() {
     const user = Auth.getLoggedInUser();
     if (!user || !user.email) {
         console.error('Usuário não encontrado ou sem email');
         return;
     }
 
-    const metasStorage = localStorage.getItem(`metas_${user.email}`);
+    // carrega imediatamente do localStorage
+    carregarLocalStorage(user.email);
+    
+    // renderiza UI com dados do localStorage
+    exibirMetas();
+    calcularEstimativas();
 
+    // inicializar coleções e atualizar do Firestore em segundo plano
+    setTimeout(async () => {
+        await FirestoreService.inicializarColecoes();
+        await atualizarDoFirestore();
+    }, 0);
+
+    return true;
+}
+
+// carrega apenas do localStorage (rápido)
+function carregarLocalStorage(userEmail) {
+    // carrega metas
+    const metasStorage = localStorage.getItem(`metas_${userEmail}`);
     if (metasStorage) {
         const metasData = JSON.parse(metasStorage);
         metas = metasData.map(data => {
             try {
-                return new Meta(data.nome, data.descricao, data.valor, data.dataCriacao);
+                const meta = new Meta(data.nome, data.descricao, data.valor, data.dataCriacao);
+                if (data.id) meta.id = data.id;
+                return meta;
             } catch (erro) {
                 console.error('Erro ao carregar meta:', erro);
                 return null;
@@ -205,8 +225,14 @@ function carregarDados() {
         }).filter(meta => meta !== null);
     }
 
+    // carrega dados financeiros do localStorage
+    carregarDadosFinanceirosLocais(userEmail);
+}
+
+// carrega os dados financeiros do localStorage
+function carregarDadosFinanceirosLocais(userEmail) {
     // carrega receitas
-    const receitasStorage = localStorage.getItem(`receitas_${user.email}`);
+    const receitasStorage = localStorage.getItem(`receitas_${userEmail}`);
     if (receitasStorage) {
         try {
             const receitas = JSON.parse(receitasStorage);
@@ -218,7 +244,7 @@ function carregarDados() {
     }
 
     // carrega gastos
-    const gastosStorage = localStorage.getItem(`gastos_${user.email}`);
+    const gastosStorage = localStorage.getItem(`gastos_${userEmail}`);
     if (gastosStorage) {
         try {
             const gastos = JSON.parse(gastosStorage);
@@ -232,6 +258,42 @@ function carregarDados() {
     // calcula saldo mensal
     saldoMensal = receitasMensais - gastosMensais;
     atualizarSaldoMensal();
+}
+
+// Função para atualizar dados do Firestore em segundo plano
+async function atualizarDoFirestore() {
+    try {
+        const metasData = await FirestoreService.getMetas();
+        if (metasData && metasData.length > 0) {
+            const novasMetas = metasData.map(data => {
+                try {
+                    const meta = new Meta(
+                        data.nome,
+                        data.descricao,
+                        parseFloat(data.valor),
+                        new Date(data.dataCriacao)
+                    );
+                    meta.id = data.id;
+                    return meta;
+                } catch (erro) {
+                    console.error('Erro ao processar meta do Firestore:', erro);
+                    return null;
+                }
+            }).filter(meta => meta !== null);
+            
+            // Verificar se há mudanças antes de atualizar a UI
+            if (JSON.stringify(novasMetas) !== JSON.stringify(metas)) {
+                metas = novasMetas;
+                salvarDados();
+                
+                // Atualizar UI apenas se houver mudanças
+                exibirMetas();
+                calcularEstimativas();
+            }
+        }
+    } catch (erro) {
+        console.error('Erro ao carregar metas do Firestore:', erro);
+    }
 }
 
 // calcula a média mensal de receitas ou gastos
@@ -407,14 +469,32 @@ function calcularEstimativas() {
     container.appendChild(table);
 }
 
-// salva metas no localStorage
+// salva metas no localStorage e inclui ID do Firestore
 function salvarDados() {
     const user = Auth.getLoggedInUser();
     if (!user || !user.email) {
         console.error('Erro ao salvar metas: usuário não encontrado ou sem email');
         return;
     }
-    localStorage.setItem(`metas_${user.email}`, JSON.stringify(metas));
+    
+    // Incluir os IDs do Firestore ao salvar no localStorage
+    const metasData = metas.map(meta => {
+        const metaObj = {
+            nome: meta.nome,
+            descricao: meta.descricao,
+            valor: meta.valor,
+            dataCriacao: meta.dataCriacao
+        };
+        
+        // adiciona ID se existir (para sincronização com Firestore)
+        if (meta.id) {
+            metaObj.id = meta.id;
+        }
+        
+        return metaObj;
+    });
+    
+    localStorage.setItem(`metas_${user.email}`, JSON.stringify(metasData));
 }
 
 // exibe as metas na lista
@@ -471,7 +551,7 @@ function exibirMetas() {
 }
 
 // add uma nova meta
-function adicionarMeta(evento) {
+async function adicionarMeta(evento) {
     evento.preventDefault();
 
     try {
@@ -479,12 +559,36 @@ function adicionarMeta(evento) {
         const descricaoInput = document.getElementById('description');
         const valorInput = document.getElementById('amount');
 
+        // Validação básica
+        if (!nomeInput.value.trim()) {
+            throw new Error('O nome da meta é obrigatório');
+        }
+
+        if (!valorInput.value || isNaN(parseFloat(valorInput.value)) || parseFloat(valorInput.value) <= 0) {
+            throw new Error('O valor da meta deve ser um número positivo');
+        }
+
         const meta = new Meta(
-            nomeInput.value,
-            descricaoInput.value,
+            nomeInput.value.trim(),
+            descricaoInput.value.trim(),
             parseFloat(valorInput.value)
         );
 
+        // Adicionar ao Firebase silenciosamente
+        const metaData = {
+            nome: meta.nome,
+            descricao: meta.descricao,
+            valor: meta.valor,
+            dataCriacao: meta.dataCriacao
+        };
+
+        const novaMeta = await FirestoreService.addMeta(metaData);
+        
+        // Se bem-sucedido, atribui o ID e adiciona ao array local
+        if (novaMeta && novaMeta.id) {
+            meta.id = novaMeta.id;
+        }
+        
         metas.push(meta);
         salvarDados();
 
@@ -494,7 +598,6 @@ function adicionarMeta(evento) {
         valorInput.value = '';
 
         exibirMetas();
-        // chama explicitamente calcularEstimativas após adicionar uma meta
         calcularEstimativas();
 
         // mostra mensagem de sucesso
@@ -551,7 +654,7 @@ function fecharModalEdicao() {
 }
 
 // salva as alterações da meta
-function salvarEdicaoMeta(evento) {
+async function salvarEdicaoMeta(evento) {
     evento.preventDefault();
 
     try {
@@ -561,6 +664,22 @@ function salvarEdicaoMeta(evento) {
             parseFloat(inputValorEdicao.value)
         );
 
+        // Obter ID do Firestore da meta atual se existir
+        const metaAtual = metas[indiceMetaAtual];
+        if (metaAtual.id) {
+            meta.id = metaAtual.id;
+        
+            // Atualizar no Firestore silenciosamente
+            const metaData = {
+                nome: meta.nome,
+                descricao: meta.descricao,
+                valor: meta.valor,
+                dataCriacao: meta.dataCriacao
+            };
+
+            await FirestoreService.updateMeta(meta.id, metaData);
+        }
+        
         metas[indiceMetaAtual] = meta;
         salvarDados();
         fecharModalEdicao();
@@ -589,7 +708,7 @@ function salvarEdicaoMeta(evento) {
 }
 
 // excluir uma meta existente
-function excluirMeta(indice) {
+async function excluirMeta(indice) {
     Swal.fire({
         title: 'Tem certeza?',
         text: "Você não poderá reverter esta ação!",
@@ -599,22 +718,40 @@ function excluirMeta(indice) {
         cancelButtonColor: '#3085d6',
         confirmButtonText: 'Sim, excluir!',
         cancelButtonText: 'Cancelar'
-    }).then((result) => {
+    }).then(async (result) => {
         if (result.isConfirmed) {
-            metas.splice(indice, 1);
-            salvarDados();
-            exibirMetas();
-            setTimeout(() => {
-                calcularEstimativas();
-            }, 100);
+            try {
+                const meta = metas[indice];
+                
+                // Verifica se a meta tem ID do Firestore antes de tentar excluir
+                if (meta.id) {
+                    await FirestoreService.deleteMeta(meta.id);
+                }
+                
+                // Remove localmente
+                metas.splice(indice, 1);
+                salvarDados();
+                exibirMetas();
+                setTimeout(() => {
+                    calcularEstimativas();
+                }, 100);
 
-            Swal.fire({
-                title: 'Excluído!',
-                text: 'Sua meta foi excluída com sucesso',
-                icon: 'success',
-                timer: 2000,
-                showConfirmButton: false
-            });
+                Swal.fire({
+                    title: 'Excluído!',
+                    text: 'Sua meta foi excluída com sucesso',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } catch (erro) {
+                console.error('Erro ao excluir meta:', erro);
+                Swal.fire({
+                    title: 'Erro!',
+                    text: 'Ocorreu um erro ao excluir a meta: ' + erro.message,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
         }
     });
 }
@@ -661,14 +798,12 @@ function atualizarDadosUsuarioNoMenu() {
 }
 
 // inicialização
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     setupUserAccountActions();
     atualizarDadosUsuarioNoMenu();
-    carregarDados();
+    await carregarDados();
     exibirMetas();
-    setTimeout(() => {
-        calcularEstimativas();
-    }, 100);
+    calcularEstimativas();
 
     // eventos
     const formularioMeta = document.getElementById('goalForm');

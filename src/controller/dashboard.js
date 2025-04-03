@@ -1,5 +1,6 @@
 import { Auth } from "../services/Auth.js";
 import { FirestoreService } from "../services/FirestoreService.js";
+import Swal from 'https://cdn.jsdelivr.net/npm/sweetalert2@11/+esm';
 
 // verifica autenticação
 if (!Auth.isAuthenticated()) {
@@ -8,28 +9,20 @@ if (!Auth.isAuthenticated()) {
 
 // menu user
 function setupUserAccountActions() {
+    console.log("Configurando ações da conta de usuário");
+    
     const logoutButton = document.getElementById('logout-button');
     if (logoutButton) {
         logoutButton.addEventListener('click', (e) => {
             e.preventDefault();
             console.log("Logout button clicked");
             try {
-                // verficia se temos o usuário antes de sair
-                const user = Auth.getLoggedInUser();
-
-                localStorage.removeItem('loggedInUser');
-
-                window.location.href = 'login.html';
+                Auth.logout();
             } catch (error) {
-                console.error('Erro ao fazer logout:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Erro ao sair da conta',
-                    text: error.message || 'Tente novamente mais tarde',
-                    confirmButtonText: 'OK'
-                });
+                console.error("Error during logout:", error);
             }
         });
+        console.log("Logout button event listener added");
     } else {
         console.error("Logout button not found in the DOM");
     }
@@ -37,90 +30,70 @@ function setupUserAccountActions() {
     // excluir conta
     const deleteAccountButton = document.getElementById('delete-account-button');
     if (deleteAccountButton) {
+        console.log("Delete account button found");
         deleteAccountButton.addEventListener('click', (e) => {
             e.preventDefault();
+            console.log("Delete account button clicked");
             showDeleteAccountConfirmation();
         });
+    } else {
+        console.error("Delete account button not found in the DOM");
     }
 }
 
 // mostra confirmação antes de excluir a conta
 function showDeleteAccountConfirmation() {
-    // cria modal de confirmação
-    const modal = document.createElement('div');
-    modal.className = 'modal fade show';
-    modal.style.display = 'block';
-    modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
-
-    modal.innerHTML = `
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title">Excluir Conta</h5>
-                    <button type="button" class="btn-close btn-close-white" id="close-delete-modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.</p>
-                    <p class="text-danger fw-bold">Todos os seus dados serão permanentemente excluídos:</p>
-                    <ul>
-                        <li>Gastos</li>
-                        <li>Receitas</li>
-                        <li>Metas</li>
-                    </ul>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" id="cancel-delete-account">Cancelar</button>
-                    <button type="button" class="btn btn-danger" id="confirm-delete-account">
-                        <i class="fas fa-trash me-2"></i>Sim, excluir minha conta
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-
-    document.body.appendChild(modal);
-    document.body.classList.add('modal-open');
-
-    // event listeners para botões do modal
-    document.getElementById('close-delete-modal').addEventListener('click', () => {
-        closeDeleteModal(modal);
-    });
-
-    document.getElementById('cancel-delete-account').addEventListener('click', () => {
-        closeDeleteModal(modal);
-    });
-
-    document.getElementById('confirm-delete-account').addEventListener('click', async () => {
-        try {
-            const confirmButton = document.getElementById('confirm-delete-account');
-            const originalText = confirmButton.innerHTML;
-            confirmButton.disabled = true;
-            confirmButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processando...';
-
-            await deleteUserAccount();
-
-            Swal.fire({
-                icon: 'success',
-                title: 'Conta excluída',
-                text: 'Sua conta foi excluída com sucesso.',
-                confirmButtonText: 'OK'
-            });
-
-            window.location.href = 'login.html';
-        } catch (error) {
-            console.error('Erro ao excluir conta:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Erro ao excluir conta',
-                text: error.message || 'Tente novamente mais tarde',
-                confirmButtonText: 'OK'
-            });
-
-            const confirmButton = document.getElementById('confirm-delete-account');
-            confirmButton.disabled = false;
-            confirmButton.innerHTML = originalText;
-        } finally {
-            closeDeleteModal(modal);
+    // Usar SweetAlert2 diretamente em vez de criar um modal manualmente
+    Swal.fire({
+        title: 'Excluir Conta',
+        html: `
+            <p>Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.</p>
+            <p class="text-danger fw-bold">Todos os seus dados serão permanentemente excluídos:</p>
+            <ul class="text-start">
+                <li>Gastos</li>
+                <li>Receitas</li>
+                <li>Metas</li>
+            </ul>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '<i class="fas fa-trash me-2"></i>Sim, excluir minha conta',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                Swal.fire({
+                    title: 'Excluindo conta...',
+                    text: 'Por favor, aguarde enquanto excluímos sua conta.',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                // Deleta a conta do usuário
+                await deleteUserAccount();
+                
+                Swal.fire({
+                    title: 'Conta Excluída',
+                    text: 'Sua conta foi excluída com sucesso.',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.href = 'login.html';
+                });
+            } catch (error) {
+                console.error('Erro ao excluir conta:', error);
+                Swal.fire({
+                    title: 'Erro',
+                    text: 'Ocorreu um erro ao excluir sua conta: ' + (error.message || 'Tente novamente mais tarde'),
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
         }
     });
 }
@@ -160,6 +133,7 @@ async function deleteUserAccount() {
         throw error;
     }
 }
+
 // clean no localStorage
 function cleanupLocalStorage(userEmail) {
     if (!userEmail) return;
