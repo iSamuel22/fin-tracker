@@ -173,20 +173,47 @@ function cleanupLocalStorage(userEmail) {
     localStorage.removeItem('loggedInUser');
 }
 
-// formata valores monetários
-function formatarMoeda(valor) {
-    return valor.toLocaleString('pt-BR', {
+// formata valores monetários, permitindo exibição abreviada com tooltip para valores completos
+function formatarMoeda(valor, formatoCompleto = false) {
+    // formato completo para exibição no tooltip
+    const valorCompleto = valor.toLocaleString('pt-BR', {
         style: 'currency',
         currency: 'BRL'
     });
-}
 
-// obtém dados do localStorage
-function obterDados() {
-    const user = Auth.getLoggedInUser();
-    const gastos = JSON.parse(localStorage.getItem(`gastos_${user.email}`)) || [];
-    const receitas = JSON.parse(localStorage.getItem(`receitas_${user.email}`)) || [];
-    return { gastos, receitas };
+    // se quisermos o formato completo, retornamos diretamente
+    if (formatoCompleto) {
+        return valorCompleto;
+    }
+
+    // formato abreviado para valores grandes
+    const abs = Math.abs(valor);
+    let valorAbreviado;
+
+    if (abs >= 1000000) {
+        // valores em milhões (M) - três casas decimais para maior precisão
+        valorAbreviado = 'R$ ' + (valor / 1000000).toFixed(3).replace('.', ',') + 'M';
+    } else if (abs >= 10000) {
+        // valores entre 10 mil e 1 milhão - duas casas decimais para maior precisão
+        valorAbreviado = 'R$ ' + (valor / 1000).toFixed(2).replace('.', ',') + 'K';
+    } else if (abs >= 1000) {
+        // valores entre 1000 e 10000 - três casas decimais para alta precisão
+        valorAbreviado = 'R$ ' + (valor / 1000).toFixed(3).replace('.', ',') + 'K';
+    } else {
+        // valores menores, formato padrão sem abreviação
+        valorAbreviado = valorCompleto;
+    }
+
+    // remove zeros desnecessários no final das casas decimais
+    valorAbreviado = valorAbreviado.replace(/,0+([KM])/g, '$1');
+
+    // se terminar com um só zero na casa decimal (ex: 3,20K), remove-o
+    valorAbreviado = valorAbreviado.replace(/,(\d)0([KM])/g, ',$1$2');
+
+    return {
+        abreviado: valorAbreviado,
+        completo: valorCompleto
+    };
 }
 
 // calcula totais
@@ -197,12 +224,231 @@ function calcularTotais() {
     const totalReceitas = receitas.reduce((total, receita) => total + parseFloat(receita.valor), 0);
     const saldo = totalReceitas - totalGastos;
 
-    // atualiza elementos HTML
-    document.getElementById('totalGastos').textContent = formatarMoeda(totalGastos);
-    document.getElementById('totalReceitas').textContent = formatarMoeda(totalReceitas);
-    document.getElementById('saldoTotal').textContent = formatarMoeda(saldo);
+    // atualiza elementos HTML com tooltip
+    atualizarElementoComTooltip('totalGastos', totalGastos);
+    atualizarElementoComTooltip('totalReceitas', totalReceitas);
+    atualizarElementoComTooltip('saldoTotal', saldo);
 
     return { totalGastos, totalReceitas, saldo };
+}
+
+// função auxiliar para atualizar elemento com tooltip
+function atualizarElementoComTooltip(elementId, valor) {
+    const elemento = document.getElementById(elementId);
+    if (!elemento) return;
+
+    const formatado = formatarMoeda(valor);
+
+    // adiciona atributos de dados e classes para tooltip
+    elemento.textContent = formatado.abreviado;
+    elemento.setAttribute('data-bs-toggle', 'tooltip');
+    elemento.setAttribute('data-bs-placement', 'top');
+    elemento.setAttribute('title', formatado.completo);
+    elemento.classList.add('valor-monetario');
+}
+
+// configura tooltips personalizados que funcionam em desktop e mobile
+function configurarTitulos() {
+    const tooltipElements = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipElements.forEach(element => {
+        const instance = bootstrap.Tooltip.getInstance(element);
+        if (instance) {
+            instance.dispose();
+        }
+
+        const title = element.getAttribute('title') || element.getAttribute('data-bs-original-title');
+        element.removeAttribute('data-bs-toggle');
+        element.removeAttribute('data-bs-placement');
+        element.removeAttribute('data-bs-original-title');
+
+        if (title) {
+            element.setAttribute('title', title);
+
+            // add um atributo personalizado para armazenar o título para uso móvel
+            element.setAttribute('data-custom-tooltip', title);
+
+            // add classe para estilização
+            element.classList.add('has-tooltip');
+
+            // add eventos para desktop (mouseover/mouseleave)
+            element.addEventListener('mouseenter', showTooltip);
+            element.addEventListener('mouseleave', hideTooltip);
+
+            // add evento de toque específico para dispositivos móveis
+            element.addEventListener('touchstart', function (e) {
+                e.preventDefault(); // previne o comportamento padrão
+                e.stopPropagation(); // evita propagação
+
+                showTooltip.call(this, e);
+
+                // define um timer para fechar após um período
+                setTimeout(() => {
+                    hideAllTooltips();
+                }, 3000); // fecha após 3 segundos
+            }, { passive: false });
+        }
+    });
+
+    // add estilos para os tooltips personalizados
+    if (!document.getElementById('tooltip-style')) {
+        const style = document.createElement('style');
+        style.id = 'tooltip-style';
+        style.textContent = `
+            .has-tooltip {
+                position: relative;
+                cursor: pointer;
+            }
+            
+            .custom-tooltip {
+                position: fixed;
+                background-color: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 5px 10px;
+                border-radius: 4px;
+                font-size: 14px;
+                z-index: 9999;
+                max-width: 300px;
+                text-align: center;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                pointer-events: none;
+                animation: fadeIn 0.2s ease-in;
+            }
+            
+            @keyframes fadeIn {
+                0% { opacity: 0; transform: translateY(10px); }
+                100% { opacity: 1; transform: translateY(0); }
+            }
+            
+            .custom-tooltip::after {
+                content: '';
+                position: absolute;
+                top: 100%;
+                left: 50%;
+                margin-left: -5px;
+                border-width: 5px;
+                border-style: solid;
+                border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
+            }
+            
+            /* Estilo específico para dispositivos móveis */
+            @media (max-width: 768px) {
+                .custom-tooltip {
+                    padding: 8px 12px;
+                    font-size: 16px; /* Texto maior em dispositivos móveis */
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // evento global para fechar tooltips quando rolar a página
+    window.addEventListener('scroll', hideAllTooltips, { passive: true });
+
+    // evento global para fechar tooltips ao clicar fora em dispositivos móveis
+    document.addEventListener('touchstart', function (e) {
+        // se o clique não foi em um elemento com tooltip
+        if (!e.target.classList.contains('has-tooltip')) {
+            hideAllTooltips();
+        }
+    }, { passive: true });
+
+    // add evento de clique global para desktop
+    document.addEventListener('click', function (e) {
+        // se o clique não foi em um elemento com tooltip
+        if (!e.target.classList.contains('has-tooltip')) {
+            hideAllTooltips();
+        }
+    });
+}
+
+// mostra tooltip
+function showTooltip(e) {
+    // remove qualquer tooltip personalizado existente primeiro
+    hideAllTooltips();
+
+    // cria o tooltip personalizado
+    const tooltip = document.createElement('div');
+    tooltip.className = 'custom-tooltip';
+    tooltip.textContent = this.getAttribute('data-custom-tooltip');
+
+    // posiciona o tooltip perto do elemento
+    const rect = this.getBoundingClientRect();
+    document.body.appendChild(tooltip);
+
+    // centraliza o tooltip sobre o elemento
+    const tooltipRect = tooltip.getBoundingClientRect();
+
+    // verificação para não ultrapassar os limites da tela
+    let leftPos = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+    leftPos = Math.max(10, Math.min(leftPos, window.innerWidth - tooltipRect.width - 10)); // mantém dentro da tela
+
+    tooltip.style.left = `${leftPos}px`;
+    tooltip.style.top = `${rect.top - tooltipRect.height - 10}px`;
+
+    // marca este elemento como tendo um tooltip ativo
+    this.dataset.tooltipActive = 'true';
+}
+
+// esconde um tooltip específico
+function hideTooltip() {
+    if (this.dataset.tooltipActive === 'true') {
+        this.dataset.tooltipActive = 'false';
+        hideAllTooltips();
+    }
+}
+
+// esconde todos os tooltips
+function hideAllTooltips() {
+    document.querySelectorAll('.custom-tooltip').forEach(t => t.remove());
+    document.querySelectorAll('[data-tooltip-active="true"]').forEach(el => {
+        el.dataset.tooltipActive = 'false';
+    });
+}
+
+// detecta se o dispositivo é móvel para comportamento específico
+function isMobileDevice() {
+    return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+}
+
+// add isso à inicialização do seu documento
+document.addEventListener('DOMContentLoaded', () => {
+    // outras inicializações...
+    configurarTitulos();
+
+    // add um observador para elementos adicionados dinamicamente
+    const observer = new MutationObserver(function (mutations) {
+        let needsUpdate = false;
+        mutations.forEach(mutation => {
+            if (mutation.addedNodes.length > 0) {
+                needsUpdate = true;
+            }
+        });
+
+        if (needsUpdate) {
+            configurarTitulos();
+        }
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+
+    // add listener específico para facilitar fechamento em dispositivos móveis
+    if (isMobileDevice()) {
+        // toque em qualquer lugar fecha tooltips em dispositivos móveis
+        document.addEventListener('touchend', function () {
+            setTimeout(hideAllTooltips, 100);
+        }, { passive: true });
+    }
+});
+
+// obtém dados do localStorage
+function obterDados() {
+    const user = Auth.getLoggedInUser();
+    const gastos = JSON.parse(localStorage.getItem(`gastos_${user.email}`)) || [];
+    const receitas = JSON.parse(localStorage.getItem(`receitas_${user.email}`)) || [];
+    return { gastos, receitas };
 }
 
 // carrega metas do localStorage
@@ -225,7 +471,7 @@ function carregarMetas() {
     return [];
 }
 
-// exibe as metas no dashboard
+// exibe as metas no dashboard com tooltips para valores monetários
 function exibirMetasNoDashboard() {
     const metas = carregarMetas();
     const container = document.getElementById('metas-container');
@@ -288,7 +534,7 @@ function exibirMetasNoDashboard() {
         const porcentagemMensal = saldoMensal > 0 ? (saldoMensal / meta.valor) * 100 : 0;
         const porcentagemProgress = Math.min(100, porcentagemMensal);
 
-        // determinaa a classe de cor para a barra de progresso
+        // determina a classe de cor para a barra de progresso
         let progressClass = 'progress-bar';
         if (porcentagemMensal < 5) {
             progressClass += ' bg-danger';
@@ -300,11 +546,17 @@ function exibirMetasNoDashboard() {
             progressClass += ' bg-success';
         }
 
+        // formata o valor com tooltip
+        const valorFormatado = formatarMoeda(parseFloat(meta.valor));
+
         card.innerHTML = `
             <div class="card-body py-2">
                 <div class="d-flex justify-content-between align-items-center">
                     <h6 class="card-title mb-0">${meta.nome}</h6>
-                    <span class="badge bg-primary">R$ ${parseFloat(meta.valor).toFixed(2)}</span>
+                    <span class="badge bg-primary valor-monetario" 
+                          data-bs-toggle="tooltip" 
+                          data-bs-placement="top" 
+                          title="${valorFormatado.completo}">${valorFormatado.abreviado}</span>
                 </div>
                 <p class="card-text small text-muted mb-1">${meta.descricao || 'Sem descrição'}</p>
                 <div class="d-flex justify-content-between align-items-center mb-1">
@@ -401,7 +653,7 @@ function gerarCores(quantidade) {
 let gastosReceitasChart = null;
 let gastosPorCategoriaChart = null;
 
-// cria ou atualizar o gráfico de barras (Gastos vs Receitas)
+// cria ou atualiza o gráfico de barras (Gastos vs Receitas)
 function criarGraficoGastosReceitas() {
     const { gastos, receitas } = obterDados();
     const gastosporMes = agruparPorMes(gastos);
@@ -409,7 +661,7 @@ function criarGraficoGastosReceitas() {
 
     const ctx = document.getElementById('gastosReceitasChart').getContext('2d');
 
-    // gera labels para os últimos 6 meses e próximos 6 meses
+    // gera labels para os últimos 6 meses
     const labels = [];
     const hoje = new Date();
 
@@ -452,7 +704,7 @@ function criarGraficoGastosReceitas() {
                     beginAtZero: true,
                     ticks: {
                         callback: function (value) {
-                            return formatarMoeda(value);
+                            return formatarMoeda(value).abreviado;
                         }
                     }
                 }
@@ -461,7 +713,8 @@ function criarGraficoGastosReceitas() {
                 tooltip: {
                     callbacks: {
                         label: function (context) {
-                            return `${context.dataset.label}: ${formatarMoeda(context.raw)}`;
+                            const valorFormatado = formatarMoeda(context.raw, true);
+                            return `${context.dataset.label}: ${valorFormatado}`;
                         }
                     }
                 }
@@ -502,9 +755,9 @@ function criarGraficoGastosPorCategoria() {
                 tooltip: {
                     callbacks: {
                         label: function (context) {
-                            const valor = formatarMoeda(context.raw);
+                            const valorFormatado = formatarMoeda(context.raw, true);
                             const categoria = context.label;
-                            return `${categoria}: ${valor}`;
+                            return `${categoria}: ${valorFormatado}`;
                         }
                     }
                 }
@@ -545,7 +798,7 @@ function configurarAtualizacaoAutomatica() {
     });
 }
 
-// inicializa
+// modificação no evento DOMContentLoaded para inicializar tooltips
 document.addEventListener('DOMContentLoaded', () => {
     // configura botões de gerenciamento de conta
     setupUserAccountActions();
@@ -556,6 +809,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // inicializa o dashboard
     atualizarDashboard();
 
-    // atualiza a cada minuto para garantir dados atualizados
-    setInterval(atualizarDashboard, 60000);
+    // inicializa tooltips
+    configurarTitulos();
+
+    // atualiza a cada minuto para garantir dados atualizados e reinicializa tooltips
+    setInterval(() => {
+        atualizarDashboard();
+        configurarTitulos();
+    }, 60000);
+
+    // adiciona observer para inicializar tooltips em elementos adicionados dinamicamente
+    const observer = new MutationObserver(function () {
+        configurarTitulos();
+    });
+
+    // observa mudanças no corpo do documento
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
 });

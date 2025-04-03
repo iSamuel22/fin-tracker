@@ -174,12 +174,44 @@ function cleanupLocalStorage(userEmail) {
     localStorage.removeItem('loggedInUser');
 }
 
-// formata valores monetários
-function formatarMoeda(valor) {
-    return valor.toLocaleString('pt-BR', {
+// formata valores monetários, permitindo exibição abreviada com tooltip para valores completos
+function formatarMoeda(valor, formatoCompleto = false) {
+    // formato completo para exibição no tooltip
+    const valorCompleto = valor.toLocaleString('pt-BR', {
         style: 'currency',
         currency: 'BRL'
     });
+
+    // se quisermos o formato completo, retornamos diretamente
+    if (formatoCompleto) {
+        return valorCompleto;
+    }
+
+    // formato abreviado para valores grandes
+    const abs = Math.abs(valor);
+    let valorAbreviado;
+
+    if (abs >= 1000000) {
+        // valores em milhões (M) - três casas decimais para maior precisão
+        valorAbreviado = 'R$ ' + (valor / 1000000).toFixed(3).replace('.', ',') + 'M';
+    } else if (abs >= 10000) {
+        // valores entre 10 mil e 1 milhão - duas casas decimais para maior precisão
+        valorAbreviado = 'R$ ' + (valor / 1000).toFixed(2).replace('.', ',') + 'K';
+    } else if (abs >= 1000) {
+        // valores entre 1000 e 10000 - três casas decimais para alta precisão
+        valorAbreviado = 'R$ ' + (valor / 1000).toFixed(3).replace('.', ',') + 'K';
+    } else {
+        // valores menores, formato padrão sem abreviação
+        valorAbreviado = valorCompleto;
+    }
+
+    // remove zeros desnecessários no final das casas decimais
+    valorAbreviado = valorAbreviado.replace(/,0+([KM])/g, '$1');
+
+    // se terminar com um só zero na casa decimal (ex: 3,20K), remove-o
+    valorAbreviado = valorAbreviado.replace(/,(\d)0([KM])/g, ',$1$2');
+
+    return valorAbreviado;
 }
 
 // formata data
@@ -201,7 +233,7 @@ function filtrarDadosPorPeriodo(dados, dataInicio, dataFim) {
     if (!dataInicio || !dataFim) {
         return dados;
     }
-    
+
     return dados.filter(item => {
         const data = new Date(item.data);
         return data >= dataInicio && data <= dataFim;
@@ -211,10 +243,10 @@ function filtrarDadosPorPeriodo(dados, dataInicio, dataFim) {
 // calcula totais do período
 function calcularTotaisPeriodo(dataInicio, dataFim) {
     const { gastos, receitas } = obterDados();
-    
+
     // se não houver restrição de datas, usar todos os dados
     const useAllData = !dataInicio || !dataFim;
-    
+
     // se usar todos os dados, não filtrar
     const gastosFiltrados = useAllData ? gastos : filtrarDadosPorPeriodo(gastos, dataInicio, dataFim);
     const receitasFiltradas = useAllData ? receitas : filtrarDadosPorPeriodo(receitas, dataInicio, dataFim);
@@ -254,24 +286,24 @@ function criarGraficoEvolucaoFinanceira(dataInicio, dataFim) {
 
     // determinar se devemos usar todas as datas
     const useAllData = !dataInicio || !dataFim;
-    
+
     // definir o intervalo de datas
     let datas = [];
-    
+
     if (useAllData) {
         // se não há restrição de datas, encontrar a data mais antiga e a mais recente
         const todasDatas = [...gastos, ...receitas].map(item => new Date(item.data));
         if (todasDatas.length > 0) {
             const dataMinima = new Date(Math.min(...todasDatas));
             const dataMaxima = new Date(Math.max(...todasDatas));
-            
+
             // ajustar para garantir um período razoável
             const umAnoAtras = new Date();
             umAnoAtras.setFullYear(umAnoAtras.getFullYear() - 1);
-            
+
             // usar o que for mais recente: data mínima ou um ano atrás
             const dataInicial = dataMinima < umAnoAtras ? umAnoAtras : dataMinima;
-            
+
             // criar array de datas
             let dataAtual = new Date(dataInicial);
             while (dataAtual <= dataMaxima) {
@@ -284,7 +316,7 @@ function criarGraficoEvolucaoFinanceira(dataInicio, dataFim) {
         let dataAtual = new Date(dataInicio);
         while (dataAtual <= dataFim) {
             datas.push(new Date(dataAtual));
-            
+
             // incremento depende do tamanho do intervalo
             const diasNoIntervalo = Math.ceil((dataFim - dataInicio) / (1000 * 60 * 60 * 24));
             if (diasNoIntervalo > 60) {
@@ -310,7 +342,7 @@ function criarGraficoEvolucaoFinanceira(dataInicio, dataFim) {
         newInfoElement.id = 'data-info';
         newInfoElement.className = 'alert alert-info';
         newInfoElement.textContent = "Mostrando todos os dados disponíveis sem restrição de data.";
-        
+
         // inserir antes do primeiro gráfico
         const chartContainer = document.querySelector('.chart-container');
         if (chartContainer) {
@@ -374,10 +406,10 @@ function criarGraficoEvolucaoFinanceira(dataInicio, dataFim) {
 // cria gráfico de top categorias
 function criarGraficoTopCategorias(dataInicio, dataFim) {
     const { gastos } = obterDados();
-    
+
     // determinar se devemos usar todas as datas
     const useAllData = !dataInicio || !dataFim;
-    
+
     const gastosFiltrados = useAllData ? gastos : filtrarDadosPorPeriodo(gastos, dataInicio, dataFim);
 
     // agrupa por categoria
@@ -432,10 +464,10 @@ function criarGraficoTopCategorias(dataInicio, dataFim) {
 function criarGraficoTendencias(dataInicio, dataFim) {
     const { gastos, receitas } = obterDados();
     const ctx = document.getElementById('tendenciasChart').getContext('2d');
-    
+
     // determinar se devemos usar todas as datas
     const useAllData = !dataInicio || !dataFim;
-    
+
     // filtrar dados se necessário
     const gastosFiltrados = useAllData ? gastos : filtrarDadosPorPeriodo(gastos, dataInicio, dataFim);
     const receitasFiltradas = useAllData ? receitas : filtrarDadosPorPeriodo(receitas, dataInicio, dataFim);
@@ -513,10 +545,10 @@ function criarGraficoTendencias(dataInicio, dataFim) {
 function criarGraficoComparativoMensal(dataInicio, dataFim) {
     const { gastos } = obterDados();
     const ctx = document.getElementById('comparativoMensalChart').getContext('2d');
-    
+
     // determinar se devemos usar todas as datas
     const useAllData = !dataInicio || !dataFim;
-    
+
     // filtrar dados se necessário
     const gastosFiltrados = useAllData ? gastos : filtrarDadosPorPeriodo(gastos, dataInicio, dataFim);
 
@@ -539,14 +571,14 @@ function criarGraficoComparativoMensal(dataInicio, dataFim) {
 
     // prepara dados para o gráfico
     const categorias = Object.keys(dadosPorCategoria);
-    
+
     // usar meses únicos e ordená-los
     const mesesSet = new Set();
     gastosFiltrados.forEach(g => {
         const data = new Date(g.data);
         mesesSet.add(`${data.getFullYear()}-${data.getMonth()}`);
     });
-    
+
     // ordenar os meses cronologicamente
     const mesesOrdenados = Array.from(mesesSet)
         .sort()
@@ -597,7 +629,7 @@ function criarGraficoComparativoMensal(dataInicio, dataFim) {
 function atualizarTabelaTransacoes(dataInicio, dataFim) {
     const { gastos, receitas } = obterDados();
     const tbody = document.getElementById('tabelaTransacoes');
-    
+
     // determinar se devemos usar todas as datas
     const useAllData = !dataInicio || !dataFim;
 
@@ -606,15 +638,15 @@ function atualizarTabelaTransacoes(dataInicio, dataFim) {
         ...gastos.map(g => ({ ...g, tipo: 'Gasto' })),
         ...receitas.map(r => ({ ...r, tipo: 'Receita' }))
     ];
-    
+
     // filtrar se necessário
-    const transacoesFiltradas = useAllData 
-        ? transacoes 
+    const transacoesFiltradas = useAllData
+        ? transacoes
         : transacoes.filter(t => {
             const data = new Date(t.data);
             return data >= dataInicio && data <= dataFim;
         });
-        
+
     // ordenar por data (mais recente primeiro)
     transacoesFiltradas.sort((a, b) => new Date(b.data) - new Date(a.data));
 
@@ -633,7 +665,7 @@ function atualizarTabelaTransacoes(dataInicio, dataFim) {
         `;
         tbody.appendChild(tr);
     });
-    
+
     // se a tabela estiver vazia, mostrar mensagem
     if (transacoesFiltradas.length === 0) {
         const tr = document.createElement('tr');
@@ -649,12 +681,12 @@ function atualizarRelatorios() {
     const periodoSelect = document.getElementById('periodoSelect');
     const dataInicio = document.getElementById('dataInicio');
     const dataFim = document.getElementById('dataFim');
-    
+
     // opção para remover restrição de data
     if (periodoSelect.value === 'semrestrição') {
         dataInicio.disabled = true;
         dataFim.disabled = true;
-        
+
         // chamar funções sem passar datas (null)
         calcularTotaisPeriodo(null, null);
         criarGraficoEvolucaoFinanceira(null, null);
@@ -662,7 +694,7 @@ function atualizarRelatorios() {
         criarGraficoTendencias(null, null);
         criarGraficoComparativoMensal(null, null);
         atualizarTabelaTransacoes(null, null);
-        
+
         return;
     }
 
@@ -724,7 +756,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const periodoSelect = document.getElementById('periodoSelect');
     const dataInicio = document.getElementById('dataInicio');
     const dataFim = document.getElementById('dataFim');
-    
+
     // adicionar opção "sem restrição de data"
     const semRestricaoOption = document.createElement('option');
     semRestricaoOption.value = 'semrestrição';

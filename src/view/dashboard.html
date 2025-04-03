@@ -81,16 +81,36 @@
                         <h5 class="card-title">Resumo Financeiro</h5>
                         <div class="d-flex justify-content-between mb-3">
                             <div class="text-success">
-                                <h6>Receitas</h6>
+                                <h6 class="card-subtitle mb-2 text-success">Receitas</h6>
                                 <h4 id="totalReceitas">R$ 0,00</h4>
                             </div>
                             <div class="text-danger">
-                                <h6>Gastos</h6>
+                                <h6 class="card-subtitle mb-2 text-danger">Gastos</h6>
                                 <h4 id="totalGastos">R$ 0,00</h4>
                             </div>
                             <div class="text-primary">
-                                <h6>Saldo</h6>
+                                <h6 class="card-subtitle mb-2 text-primary">Saldo</h6>
                                 <h4 id="saldoTotal">R$ 0,00</h4>
+                            </div>
+                        </div>
+                        <div class="currency-info p-2 rounded-3 bg-light border-start border-info border-3 mt-3 mb-1">
+                            <div class="d-flex align-items-center">
+                                <div class="info-icon me-2">
+                                    <i class="fas fa-info-circle text-info"></i>
+                                </div>
+                                <div class="info-content">
+                                    <p class="mb-0 small">
+                                        <span class="fw-semibold">Formato de valores:</span>
+                                        <span class="badge bg-light text-dark border me-1">K</span> = milhares (R$ 1,5K
+                                        = R$ 1.500),
+                                        <span class="badge bg-light text-dark border me-1">M</span> = milhões (R$ 1,2M =
+                                        R$ 1.200.000)
+                                    </p>
+                                    <p class="mb-0 small fst-italic text-secondary">
+                                        <i class="fas fa-mouse-pointer me-1 small"></i>Passe o cursor ou clique sobre os valores
+                                        para visualizar o formato completo
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
