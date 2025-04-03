@@ -22,7 +22,12 @@ function setupUserAccountActions() {
                 window.location.href = 'login.html';
             } catch (error) {
                 console.error('Erro ao fazer logout:', error);
-                alert('Ocorreu um erro ao sair da conta: ' + (error.message || 'Tente novamente mais tarde'));
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro ao sair da conta',
+                    text: error.message || 'Tente novamente mais tarde',
+                    confirmButtonText: 'OK'
+                });
             }
         });
     } else {
@@ -94,12 +99,22 @@ function showDeleteAccountConfirmation() {
 
             await deleteUserAccount();
 
-            alert('Sua conta foi excluída com sucesso.');
+            Swal.fire({
+                icon: 'success',
+                title: 'Conta excluída',
+                text: 'Sua conta foi excluída com sucesso.',
+                confirmButtonText: 'OK'
+            });
 
             window.location.href = 'login.html';
         } catch (error) {
             console.error('Erro ao excluir conta:', error);
-            alert('Ocorreu um erro ao excluir sua conta: ' + (error.message || 'Tente novamente mais tarde'));
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro ao excluir conta',
+                text: error.message || 'Tente novamente mais tarde',
+                confirmButtonText: 'OK'
+            });
 
             const confirmButton = document.getElementById('confirm-delete-account');
             confirmButton.disabled = false;

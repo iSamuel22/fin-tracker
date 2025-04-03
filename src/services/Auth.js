@@ -86,7 +86,12 @@ class Auth {
             console.error("Error deleting account:", error);
 
             if (error.code === 'auth/requires-recent-login') {
-                alert("Por razões de segurança, você precisa fazer login novamente antes de excluir sua conta.");
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Atenção',
+                    text: 'Por razões de segurança, você precisa fazer login novamente antes de excluir sua conta.',
+                    confirmButtonText: 'OK'
+                });
                 this.logout();
             }
 

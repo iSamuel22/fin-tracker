@@ -12,6 +12,43 @@ if (!Auth.isAuthenticated()) {
 let gastos = [];
 let categorias = ['Alimentação', 'Transporte', 'Lazer', 'Moradia'];
 
+// função aprimorada para garantir que uma data seja válida e considerar o fuso horário
+function garantirDataValida(data) {
+    if (!data) return new Date();
+    
+    // se for string de data ISO, converter para Date com ajuste de fuso horário
+    if (typeof data === 'string') {
+        const d = new Date(data);
+        // Adicionar offset do fuso horário para garantir que a data exibida seja a mesma que foi inserida
+        return new Date(d.getTime() + d.getTimezoneOffset() * 60000);
+    }
+    
+    // se for timestamp do Firebase
+    if (data && typeof data === 'object' && data.toDate) {
+        return data.toDate();
+    }
+    
+    // se já for um objeto Date válido
+    if (data instanceof Date && !isNaN(data)) {
+        return data;
+    }
+    
+    // fallback para data atual
+    return new Date();
+}
+
+// função aprimorada para formatar data para o input date no formato esperado (YYYY-MM-DD)
+function formatarDataParaInput(data) {
+    const dataObj = garantirDataValida(data);
+    
+    // usa formatação manual para garantir que não haja problemas com fuso horário
+    const ano = dataObj.getFullYear();
+    const mes = String(dataObj.getMonth() + 1).padStart(2, '0'); // Mês começa do zero
+    const dia = String(dataObj.getDate()).padStart(2, '0');
+    
+    return `${ano}-${mes}-${dia}`;
+}
+
 // menu user
 function setupUserAccountActions() {
     const logoutButton = document.getElementById('logout-button');
@@ -31,7 +68,12 @@ function setupUserAccountActions() {
                 window.location.href = 'login.html';
             } catch (error) {
                 console.error('Erro ao fazer logout:', error);
-                alert('Ocorreu um erro ao sair da conta: ' + (error.message || 'Tente novamente mais tarde'));
+                Swal.fire({
+                    title: 'Erro ao sair',
+                    text: 'Ocorreu um erro ao sair da conta: ' + (error.message || 'Tente novamente mais tarde'),
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
             }
         });
         console.log("Logout button event listener added");
@@ -105,12 +147,22 @@ function showDeleteAccountConfirmation() {
             // deleta a conta do usuário
             await deleteUserAccount();
 
-            alert('Sua conta foi excluída com sucesso.');
+            Swal.fire({
+                title: 'Conta Excluída',
+                text: 'Sua conta foi excluída com sucesso.',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
 
             window.location.href = 'login.html';
         } catch (error) {
             console.error('Erro ao excluir conta:', error);
-            alert('Ocorreu um erro ao excluir sua conta: ' + (error.message || 'Tente novamente mais tarde'));
+            Swal.fire({
+                title: 'Erro',
+                text: 'Ocorreu um erro ao excluir sua conta: ' + (error.message || 'Tente novamente mais tarde'),
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
 
             const confirmButton = document.getElementById('confirm-delete-account');
             confirmButton.disabled = false;
@@ -178,7 +230,8 @@ function salvarGastosLocalStorage() {
             id: g.id,
             descricao: g.descricao,
             valor: g.valor,
-            data: g.data,
+            // Garantir que a data seja salva como string ISO
+            data: garantirDataValida(g.data).toISOString(),
             categoria: g.categoria
         }));
         localStorage.setItem(`gastos_${user.email}`, JSON.stringify(gastosParaSalvar));
@@ -198,7 +251,8 @@ function carregarGastosLocalStorage() {
                     const gasto = new Gasto(
                         data.descricao,
                         parseFloat(data.valor),
-                        new Date(data.data),
+                        // Garantir conversão correta da data
+                        garantirDataValida(data.data),
                         data.categoria
                     );
                     gasto.id = data.id;
@@ -254,17 +308,17 @@ async function carregarDados() {
         gastos = gastosData
             .filter(data => !data.isSystemGenerated)
             .map(data => {
-                // converte timestamp para Date se necessário
-                const data_formatada = data.data instanceof Date ? data.data : new Date(data.data);
+                // Correção na conversão de datas
+                const data_formatada = garantirDataValida(data.data);
 
-                // cria nova instância de Gasto com ID do Firestore
+                // Cria nova instância de Gasto com ID do Firestore
                 const gasto = new Gasto(
                     data.descricao,
                     parseFloat(data.valor),
                     data_formatada,
                     data.categoria
                 );
-                gasto.id = data.id; // armazena o ID do Firestore
+                gasto.id = data.id;
                 return gasto;
             });
 
@@ -395,18 +449,22 @@ function exibirGastos() {
     // ordena gastos por data (mais recente primeiro)
     const gastosOrdenados = [...gastos].sort((a, b) => new Date(b.data) - new Date(a.data));
 
-    gastosOrdenados.forEach((gasto, index) => {
+    gastosOrdenados.forEach((gasto) => {
         const tr = document.createElement('tr');
+        
+        // garante que a data seja válida antes de formatar
+        const dataFormatada = garantirDataValida(gasto.data).toLocaleDateString();
+        
         tr.innerHTML = `
             <td>${gasto.descricao}</td>
             <td>R$ ${parseFloat(gasto.valor).toFixed(2)}</td>
             <td>${gasto.categoria}</td>
-            <td>${new Date(gasto.data).toLocaleDateString()}</td>
+            <td>${dataFormatada}</td>
             <td>
-                <button class="btn btn-sm btn-outline-primary" onclick="window.abrirModalEdicao(${index})">
+                <button class="btn btn-sm btn-outline-primary" onclick="window.abrirModalEdicao('${gasto.id}')">
                     <i class="fas fa-edit"></i> Editar
                 </button>
-                <button class="btn btn-sm btn-outline-danger ms-1" onclick="window.excluirGasto(${index})">
+                <button class="btn btn-sm btn-outline-danger ms-1" onclick="window.excluirGasto('${gasto.id}')">
                     <i class="fas fa-trash"></i> Excluir
                 </button>
             </td>
@@ -471,11 +529,15 @@ async function adicionarGasto(evento) {
             }
         });
 
-        // cria nova instância de gasto
+        // cria nova instância de gasto com ajuste para evitar problema de fuso horário
+        const dataValor = dataInput.value;
+        const dataSelecionada = new Date(dataValor);
+        const dataCorrigida = new Date(dataSelecionada.getTime() + dataSelecionada.getTimezoneOffset() * 60000);
+
         const gasto = new Gasto(
             descricaoInput.value,
             parseFloat(valorInput.value),
-            new Date(dataInput.value),
+            dataCorrigida,
             categoria
         );
 
@@ -538,9 +600,17 @@ const formularioEdicaoGasto = document.getElementById('editExpenseForm');
 let indiceGastoAtual = -1;
 
 // abre o modal de edição
-function abrirModalEdicao(indice) {
-    indiceGastoAtual = indice;
-    const gasto = gastos[indice];
+function abrirModalEdicao(id) {
+    const gastoIndex = gastos.findIndex(g => g.id === id);
+    if (gastoIndex === -1) {
+        console.error('Gasto não encontrado');
+        return;
+    }
+    
+    indiceGastoAtual = gastoIndex;
+    const gasto = gastos[gastoIndex];
+    
+    console.log(`Abrindo modal para edição do gasto [${id}]:`, gasto);
 
     inputDescricaoEdicao.value = gasto.descricao;
     inputValorEdicao.value = gasto.valor;
@@ -554,9 +624,9 @@ function abrirModalEdicao(indice) {
     // verifica se precisamos mostrar o campo de nova categoria
     alternarCampoNovaCategoriaEdicao();
 
-    // formata data para o formato esperado pelo input date (YYYY-MM-DD)
-    const data = new Date(gasto.data);
-    const dataFormatada = data.toISOString().split('T')[0];
+    // Usar a função formatarDataParaInput para garantir consistência
+    const dataFormatada = formatarDataParaInput(gasto.data);
+    console.log(`Data original: ${gasto.data}, Data formatada para input: ${dataFormatada}`);
     inputDataEdicao.value = dataFormatada;
 
     modalEdicao.style.display = "block";
@@ -653,10 +723,14 @@ async function salvarEdicaoGasto(evento) {
             }
         });
 
+        // cria a data com ajuste de fuso horário
+        const dataSelecionada = new Date(inputDataEdicao.value);
+        const dataCorrigida = new Date(dataSelecionada.getTime() + dataSelecionada.getTimezoneOffset() * 60000);
+
         const gasto = new Gasto(
             inputDescricaoEdicao.value,
             parseFloat(inputValorEdicao.value),
-            new Date(inputDataEdicao.value),
+            dataCorrigida,
             categoria
         );
 
@@ -701,7 +775,13 @@ async function salvarEdicaoGasto(evento) {
 }
 
 // exclui um gasto existente
-async function excluirGasto(indice) {
+async function excluirGasto(id) {
+    const gastoIndex = gastos.findIndex(g => g.id === id);
+    if (gastoIndex === -1) {
+        console.error('Gasto não encontrado');
+        return;
+    }
+
     const confirmarExclusao = await Swal.fire({
         title: 'Tem certeza?',
         text: 'Você deseja excluir este gasto?',
@@ -725,9 +805,9 @@ async function excluirGasto(indice) {
                 }
             });
 
-            const gasto = gastos[indice];
+            const gasto = gastos[gastoIndex];
             await FirestoreService.deleteGasto(gasto.id);
-            gastos.splice(indice, 1);
+            gastos.splice(gastoIndex, 1);
             salvarGastosLocalStorage();
 
             // fecha o loader

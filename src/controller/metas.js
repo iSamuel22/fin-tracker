@@ -29,7 +29,12 @@ function setupUserAccountActions() {
                 window.location.href = 'login.html';
             } catch (error) {
                 console.error('Erro ao fazer logout:', error);
-                alert('Ocorreu um erro ao sair da conta: ' + (error.message || 'Tente novamente mais tarde'));
+                Swal.fire({
+                    title: 'Erro!',
+                    text: 'Ocorreu um erro ao sair da conta: ' + (error.message || 'Tente novamente mais tarde'),
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
             }
         });
         console.log("Logout button event listener added");
@@ -510,7 +515,12 @@ function adicionarMeta(evento) {
             }
         }, 3000);
     } catch (erro) {
-        alert(erro.message);
+        Swal.fire({
+            title: 'Erro!',
+            text: erro.message,
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
     }
 }
 
@@ -569,7 +579,12 @@ function salvarEdicaoMeta(evento) {
         });
 
     } catch (erro) {
-        alert(erro.message);
+        Swal.fire({
+            title: 'Erro!',
+            text: erro.message,
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
     }
 }
 

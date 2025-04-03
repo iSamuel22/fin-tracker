@@ -12,6 +12,43 @@ if (!Auth.isAuthenticated()) {
 let receitas = [];
 let categorias = ['Salário', 'Investimentos', 'Freelance', 'Presentes'];
 
+// função aprimorada para garantir que uma data seja válida e considerar o fuso horário
+function garantirDataValida(data) {
+    if (!data) return new Date();
+    
+    // se for string de data ISO, converter para Date com ajuste de fuso horário
+    if (typeof data === 'string') {
+        const d = new Date(data);
+        // Adicionar offset do fuso horário para garantir que a data exibida seja a mesma que foi inserida
+        return new Date(d.getTime() + d.getTimezoneOffset() * 60000);
+    }
+    
+    // se for timestamp do Firebase
+    if (data && typeof data === 'object' && data.toDate) {
+        return data.toDate();
+    }
+    
+    // se já for um objeto Date válido
+    if (data instanceof Date && !isNaN(data)) {
+        return data;
+    }
+    
+    // fallback para data atual
+    return new Date();
+}
+
+// função aprimorada para formatar data para o input date no formato esperado (YYYY-MM-DD)
+function formatarDataParaInput(data) {
+    const dataObj = garantirDataValida(data);
+    
+    // usa formatação manual para garantir que não haja problemas com fuso horário
+    const ano = dataObj.getFullYear();
+    const mes = String(dataObj.getMonth() + 1).padStart(2, '0'); // Mês começa do zero
+    const dia = String(dataObj.getDate()).padStart(2, '0');
+    
+    return `${ano}-${mes}-${dia}`;
+}
+
 // menu user
 function setupUserAccountActions() {
     const logoutButton = document.getElementById('logout-button');
@@ -31,7 +68,12 @@ function setupUserAccountActions() {
                 window.location.href = 'login.html';
             } catch (error) {
                 console.error('Erro ao fazer logout:', error);
-                alert('Ocorreu um erro ao sair da conta: ' + (error.message || 'Tente novamente mais tarde'));
+                Swal.fire({
+                    title: 'Erro ao sair',
+                    text: 'Ocorreu um erro ao sair da conta: ' + (error.message || 'Tente novamente mais tarde'),
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
             }
         });
         console.log("Logout button event listener added");
@@ -105,12 +147,22 @@ function showDeleteAccountConfirmation() {
             // deleta conta do usuário
             await deleteUserAccount();
 
-            alert('Sua conta foi excluída com sucesso.');
+            Swal.fire({
+                title: 'Conta Excluída',
+                text: 'Sua conta foi excluída com sucesso.',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
 
             window.location.href = 'login.html';
         } catch (error) {
             console.error('Erro ao excluir conta:', error);
-            alert('Ocorreu um erro ao excluir sua conta: ' + (error.message || 'Tente novamente mais tarde'));
+            Swal.fire({
+                title: 'Erro ao excluir conta',
+                text: 'Ocorreu um erro ao excluir sua conta: ' + (error.message || 'Tente novamente mais tarde'),
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
 
             const confirmButton = document.getElementById('confirm-delete-account');
             confirmButton.disabled = false;
@@ -170,7 +222,7 @@ function cleanupLocalStorage(userEmail) {
     localStorage.removeItem('loggedInUser');
 }
 
-// Fsalva receitas no localStorage
+// salva receitas no localStorage
 function salvarReceitasLocalStorage() {
     const user = Auth.getLoggedInUser();
     if (user) {
@@ -178,7 +230,8 @@ function salvarReceitasLocalStorage() {
             id: r.id,
             descricao: r.descricao,
             valor: r.valor,
-            data: r.data,
+            // Garantir que a data seja salva como string ISO
+            data: garantirDataValida(r.data).toISOString(),
             categoria: r.categoria
         }));
         localStorage.setItem(`receitas_${user.email}`, JSON.stringify(receitasParaSalvar));
@@ -198,7 +251,8 @@ function carregarReceitasLocalStorage() {
                     const receita = new Receita(
                         data.descricao,
                         parseFloat(data.valor),
-                        new Date(data.data),
+                        // Garantir conversão correta da data
+                        garantirDataValida(data.data),
                         data.categoria
                     );
                     receita.id = data.id;
@@ -254,8 +308,8 @@ async function carregarDados() {
         receitas = receitasData
             .filter(data => !data.isSystemGenerated)
             .map(data => {
-                // converte timestamp para Date se necessário
-                const data_formatada = data.data instanceof Date ? data.data : new Date(data.data);
+                // Correção na conversão de datas
+                const data_formatada = garantirDataValida(data.data);
 
                 // cria nova instância de Receita com ID do Firestore
                 const receita = new Receita(
@@ -397,16 +451,20 @@ function exibirReceitas() {
 
     receitasOrdenadas.forEach((receita, index) => {
         const tr = document.createElement('tr');
+        
+        // Garantir que a data seja válida antes de formatar
+        const dataFormatada = garantirDataValida(receita.data).toLocaleDateString();
+        
         tr.innerHTML = `
             <td>${receita.descricao}</td>
             <td>R$ ${parseFloat(receita.valor).toFixed(2)}</td>
             <td>${receita.categoria}</td>
-            <td>${new Date(receita.data).toLocaleDateString()}</td>
+            <td>${dataFormatada}</td>
             <td>
-                <button class="btn btn-sm btn-outline-primary" onclick="window.abrirModalEdicao(${index})">
+                <button class="btn btn-sm btn-outline-primary" onclick="window.abrirModalEdicao('${receita.id}')">
                     <i class="fas fa-edit"></i> Editar
                 </button>
-                <button class="btn btn-sm btn-outline-danger ms-1" onclick="window.excluirReceita(${index})">
+                <button class="btn btn-sm btn-outline-danger ms-1" onclick="window.excluirReceita('${receita.id}')">
                     <i class="fas fa-trash"></i> Excluir
                 </button>
             </td>
@@ -471,11 +529,15 @@ async function adicionarReceita(evento) {
             }
         });
 
-        // cria nova instância de receita
+        // cria nova instância de receita com ajuste para evitar problema de fuso horário
+        const dataValor = dataInput.value;
+        const dataSelecionada = new Date(dataValor);
+        const dataCorrigida = new Date(dataSelecionada.getTime() + dataSelecionada.getTimezoneOffset() * 60000);
+
         const receita = new Receita(
             descricaoInput.value,
             parseFloat(valorInput.value),
-            new Date(dataInput.value),
+            dataCorrigida,
             categoria
         );
 
@@ -538,9 +600,17 @@ const formularioEdicaoReceita = document.getElementById('editExpenseForm');
 let indiceReceitaAtual = -1;
 
 // abre o modal de edição
-function abrirModalEdicao(indice) {
-    indiceReceitaAtual = indice;
-    const receita = receitas[indice];
+function abrirModalEdicao(id) {
+    const receitaIndex = receitas.findIndex(r => r.id === id);
+    if (receitaIndex === -1) {
+        console.error('Receita não encontrada');
+        return;
+    }
+    
+    indiceReceitaAtual = receitaIndex;
+    const receita = receitas[receitaIndex];
+    
+    console.log(`Abrindo modal para edição da receita [${id}]:`, receita);
 
     inputDescricaoEdicao.value = receita.descricao;
     inputValorEdicao.value = receita.valor;
@@ -554,9 +624,9 @@ function abrirModalEdicao(indice) {
     // verifica se precisamos mostrar o campo de nova categoria
     alternarCampoNovaCategoriaEdicao();
 
-    // formata data para o formato esperado pelo input date (YYYY-MM-DD)
-    const data = new Date(receita.data);
-    const dataFormatada = data.toISOString().split('T')[0];
+    // usa a função formatarDataParaInput para garantir consistência
+    const dataFormatada = formatarDataParaInput(receita.data);
+    console.log(`Data original: ${receita.data}, Data formatada para input: ${dataFormatada}`);
     inputDataEdicao.value = dataFormatada;
 
     modalEdicao.style.display = "block";
@@ -653,10 +723,14 @@ async function salvarEdicaoReceita(evento) {
             }
         });
 
+        // Criar a data com ajuste de fuso horário
+        const dataSelecionada = new Date(inputDataEdicao.value);
+        const dataCorrigida = new Date(dataSelecionada.getTime() + dataSelecionada.getTimezoneOffset() * 60000);
+
         const receita = new Receita(
             inputDescricaoEdicao.value,
             parseFloat(inputValorEdicao.value),
-            new Date(inputDataEdicao.value),
+            dataCorrigida,
             categoria
         );
 
@@ -701,7 +775,13 @@ async function salvarEdicaoReceita(evento) {
 }
 
 // exclui uma receita existente
-async function excluirReceita(indice) {
+async function excluirReceita(id) {
+    const receitaIndex = receitas.findIndex(r => r.id === id);
+    if (receitaIndex === -1) {
+        console.error('Receita não encontrada');
+        return;
+    }
+
     const confirmarExclusao = await Swal.fire({
         title: 'Tem certeza?',
         text: 'Você deseja excluir esta receita?',
@@ -725,9 +805,9 @@ async function excluirReceita(indice) {
                 }
             });
 
-            const receita = receitas[indice];
+            const receita = receitas[receitaIndex];
             await FirestoreService.deleteReceita(receita.id);
-            receitas.splice(indice, 1);
+            receitas.splice(receitaIndex, 1);
             salvarReceitasLocalStorage();
 
             // fecha o loader
