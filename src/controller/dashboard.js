@@ -410,25 +410,76 @@ function isMobileDevice() {
     return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
 }
 
+// Função para atualizar as informações do usuário no menu
+function atualizarDadosUsuarioNoMenu() {
+    try {
+        const user = Auth.getLoggedInUser();
+        
+        if (!user) {
+            console.warn("Usuário não encontrado no localStorage");
+            return;
+        }
+        
+        // Atualiza o nome do usuário na barra de navegação
+        const userMenuName = document.querySelector('#userMenu span.d-none.d-md-inline');
+        if (userMenuName) {
+            userMenuName.textContent = user.name || 'Usuário';
+        }
+        
+        // Atualiza avatar com as iniciais do usuário real
+        const userInitials = user.name ? encodeURIComponent(user.name) : 'Usuario';
+        const avatarUrls = document.querySelectorAll('.user-avatar');
+        avatarUrls.forEach(avatar => {
+            avatar.src = `https://ui-avatars.com/api/?name=${userInitials}&background=4e73df&color=fff&rounded=true${avatar.width >= 64 ? '&size=64' : ''}`;
+            avatar.alt = `Avatar de ${user.name || 'Usuário'}`;
+        });
+        
+        // Atualiza informações no dropdown
+        const userNameElement = document.querySelector('.user-info .user-name');
+        if (userNameElement) {
+            userNameElement.textContent = user.name || 'Usuário';
+        }
+        
+        const userEmailElement = document.querySelector('.user-info .user-email');
+        if (userEmailElement) {
+            userEmailElement.textContent = user.email || 'usuario@email.com';
+        }
+        
+        console.log("Informações do usuário atualizadas no menu");
+    } catch (error) {
+        console.error("Erro ao atualizar informações do usuário:", error);
+    }
+}
+
 // add isso à inicialização do seu documento
 document.addEventListener('DOMContentLoaded', () => {
-    // outras inicializações...
+    // configura botões de gerenciamento de conta
+    setupUserAccountActions();
+    
+    // Atualiza informações do usuário no menu
+    atualizarDadosUsuarioNoMenu();
+
+    // configura a atualização automática
+    configurarAtualizacaoAutomatica();
+
+    // inicializa o dashboard
+    atualizarDashboard();
+
+    // inicializa tooltips
     configurarTitulos();
 
-    // add um observador para elementos adicionados dinamicamente
-    const observer = new MutationObserver(function (mutations) {
-        let needsUpdate = false;
-        mutations.forEach(mutation => {
-            if (mutation.addedNodes.length > 0) {
-                needsUpdate = true;
-            }
-        });
+    // atualiza a cada minuto para garantir dados atualizados e reinicializa tooltips
+    setInterval(() => {
+        atualizarDashboard();
+        configurarTitulos();
+    }, 60000);
 
-        if (needsUpdate) {
-            configurarTitulos();
-        }
+    // adiciona observer para inicializar tooltips em elementos adicionados dinamicamente
+    const observer = new MutationObserver(function () {
+        configurarTitulos();
     });
 
+    // observa mudanças no corpo do documento
     observer.observe(document.body, {
         childList: true,
         subtree: true
@@ -802,6 +853,9 @@ function configurarAtualizacaoAutomatica() {
 document.addEventListener('DOMContentLoaded', () => {
     // configura botões de gerenciamento de conta
     setupUserAccountActions();
+    
+    // Atualiza informações do usuário no menu
+    atualizarDadosUsuarioNoMenu();
 
     // configura a atualização automática
     configurarAtualizacaoAutomatica();

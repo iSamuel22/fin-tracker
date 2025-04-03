@@ -15,24 +15,24 @@ let categorias = ['Salário', 'Investimentos', 'Freelance', 'Presentes'];
 // função aprimorada para garantir que uma data seja válida e considerar o fuso horário
 function garantirDataValida(data) {
     if (!data) return new Date();
-    
+
     // se for string de data ISO, converter para Date com ajuste de fuso horário
     if (typeof data === 'string') {
         const d = new Date(data);
         // Adicionar offset do fuso horário para garantir que a data exibida seja a mesma que foi inserida
         return new Date(d.getTime() + d.getTimezoneOffset() * 60000);
     }
-    
+
     // se for timestamp do Firebase
     if (data && typeof data === 'object' && data.toDate) {
         return data.toDate();
     }
-    
+
     // se já for um objeto Date válido
     if (data instanceof Date && !isNaN(data)) {
         return data;
     }
-    
+
     // fallback para data atual
     return new Date();
 }
@@ -40,12 +40,12 @@ function garantirDataValida(data) {
 // função aprimorada para formatar data para o input date no formato esperado (YYYY-MM-DD)
 function formatarDataParaInput(data) {
     const dataObj = garantirDataValida(data);
-    
+
     // usa formatação manual para garantir que não haja problemas com fuso horário
     const ano = dataObj.getFullYear();
     const mes = String(dataObj.getMonth() + 1).padStart(2, '0'); // Mês começa do zero
     const dia = String(dataObj.getDate()).padStart(2, '0');
-    
+
     return `${ano}-${mes}-${dia}`;
 }
 
@@ -451,10 +451,10 @@ function exibirReceitas() {
 
     receitasOrdenadas.forEach((receita, index) => {
         const tr = document.createElement('tr');
-        
+
         // Garantir que a data seja válida antes de formatar
         const dataFormatada = garantirDataValida(receita.data).toLocaleDateString();
-        
+
         tr.innerHTML = `
             <td>${receita.descricao}</td>
             <td>R$ ${parseFloat(receita.valor).toFixed(2)}</td>
@@ -606,10 +606,10 @@ function abrirModalEdicao(id) {
         console.error('Receita não encontrada');
         return;
     }
-    
+
     indiceReceitaAtual = receitaIndex;
     const receita = receitas[receitaIndex];
-    
+
     console.log(`Abrindo modal para edição da receita [${id}]:`, receita);
 
     inputDescricaoEdicao.value = receita.descricao;
@@ -856,9 +856,51 @@ function alternarCampoNovaCategoria() {
     }
 }
 
+// Função para atualizar as informações do usuário no menu
+function atualizarDadosUsuarioNoMenu() {
+    try {
+        const user = Auth.getLoggedInUser();
+
+        if (!user) {
+            console.warn("Usuário não encontrado no localStorage");
+            return;
+        }
+
+        // Atualiza o nome do usuário na barra de navegação
+        const userMenuName = document.querySelector('#userMenu span.d-none.d-md-inline');
+        if (userMenuName) {
+            userMenuName.textContent = user.name || 'Usuário';
+        }
+
+        // Atualiza avatar com as iniciais do usuário real
+        const userInitials = user.name ? encodeURIComponent(user.name) : 'Usuario';
+        const avatarUrls = document.querySelectorAll('.user-avatar');
+        avatarUrls.forEach(avatar => {
+            avatar.src = `https://ui-avatars.com/api/?name=${userInitials}&background=4e73df&color=fff&rounded=true${avatar.width >= 64 ? '&size=64' : ''}`;
+            avatar.alt = `Avatar de ${user.name || 'Usuário'}`;
+        });
+
+        // Atualiza informações no dropdown
+        const userNameElement = document.querySelector('.user-info .user-name');
+        if (userNameElement) {
+            userNameElement.textContent = user.name || 'Usuário';
+        }
+
+        const userEmailElement = document.querySelector('.user-info .user-email');
+        if (userEmailElement) {
+            userEmailElement.textContent = user.email || 'usuario@email.com';
+        }
+
+        console.log("Informações do usuário atualizadas no menu");
+    } catch (error) {
+        console.error("Erro ao atualizar informações do usuário:", error);
+    }
+}
+
 // inicialização
 document.addEventListener('DOMContentLoaded', async () => {
     setupUserAccountActions();
+    atualizarDadosUsuarioNoMenu();
     try {
         await carregarDados();
         exibirReceitas();

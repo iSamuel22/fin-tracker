@@ -619,9 +619,51 @@ function excluirMeta(indice) {
     });
 }
 
+// Função para atualizar as informações do usuário no menu
+function atualizarDadosUsuarioNoMenu() {
+    try {
+        const user = Auth.getLoggedInUser();
+
+        if (!user) {
+            console.warn("Usuário não encontrado no localStorage");
+            return;
+        }
+
+        // Atualiza o nome do usuário na barra de navegação
+        const userMenuName = document.querySelector('#userMenu span.d-none.d-md-inline');
+        if (userMenuName) {
+            userMenuName.textContent = user.name || 'Usuário';
+        }
+
+        // Atualiza avatar com as iniciais do usuário real
+        const userInitials = user.name ? encodeURIComponent(user.name) : 'Usuario';
+        const avatarUrls = document.querySelectorAll('.user-avatar');
+        avatarUrls.forEach(avatar => {
+            avatar.src = `https://ui-avatars.com/api/?name=${userInitials}&background=4e73df&color=fff&rounded=true${avatar.width >= 64 ? '&size=64' : ''}`;
+            avatar.alt = `Avatar de ${user.name || 'Usuário'}`;
+        });
+
+        // Atualiza informações no dropdown
+        const userNameElement = document.querySelector('.user-info .user-name');
+        if (userNameElement) {
+            userNameElement.textContent = user.name || 'Usuário';
+        }
+
+        const userEmailElement = document.querySelector('.user-info .user-email');
+        if (userEmailElement) {
+            userEmailElement.textContent = user.email || 'usuario@email.com';
+        }
+
+        console.log("Informações do usuário atualizadas no menu");
+    } catch (error) {
+        console.error("Erro ao atualizar informações do usuário:", error);
+    }
+}
+
 // inicialização
 document.addEventListener('DOMContentLoaded', () => {
     setupUserAccountActions();
+    atualizarDadosUsuarioNoMenu();
     carregarDados();
     exibirMetas();
     setTimeout(() => {

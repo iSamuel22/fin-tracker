@@ -22,7 +22,7 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
+                <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="dashboard.html">Home</a>
                     </li>
@@ -38,24 +38,35 @@
                     <li class="nav-item">
                         <a class="nav-link active" href="relatorio.html">Relatório</a>
                     </li>
-                    <li class="nav-item dropdown ms-auto">
-                        <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-user-circle"></i> Minha Conta
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userMenu"
+                            role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="https://ui-avatars.com/api/?name=Usuario&background=4e73df&color=fff&rounded=true"
+                                alt="Avatar" class="user-avatar">
+                            <span class="d-none d-md-inline">Usuário</span>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenu">
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-user" aria-labelledby="userMenu">
+                            <li class="dropdown-header-user">
+                                <img src="https://ui-avatars.com/api/?name=Usuario&background=4e73df&color=fff&size=64&rounded=true"
+                                    alt="Avatar" class="user-avatar">
+                                <div class="user-info">
+                                    <div class="user-name">Usuário</div>
+                                    <div class="user-email">usuario@email.com</div>
+                                </div>
+                            </li>
+                            <li><hr class="dropdown-divider-user"></li>
                             <li>
-                                <a class="dropdown-item d-flex align-items-center" href="#" id="logout-button">
-                                    <i class="fas fa-sign-out-alt me-2 text-primary"></i>
+                                <a class="dropdown-item dropdown-item-user" href="#" id="logout-button">
+                                    <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
                                     <span>Sair</span>
                                 </a>
                             </li>
+                            <li><hr class="dropdown-divider-user"></li>
                             <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li>
-                                <a class="dropdown-item d-flex align-items-center text-danger" href="#" id="delete-account-button">
-                                    <i class="fas fa-trash me-2"></i>
+                                <a class="dropdown-item dropdown-item-user danger-item" href="#" id="delete-account-button">
+                                    <span class="icon"><i class="fas fa-trash"></i></span>
                                     <span>Excluir Conta</span>
                                 </a>
                             </li>
@@ -201,7 +212,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
-    
+    <script src="/src/controller/footer-modals.js"></script>
+
     <script type="module" src="/src/controller/relatorio.js"></script>
 </body>
 
