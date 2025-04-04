@@ -21,7 +21,7 @@ async function loadSweetAlert() {
     }
 }
 
-// validação de email
+// validação de e-mail
 function validandoEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);

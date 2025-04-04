@@ -1344,7 +1344,7 @@ footer a:hover {
     color: var(--secondary-light) !important;
 }
 
-/* loading indicator */
+/* loading indicador */
 .loading-indicator {
     position: fixed;
     top: 0;

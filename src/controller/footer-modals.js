@@ -1271,7 +1271,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Implementar navegação por abas no modal de ajuda
+    // implementar navegação por abas no modal de ajuda
     document.querySelectorAll('.help-nav button').forEach(button => {
         button.addEventListener('click', function () {
             // Remover classe ativa de todos os botões

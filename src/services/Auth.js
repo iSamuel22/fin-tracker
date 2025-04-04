@@ -110,7 +110,6 @@ class Auth {
     static onAuthStateChange(callback) {
         return onAuthStateChanged(auth, callback);
     }
-
 }
 
 export { Auth };

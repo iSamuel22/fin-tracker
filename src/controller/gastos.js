@@ -856,7 +856,7 @@ function alternarCampoNovaCategoria() {
     }
 }
 
-// Função para atualizar as informações do usuário no menu
+// atualiza as informações do usuário no menu
 function atualizarDadosUsuarioNoMenu() {
     try {
         const user = Auth.getLoggedInUser();
@@ -866,13 +866,13 @@ function atualizarDadosUsuarioNoMenu() {
             return;
         }
 
-        // Atualiza o nome do usuário na barra de navegação
+        //aAtualiza o nome do usuário na barra de navegação
         const userMenuName = document.querySelector('#userMenu span.d-none.d-md-inline');
         if (userMenuName) {
             userMenuName.textContent = user.name || 'Usuário';
         }
 
-        // Atualiza avatar com as iniciais do usuário real
+        // atualiza avatar com as iniciais do usuário real
         const userInitials = user.name ? encodeURIComponent(user.name) : 'Usuario';
         const avatarUrls = document.querySelectorAll('.user-avatar');
         avatarUrls.forEach(avatar => {
@@ -880,7 +880,7 @@ function atualizarDadosUsuarioNoMenu() {
             avatar.alt = `Avatar de ${user.name || 'Usuário'}`;
         });
 
-        // Atualiza informações no dropdown
+        // atualiza informações no dropdown
         const userNameElement = document.querySelector('.user-info .user-name');
         if (userNameElement) {
             userNameElement.textContent = user.name || 'Usuário';

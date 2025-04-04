@@ -14,7 +14,7 @@ import { db } from "../config/firebase.js";
 import { Auth } from "./Auth.js";
 
 class FirestoreService {
-    // inicializa coleções - método silencioso para evitar erros no console
+    // inicializa coleções: método silencioso para evitar erros no console
     static async inicializarColecoes() {
         try {
             const user = Auth.getLoggedInUser();

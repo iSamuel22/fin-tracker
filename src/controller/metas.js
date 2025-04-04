@@ -178,7 +178,7 @@ function cleanupLocalStorage(userEmail) {
 // array para armazenar as metas
 let metas = [];
 
-// variaveis para armazenar dados financeiros
+// variáveis para armazenar dados financeiros
 let saldoMensal = 0;
 let receitasMensais = 0;
 let gastosMensais = 0;

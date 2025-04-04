@@ -43,7 +43,7 @@ function setupUserAccountActions() {
 
 // mostra confirmação antes de excluir a conta
 function showDeleteAccountConfirmation() {
-    // Usar SweetAlert2 diretamente em vez de criar um modal manualmente
+    // usar SweetAlert2 diretamente em vez de criar um modal manualmente
     Swal.fire({
         title: 'Excluir Conta',
         html: `
@@ -74,7 +74,7 @@ function showDeleteAccountConfirmation() {
                     }
                 });
                 
-                // Deleta a conta do usuário
+                // deleta conta do usuário
                 await deleteUserAccount();
                 
                 Swal.fire({

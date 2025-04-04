@@ -771,7 +771,7 @@ function atualizarDadosUsuarioNoMenu() {
             avatar.alt = `Avatar de ${user.name || 'Usuário'}`;
         });
 
-        // Atualiza informações no dropdown
+        // atualiza informações no dropdown
         const userNameElement = document.querySelector('.user-info .user-name');
         if (userNameElement) {
             userNameElement.textContent = user.name || 'Usuário';

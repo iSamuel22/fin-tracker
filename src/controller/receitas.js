@@ -921,7 +921,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        // cria campo para nova categoria no formulário de edição se não existir
+        // cria campo para nova categoria no formulário de ediçãom, se não existir
         if (!document.getElementById('editNewCategoryField')) {
             const editCategorySelect = document.getElementById('editCategory');
             if (editCategorySelect) {
