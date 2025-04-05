@@ -61,6 +61,45 @@ function setupPasswordVisibilityTogglers() {
     });
 }
 
+// Função para configurar o indicador de força da senha
+function setupPasswordStrengthIndicator() {
+    const newPasswordInput = document.getElementById('newPassword');
+    const progressBar = document.querySelector('.password-strength .progress-bar');
+    const strengthLabel = document.querySelector('.password-strength-label');
+    
+    if (newPasswordInput && progressBar && strengthLabel) {
+        newPasswordInput.addEventListener('input', function() {
+            const password = this.value;
+            let strength = 0;
+            
+            // Critérios de força da senha
+            if (password.length >= 8) strength += 20;
+            if (password.match(/[a-z]+/)) strength += 20;
+            if (password.match(/[A-Z]+/)) strength += 20;
+            if (password.match(/[0-9]+/)) strength += 20;
+            if (password.match(/[^a-zA-Z0-9]+/)) strength += 20;
+            
+            // Atualizar barra de progresso
+            progressBar.style.width = strength + '%';
+            
+            // Atualizar classe e texto conforme a força
+            if (strength < 40) {
+                progressBar.className = 'progress-bar bg-danger';
+                strengthLabel.textContent = 'Fraca';
+                strengthLabel.className = 'password-strength-label text-danger';
+            } else if (strength < 80) {
+                progressBar.className = 'progress-bar bg-warning';
+                strengthLabel.textContent = 'Média';
+                strengthLabel.className = 'password-strength-label text-warning';
+            } else {
+                progressBar.className = 'progress-bar bg-success';
+                strengthLabel.textContent = 'Forte';
+                strengthLabel.className = 'password-strength-label text-success';
+            }
+        });
+    }
+}
+
 // Função para atualizar os dados do usuário na UI
 function updateUserDisplay(user) {
     if (!user) return;
@@ -287,6 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateUserDisplay(user);
     setupPasswordToggle();
     setupPasswordVisibilityTogglers();
+    setupPasswordStrengthIndicator(); // Nova linha adicionada
     setupProfileForm();
     setupCancelButton();
     

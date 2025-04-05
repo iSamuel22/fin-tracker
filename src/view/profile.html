@@ -11,6 +11,27 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
         integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        /* Estilos para o indicador de força de senha */
+        .password-strength {
+            margin-top: 8px;
+        }
+        
+        .password-strength .progress {
+            height: 5px;
+            border-radius: 2px;
+        }
+        
+        .password-strength-label {
+            font-size: 12px;
+            transition: color 0.3s;
+        }
+        
+        .password-requirements {
+            font-size: 12px;
+        }
+    </style>
 </head>
 
 <body>
@@ -149,6 +170,19 @@
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
+                                    
+                                    <!-- Indicador de força da senha -->
+                                    <div class="password-strength mt-2">
+                                        <div class="progress" style="height: 5px;">
+                                            <div class="progress-bar" role="progressbar" style="width: 0%;" 
+                                                aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center mt-1">
+                                            <small class="password-strength-label text-muted">Força da senha</small>
+                                            <small class="password-requirements text-muted">Mín. 6 caracteres</small>
+                                        </div>
+                                    </div>
+                                    
                                     <small class="form-text text-muted">A senha deve ter pelo menos 6
                                         caracteres.</small>
                                 </div>
