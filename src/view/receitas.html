@@ -149,7 +149,8 @@
                     <div class="collapse" id="filterCollapse">
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-md-4 mb-3">
+                                <!-- Filtro por texto - ocupará toda a largura -->
+                                <div class="col-12 mb-3">
                                     <label for="filterText" class="form-label">Buscar por descrição</label>
                                     <div class="input-group">
                                         <input type="text" class="form-control" id="filterText"
@@ -160,28 +161,34 @@
                                         </button>
                                     </div>
                                 </div>
-                                <div class="col-md-4 mb-3">
-                                    <label class="form-label">Período</label>
-                                    <div class="d-flex gap-2">
-                                        <div class="input-group">
-                                            <span class="input-group-text">De</span>
-                                            <input type="date" class="form-control" id="filterStartDate">
-                                            <button class="btn btn-outline-secondary clear-filter" type="button"
-                                                title="Limpar data inicial" data-filter="startDate">
-                                                <i class="fas fa-times"></i>
-                                            </button>
-                                        </div>
-                                        <div class="input-group">
-                                            <span class="input-group-text">Até</span>
-                                            <input type="date" class="form-control" id="filterEndDate">
-                                            <button class="btn btn-outline-secondary clear-filter" type="button"
-                                                title="Limpar data final" data-filter="endDate">
-                                                <i class="fas fa-times"></i>
-                                            </button>
-                                        </div>
+                                
+                                <!-- Filtro por data - agora vem depois do texto -->
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Período - De</label>
+                                    <div class="input-group date-input-group">
+                                        <span class="input-group-text"><i class="fas fa-calendar-alt fa-lg"></i></span>
+                                        <input type="date" class="form-control" id="filterStartDate">
+                                        <button class="btn btn-outline-secondary clear-filter" type="button"
+                                            title="Limpar data inicial" data-filter="startDate">
+                                            <i class="fas fa-times"></i>
+                                        </button>
                                     </div>
                                 </div>
-                                <div class="col-md-4 mb-3">
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Período - Até</label>
+                                    <div class="input-group date-input-group">
+                                        <span class="input-group-text"><i class="fas fa-calendar-alt fa-lg"></i></span>
+                                        <input type="date" class="form-control" id="filterEndDate">
+                                        <button class="btn btn-outline-secondary clear-filter" type="button"
+                                            title="Limpar data final" data-filter="endDate">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Filtro por categoria -->
+                                <div class="col-12 mb-3">
                                     <label for="filterCategory" class="form-label">Categoria</label>
                                     <div class="input-group">
                                         <select class="form-select" id="filterCategory">

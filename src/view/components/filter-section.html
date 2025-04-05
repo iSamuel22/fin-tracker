@@ -1,11 +1,14 @@
 <div class="filter-container mb-4">
     <div class="card">
-        <div class="card-header bg-light d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">
-                <i class="fas fa-filter me-2"></i>Filtrar
-            </h5>
-            <button type="button" class="btn-toggle-filter btn btn-sm btn-outline-primary" aria-expanded="false"
-                aria-controls="filterCollapse">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center" title="Clique para expandir/recolher os filtros">
+            <div>
+                <h5 class="mb-0">
+                    <i class="fas fa-filter me-2"></i>Filtrar
+                </h5>
+                <small class="text-muted d-none d-sm-inline">Clique para expandir</small>
+            </div>
+            <button type="button" class="btn-toggle-filter btn btn-sm btn-outline-primary" 
+                aria-expanded="false" aria-controls="filterCollapse">
                 <i class="fas fa-chevron-down"></i>
             </button>
         </div>
@@ -25,22 +28,26 @@
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Período</label>
-                        <div class="d-flex gap-2">
-                            <div class="input-group">
-                                <span class="input-group-text">De</span>
-                                <input type="date" class="form-control" id="filterStartDate">
-                                <button class="btn btn-outline-secondary clear-filter" type="button"
-                                    title="Limpar data inicial" data-filter="startDate">
-                                    <i class="fas fa-times"></i>
-                                </button>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div class="input-group date-input-group">
+                                    <span class="input-group-text"><i class="fas fa-calendar-alt fa-lg"></i></span>
+                                    <input type="date" class="form-control" id="filterStartDate" placeholder="Data inicial">
+                                    <button class="btn btn-outline-secondary clear-filter" type="button"
+                                        title="Limpar data inicial" data-filter="startDate">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
                             </div>
-                            <div class="input-group">
-                                <span class="input-group-text">Até</span>
-                                <input type="date" class="form-control" id="filterEndDate">
-                                <button class="btn btn-outline-secondary clear-filter" type="button"
-                                    title="Limpar data final" data-filter="endDate">
-                                    <i class="fas fa-times"></i>
-                                </button>
+                            <div class="col-6">
+                                <div class="input-group date-input-group">
+                                    <span class="input-group-text"><i class="fas fa-calendar-alt fa-lg"></i></span>
+                                    <input type="date" class="form-control" id="filterEndDate" placeholder="Data final">
+                                    <button class="btn btn-outline-secondary clear-filter" type="button"
+                                        title="Limpar data final" data-filter="endDate">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

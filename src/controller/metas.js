@@ -76,10 +76,10 @@ async function carregarDados() {
 
     // Carregar dados financeiros PRIMEIRO para atualizar saldoMensal
     carregarDadosFinanceirosLocais(user.email);
-    
+
     // carrega imediatamente do localStorage
     carregarLocalStorage(user.email);
-    
+
     // renderiza UI com dados do localStorage
     exibirMetas();
     calcularEstimativas();
@@ -98,7 +98,7 @@ function carregarLocalStorage(userEmail) {
     const metasLocalStorage = localStorage.getItem(`metas_${userEmail}`);
     if (metasLocalStorage) {
         metas = JSON.parse(metasLocalStorage);
-        
+
         // Garantir que todas as metas tenham datas
         const agora = new Date();
         metas.forEach(meta => {
@@ -109,7 +109,7 @@ function carregarLocalStorage(userEmail) {
                 meta.ultimaAtualizacao = agora;
             }
         });
-        
+
         // Salvar as metas atualizadas
         salvarDados();
     } else {
@@ -120,7 +120,7 @@ function carregarLocalStorage(userEmail) {
 // carrega os dados financeiros do localStorage
 function carregarDadosFinanceirosLocais(userEmail) {
     console.log("Carregando dados financeiros para cálculo de saldo mensal");
-    
+
     // carrega receitas
     const receitasStorage = localStorage.getItem(`receitas_${userEmail}`);
     if (receitasStorage) {
@@ -150,7 +150,7 @@ function carregarDadosFinanceirosLocais(userEmail) {
     // calcula saldo mensal
     saldoMensal = receitasMensais - gastosMensais;
     console.log(`Saldo mensal calculado: ${saldoMensal}`);
-    
+
     // Atualiza o display imediatamente
     atualizarSaldoMensal();
 }
@@ -175,12 +175,12 @@ async function atualizarDoFirestore() {
                     return null;
                 }
             }).filter(meta => meta !== null);
-            
+
             // Verificar se há mudanças antes de atualizar a UI
             if (JSON.stringify(novasMetas) !== JSON.stringify(metas)) {
                 metas = novasMetas;
                 salvarDados();
-                
+
                 // Atualizar UI apenas se houver mudanças
                 exibirMetas();
                 calcularEstimativas();
@@ -241,7 +241,7 @@ function atualizarSaldoMensal() {
 function calcularEstimativas() {
     // Garantir que o saldo mensal esteja atualizado visualmente
     atualizarSaldoMensal();
-    
+
     const container = document.getElementById('estimativas-container');
     const placeholder = document.getElementById('estimativas-placeholder');
 
@@ -374,7 +374,7 @@ function salvarDados() {
         console.error('Erro ao salvar metas: usuário não encontrado ou sem email');
         return;
     }
-    
+
     // Incluir os IDs do Firestore ao salvar no localStorage
     const metasData = metas.map(meta => {
         try {
@@ -383,7 +383,7 @@ function salvarDados() {
                 descricao: meta.descricao,
                 valor: meta.valor
             };
-            
+
             // Tratamento seguro para datas
             try {
                 const dataCriacao = garantirDataValida(meta.dataCriacao);
@@ -391,19 +391,19 @@ function salvarDados() {
             } catch (e) {
                 metaObj.dataCriacao = new Date().toISOString();
             }
-            
+
             try {
                 const ultimaAtualizacao = garantirDataValida(meta.ultimaAtualizacao);
                 metaObj.ultimaAtualizacao = ultimaAtualizacao.toISOString();
             } catch (e) {
                 metaObj.ultimaAtualizacao = new Date().toISOString();
             }
-            
+
             // adiciona ID se existir (para sincronização com Firestore)
             if (meta.id) {
                 metaObj.id = meta.id;
             }
-            
+
             return metaObj;
         } catch (e) {
             console.error("Erro ao processar meta para salvar:", e);
@@ -418,7 +418,7 @@ function salvarDados() {
             };
         }
     });
-    
+
     localStorage.setItem(`metas_${user.email}`, JSON.stringify(metasData));
 }
 
@@ -431,18 +431,19 @@ function exibirMetas() {
 
     // aplicar filtros
     let metasFiltradas = metas;
-    
+
     // filtrar por texto (nome ou descrição)
     if (filtros.texto) {
-        metasFiltradas = metasFiltradas.filter(meta => 
-            meta.nome.toLowerCase().includes(filtros.texto) || 
-            (meta.descricao && meta.descricao.toLowerCase().includes(filtros.texto))
+        const termoFiltro = filtros.texto.toLowerCase().trim();
+        metasFiltradas = metasFiltradas.filter(meta =>
+            meta.nome.toLowerCase().includes(termoFiltro) ||
+            (meta.descricao && meta.descricao.toLowerCase().includes(termoFiltro))
         );
     }
-    
+
     // filtrar por valor máximo
     if (filtros.valorMaximo) {
-        metasFiltradas = metasFiltradas.filter(meta => 
+        metasFiltradas = metasFiltradas.filter(meta =>
             parseFloat(meta.valor) <= filtros.valorMaximo
         );
     }
@@ -504,14 +505,14 @@ function exibirMetas() {
 
     metasOrdenadas.forEach((meta, index) => {
         const tr = document.createElement('tr');
-        
+
         // Formatar datas para exibição
         const dataCriacao = meta.dataCriacao ? garantirDataValida(meta.dataCriacao).toLocaleDateString() : 'Não disponível';
         const ultimaAtualizacao = meta.ultimaAtualizacao ? garantirDataValida(meta.ultimaAtualizacao).toLocaleDateString() : 'Não disponível';
-        
+
         // Adicionar tooltip com informações adicionais
         const tooltipInfo = `Criada em: ${dataCriacao}\nÚltima atualização: ${ultimaAtualizacao}`;
-        
+
         tr.innerHTML = `
             <td title="${tooltipInfo}">${meta.nome}</td>
             <td>${meta.descricao || '-'}</td>
@@ -572,10 +573,10 @@ async function adicionarMeta(evento) {
             // Adicionar ao Firestore
             const metaRef = await FirestoreService.addMeta(meta);
             meta.id = metaRef.id;
-            
+
             // Adicionar ao array local
             metas.push(meta);
-            
+
             // Salvar no localStorage
             salvarDados();
 
@@ -654,7 +655,7 @@ async function salvarEdicaoMeta(evento) {
         // obter o ID da meta atual
         const metaAtual = metas[indiceMetaAtual];
         const metaId = metaAtual.id;
-        
+
         // preservar a data de criação original ou usar data atual se inválida
         const dataCriacaoOriginal = metaAtual.dataCriacao;
         const dataCriacao = garantirDataValida(dataCriacaoOriginal);
@@ -678,10 +679,10 @@ async function salvarEdicaoMeta(evento) {
             dataCriacao: dataCriacao.toISOString(),
             ultimaAtualizacao: ultimaAtualizacao.toISOString()
         });
-        
+
         // Substituir o objeto antigo pelo novo
         metas[indiceMetaAtual] = metaAtualizada;
-        
+
         // salvar no localStorage
         salvarDados();
 
@@ -696,7 +697,7 @@ async function salvarEdicaoMeta(evento) {
 
         // fechar o modal
         fecharModalEdicao();
-        
+
         // atualizar a exibição
         exibirMetas();
         calcularEstimativas();
@@ -727,12 +728,12 @@ async function excluirMeta(indice) {
         if (result.isConfirmed) {
             try {
                 const meta = metas[indice];
-                
+
                 // Verifica se a meta tem ID do Firestore antes de tentar excluir
                 if (meta.id) {
                     await FirestoreService.deleteMeta(meta.id);
                 }
-                
+
                 // Remove localmente
                 metas.splice(indice, 1);
                 salvarDados();
@@ -763,23 +764,47 @@ async function excluirMeta(indice) {
 
 // função para configurar eventos dos filtros
 function setupFilters() {
-    // botão para mostrar/esconder filtros
+    // Botão e cabeçalho para mostrar/esconder filtros
     const btnToggleFilter = document.querySelector('.btn-toggle-filter');
+    const filterCardHeader = document.querySelector('.filter-container .card-header');
     const filterCollapse = document.getElementById('filterCollapse');
-    
-    if (btnToggleFilter) {
-        btnToggleFilter.addEventListener('click', () => {
-            const isExpanded = btnToggleFilter.getAttribute('aria-expanded') === 'true';
-            btnToggleFilter.setAttribute('aria-expanded', !isExpanded);
-            btnToggleFilter.querySelector('i').classList.toggle('fa-chevron-down');
-            btnToggleFilter.querySelector('i').classList.toggle('fa-chevron-up');
-            
-            if (filterCollapse) {
-                filterCollapse.classList.toggle('show');
+
+    const bsCollapse = new bootstrap.Collapse(filterCollapse, {
+        toggle: false
+    });
+
+    if (filterCardHeader) {
+        filterCardHeader.style.cursor = 'pointer';
+        filterCardHeader.addEventListener('click', (e) => {
+            // Evitar que o clique no botão da seta acione este evento duas vezes
+            if (e.target.closest('.btn-toggle-filter')) {
+                return;
+            }
+            bsCollapse.toggle();
+
+            // Atualizar o ícone da seta
+            const icon = filterCardHeader.querySelector('.btn-toggle-filter i');
+            if (icon) {
+                icon.classList.toggle('fa-chevron-down');
+                icon.classList.toggle('fa-chevron-up');
             }
         });
     }
-    
+
+    if (btnToggleFilter) {
+        btnToggleFilter.addEventListener('click', (e) => {
+            e.stopPropagation(); // Impedir propagação para o card-header
+            bsCollapse.toggle();
+
+            // Atualizar o ícone da seta
+            const icon = btnToggleFilter.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('fa-chevron-down');
+                icon.classList.toggle('fa-chevron-up');
+            }
+        });
+    }
+
     // botões para limpar filtros individuais
     document.querySelectorAll('.clear-filter').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -787,19 +812,19 @@ function setupFilters() {
             limparFiltro(filtro);
         });
     });
-    
+
     // botão para limpar todos os filtros
     const clearAllBtn = document.getElementById('clearAllFilters');
     if (clearAllBtn) {
         clearAllBtn.addEventListener('click', limparTodosFiltros);
     }
-    
+
     // botão para aplicar filtros
     const applyFiltersBtn = document.getElementById('applyFilters');
     if (applyFiltersBtn) {
         applyFiltersBtn.addEventListener('click', aplicarFiltros);
     }
-    
+
     // aplicar filtros ao pressionar Enter no campo de texto
     const filterTextInput = document.getElementById('filterText');
     if (filterTextInput) {
@@ -823,7 +848,7 @@ function limparFiltro(filtro) {
             filtros.valorMaximo = null;
             break;
     }
-    
+
     // aplicar os filtros imediatamente ao limpar um filtro
     aplicarFiltros();
 }
@@ -832,12 +857,12 @@ function limparFiltro(filtro) {
 function limparTodosFiltros() {
     document.getElementById('filterText').value = '';
     document.getElementById('filterAmount').value = '';
-    
+
     filtros = {
         texto: '',
         valorMaximo: null
     };
-    
+
     // aplicar os filtros (agora limpos)
     aplicarFiltros();
 }
@@ -846,10 +871,10 @@ function limparTodosFiltros() {
 function aplicarFiltros() {
     // coletar valores dos campos de filtro
     filtros.texto = document.getElementById('filterText').value.toLowerCase().trim();
-    
+
     const amountValue = document.getElementById('filterAmount').value;
     filtros.valorMaximo = amountValue ? parseFloat(amountValue) : null;
-    
+
     // exibir metas filtradas
     exibirMetas();
 }
@@ -865,7 +890,7 @@ function setupAutoUpdates() {
             calcularEstimativas();
         }
     });
-    
+
     // Escutar eventos de atualização de receitas
     document.addEventListener('dadosReceitasAtualizados', () => {
         console.log("Atualizando metas devido a mudanças em receitas");
@@ -880,13 +905,13 @@ function setupAutoUpdates() {
 // inicialização
 document.addEventListener('DOMContentLoaded', async () => {
     await carregarDados();
-    
+
     // configurar filtros
     setupFilters();
-    
+
     // configurar atualizações automáticas
     setupAutoUpdates();
-    
+
     exibirMetas();
     calcularEstimativas();
 

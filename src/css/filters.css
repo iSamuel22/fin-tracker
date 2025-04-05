@@ -88,3 +88,83 @@ input[type="date"]:not(:placeholder-shown) {
     align-items: center;
     justify-content: center;
 }
+
+/* Estilos para os campos de data */
+.date-input-group .input-group-text {
+    background-color: #f8f9fa;
+    border-right: none;
+    padding-right: 8px;
+    color: #4e73df;
+}
+
+.date-input-group .form-control {
+    border-left: none;
+    padding-left: 8px;
+}
+
+.date-input-group .fa-calendar-alt {
+    font-size: 1.25rem;  /* Ícone maior */
+}
+
+/* Melhorar a aparência em foco */
+.date-input-group .form-control:focus {
+    box-shadow: none;
+    border-color: #ced4da;
+    border-left: none;
+}
+
+.date-input-group .input-group-text:hover {
+    cursor: pointer;
+    background-color: #e9ecef;
+}
+
+/* Estilo para o calendário nativo */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+}
+
+/* Ajuste para melhor alinhamento em dispositivos móveis */
+@media (max-width: 767.98px) {
+    .date-input-group {
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Indicador visual de que o cabeçalho é clicável */
+.filter-container .card-header {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.filter-container .card-header:hover {
+    background-color: #e9ecef;
+}
+
+/* Estilo para o botão de toggle */
+.filter-container .btn-toggle-filter {
+    transition: transform 0.2s ease;
+}
+
+.filter-container .btn-toggle-filter i.fa-chevron-up {
+    transform: rotate(180deg);
+}
+
+/* Animação suave para o collapse */
+.filter-container .collapse {
+    transition: all 0.3s ease;
+}
+
+/* Destacar título do filtro ao passar o mouse */
+.filter-container .card-header h5 {
+    transition: color 0.2s ease;
+}
+
+.filter-container .card-header:hover h5 {
+    color: #0d6efd;
+}

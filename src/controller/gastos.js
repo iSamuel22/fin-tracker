@@ -299,8 +299,9 @@ function exibirGastos() {
     
     // filtrar por texto (descrição)
     if (filtros.texto) {
+        const termoFiltro = filtros.texto.toLowerCase().trim();
         gastosFiltrados = gastosFiltrados.filter(gasto => 
-            gasto.descricao.toLowerCase().includes(filtros.texto)
+            gasto.descricao.toLowerCase().includes(termoFiltro)
         );
     }
     
@@ -837,19 +838,43 @@ function alternarCampoNovaCategoria() {
 
 // função para configurar eventos dos filtros
 function setupFilters() {
-    // botão para mostrar/esconder filtros
+    // Botão e cabeçalho para mostrar/esconder filtros
     const btnToggleFilter = document.querySelector('.btn-toggle-filter');
+    const filterCardHeader = document.querySelector('.filter-container .card-header');
     const filterCollapse = document.getElementById('filterCollapse');
     
-    if (btnToggleFilter) {
-        btnToggleFilter.addEventListener('click', () => {
-            const isExpanded = btnToggleFilter.getAttribute('aria-expanded') === 'true';
-            btnToggleFilter.setAttribute('aria-expanded', !isExpanded);
-            btnToggleFilter.querySelector('i').classList.toggle('fa-chevron-down');
-            btnToggleFilter.querySelector('i').classList.toggle('fa-chevron-up');
+    const bsCollapse = new bootstrap.Collapse(filterCollapse, {
+        toggle: false
+    });
+    
+    if (filterCardHeader) {
+        filterCardHeader.style.cursor = 'pointer';
+        filterCardHeader.addEventListener('click', (e) => {
+            // Evitar que o clique no botão da seta acione este evento duas vezes
+            if (e.target.closest('.btn-toggle-filter')) {
+                return;
+            }
+            bsCollapse.toggle();
             
-            if (filterCollapse) {
-                filterCollapse.classList.toggle('show');
+            // Atualizar o ícone da seta
+            const icon = filterCardHeader.querySelector('.btn-toggle-filter i');
+            if (icon) {
+                icon.classList.toggle('fa-chevron-down');
+                icon.classList.toggle('fa-chevron-up');
+            }
+        });
+    }
+    
+    if (btnToggleFilter) {
+        btnToggleFilter.addEventListener('click', (e) => {
+            e.stopPropagation(); // Impedir propagação para o card-header
+            bsCollapse.toggle();
+            
+            // Atualizar o ícone da seta
+            const icon = btnToggleFilter.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('fa-chevron-down');
+                icon.classList.toggle('fa-chevron-up');
             }
         });
     }

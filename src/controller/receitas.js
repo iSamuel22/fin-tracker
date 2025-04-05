@@ -258,25 +258,25 @@ function atualizarSelectCategorias() {
 function atualizarFilterCategorias() {
     const filterCategorySelect = document.getElementById('filterCategory');
     if (!filterCategorySelect) return;
-    
+
     // Preservar valor selecionado
     const valorAtual = filterCategorySelect.value;
-    
+
     // Limpar opções existentes, exceto a primeira (Todas)
     while (filterCategorySelect.options.length > 1) {
         filterCategorySelect.remove(1);
     }
-    
+
     // Adicionar categorias ao select de filtro (incluindo 'Outros')
     const todasCategorias = [...new Set([...categorias, 'Outros'])];
-    
+
     todasCategorias.forEach(categoria => {
         const option = document.createElement('option');
         option.value = categoria;
         option.textContent = categoria;
         filterCategorySelect.appendChild(option);
     });
-    
+
     // Restaurar valor anterior
     if (valorAtual && filterCategorySelect.querySelector(`option[value="${valorAtual}"]`)) {
         filterCategorySelect.value = valorAtual;
@@ -296,14 +296,15 @@ function exibirReceitas() {
 
     // aplicar filtros
     let receitasFiltradas = receitas;
-    
+
     // filtrar por texto (descrição)
     if (filtros.texto) {
-        receitasFiltradas = receitasFiltradas.filter(receita => 
-            receita.descricao.toLowerCase().includes(filtros.texto)
+        const termoFiltro = filtros.texto.toLowerCase().trim();
+        receitasFiltradas = receitasFiltradas.filter(receita =>
+            receita.descricao.toLowerCase().includes(termoFiltro)
         );
     }
-    
+
     // filtrar por data de início - usando normalização da data para comparação
     if (filtros.dataInicio) {
         const dataInicioNormalizada = normalizarDataParaComparacao(filtros.dataInicio);
@@ -312,7 +313,7 @@ function exibirReceitas() {
             return dataReceitaNormalizada >= dataInicioNormalizada;
         });
     }
-    
+
     // filtrar por data de fim - usando normalização da data para comparação
     if (filtros.dataFim) {
         const dataFimNormalizada = normalizarDataParaComparacao(filtros.dataFim);
@@ -321,10 +322,10 @@ function exibirReceitas() {
             return dataReceitaNormalizada <= dataFimNormalizada;
         });
     }
-    
+
     // filtrar por categoria
     if (filtros.categoria) {
-        receitasFiltradas = receitasFiltradas.filter(receita => 
+        receitasFiltradas = receitasFiltradas.filter(receita =>
             receita.categoria === filtros.categoria
         );
     }
@@ -414,9 +415,9 @@ function exibirReceitas() {
 // função para verificar se há filtros ativos
 function temFiltrosAtivos() {
     return (
-        filtros.texto !== '' || 
-        filtros.dataInicio !== null || 
-        filtros.dataFim !== null || 
+        filtros.texto !== '' ||
+        filtros.dataInicio !== null ||
+        filtros.dataFim !== null ||
         filtros.categoria !== ''
     );
 }
@@ -803,28 +804,52 @@ function alternarCampoNovaCategoria() {
     }
 }
 
-// Função para configurar eventos dos filtros
+// função para configurar eventos dos filtros
 function setupFilters() {
-    // botão para mostrar/esconder filtros
+    // Botão e cabeçalho para mostrar/esconder filtros
     const btnToggleFilter = document.querySelector('.btn-toggle-filter');
+    const filterCardHeader = document.querySelector('.filter-container .card-header');
     const filterCollapse = document.getElementById('filterCollapse');
-    
-    if (btnToggleFilter) {
-        btnToggleFilter.addEventListener('click', () => {
-            const isExpanded = btnToggleFilter.getAttribute('aria-expanded') === 'true';
-            btnToggleFilter.setAttribute('aria-expanded', !isExpanded);
-            btnToggleFilter.querySelector('i').classList.toggle('fa-chevron-down');
-            btnToggleFilter.querySelector('i').classList.toggle('fa-chevron-up');
-            
-            if (filterCollapse) {
-                filterCollapse.classList.toggle('show');
+
+    const bsCollapse = new bootstrap.Collapse(filterCollapse, {
+        toggle: false
+    });
+
+    if (filterCardHeader) {
+        filterCardHeader.style.cursor = 'pointer';
+        filterCardHeader.addEventListener('click', (e) => {
+            // Evitar que o clique no botão da seta acione este evento duas vezes
+            if (e.target.closest('.btn-toggle-filter')) {
+                return;
+            }
+            bsCollapse.toggle();
+
+            // Atualizar o ícone da seta
+            const icon = filterCardHeader.querySelector('.btn-toggle-filter i');
+            if (icon) {
+                icon.classList.toggle('fa-chevron-down');
+                icon.classList.toggle('fa-chevron-up');
             }
         });
     }
-    
+
+    if (btnToggleFilter) {
+        btnToggleFilter.addEventListener('click', (e) => {
+            e.stopPropagation(); // Impedir propagação para o card-header
+            bsCollapse.toggle();
+
+            // Atualizar o ícone da seta
+            const icon = btnToggleFilter.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('fa-chevron-down');
+                icon.classList.toggle('fa-chevron-up');
+            }
+        });
+    }
+
     // popular select de categorias com as categorias disponíveis
     atualizarFilterCategorias();
-    
+
     // botões para limpar filtros individuais
     document.querySelectorAll('.clear-filter').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -832,19 +857,19 @@ function setupFilters() {
             limparFiltro(filtro);
         });
     });
-    
+
     // botão para limpar todos os filtros
     const clearAllBtn = document.getElementById('clearAllFilters');
     if (clearAllBtn) {
         clearAllBtn.addEventListener('click', limparTodosFiltros);
     }
-    
+
     // botão para aplicar filtros
     const applyFiltersBtn = document.getElementById('applyFilters');
     if (applyFiltersBtn) {
         applyFiltersBtn.addEventListener('click', aplicarFiltros);
     }
-    
+
     // aplicar filtros ao pressionar Enter no campo de texto
     const filterTextInput = document.getElementById('filterText');
     if (filterTextInput) {
@@ -876,10 +901,10 @@ function limparFiltro(filtro) {
             filtros.categoria = '';
             break;
     }
-    
+
     // Atualizar o badge de filtros
     atualizarBadgeFiltros();
-    
+
     // aplicar os filtros imediatamente ao limpar um filtro
     aplicarFiltros();
 }
@@ -890,14 +915,14 @@ function limparTodosFiltros() {
     document.getElementById('filterStartDate').value = '';
     document.getElementById('filterEndDate').value = '';
     document.getElementById('filterCategory').value = '';
-    
+
     filtros = {
         texto: '',
         dataInicio: null,
         dataFim: null,
         categoria: ''
     };
-    
+
     // aplicar os filtros (agora limpos)
     aplicarFiltros();
 }
@@ -906,15 +931,15 @@ function limparTodosFiltros() {
 function aplicarFiltros() {
     // coletar valores dos campos de filtro
     filtros.texto = document.getElementById('filterText').value.toLowerCase().trim();
-    
+
     const startDateValue = document.getElementById('filterStartDate').value;
     filtros.dataInicio = startDateValue ? new Date(startDateValue) : null;
-    
+
     const endDateValue = document.getElementById('filterEndDate').value;
     filtros.dataFim = endDateValue ? new Date(endDateValue) : null;
-    
+
     filtros.categoria = document.getElementById('filterCategory').value;
-    
+
     // exibir receitas filtradas
     exibirReceitas();
 }
@@ -923,7 +948,7 @@ function aplicarFiltros() {
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         await carregarDados();
-        
+
         // configurar filtros
         setupFilters();
 
