@@ -66,43 +66,33 @@ function normalizarDataParaComparacao(data) {
 
 // menu user
 function setupUserAccountActions() {
+    console.log("Configurando ações da conta de usuário");
+
+    // Configuração existente para logout
     const logoutButton = document.getElementById('logout-button');
     if (logoutButton) {
         logoutButton.addEventListener('click', (e) => {
             e.preventDefault();
             console.log("Logout button clicked");
-            try {
-                // verifica se temos o usuário antes de sair
-                const user = Auth.getLoggedInUser();
-                console.log("Current user before logout:", user);
-
-                localStorage.removeItem('loggedInUser');
-                console.log("Removed user from localStorage");
-
-                console.log("Redirecting to login page...");
-                window.location.href = 'login.html';
-            } catch (error) {
-                console.error('Erro ao fazer logout:', error);
-                Swal.fire({
-                    title: 'Erro ao sair',
-                    text: 'Ocorreu um erro ao sair da conta: ' + (error.message || 'Tente novamente mais tarde'),
-                    icon: 'error',
-                    confirmButtonText: 'OK'
-                });
-            }
+            // Usar a função de logout direta
+            logoutUser();
         });
         console.log("Logout button event listener added");
     } else {
         console.error("Logout button not found in the DOM");
     }
 
-    // exclui conta
+    // Configuração existente para excluir conta
     const deleteAccountButton = document.getElementById('delete-account-button');
     if (deleteAccountButton) {
+        console.log("Delete account button found");
         deleteAccountButton.addEventListener('click', (e) => {
             e.preventDefault();
+            console.log("Delete account button clicked");
             showDeleteAccountConfirmation();
         });
+    } else {
+        console.error("Delete account button not found in the DOM");
     }
 }
 

@@ -47,6 +47,7 @@
                                 alt="Avatar" class="user-avatar">
                             <span class="d-none d-md-inline">Usuário</span>
                         </a>
+                        <!-- Modificação para o menu usuário em todas as páginas -->
                         <ul class="dropdown-menu dropdown-menu-end dropdown-menu-user" aria-labelledby="userMenu">
                             <li class="dropdown-header-user">
                                 <img src="https://ui-avatars.com/api/?name=Usuario&background=4e73df&color=fff&size=64&rounded=true"
@@ -56,16 +57,27 @@
                                     <div class="user-email">usuario@email.com</div>
                                 </div>
                             </li>
-                            <li><hr class="dropdown-divider-user"></li>
+                            <li>
+                                <hr class="dropdown-divider-user">
+                            </li>
+                            <li>
+                                <a class="dropdown-item dropdown-item-user" href="profile.html">
+                                    <span class="icon"><i class="fas fa-user"></i></span>
+                                    <span>Meu Perfil</span>
+                                </a>
+                            </li>
                             <li>
                                 <a class="dropdown-item dropdown-item-user" href="#" id="logout-button">
                                     <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
                                     <span>Sair</span>
                                 </a>
                             </li>
-                            <li><hr class="dropdown-divider-user"></li>
                             <li>
-                                <a class="dropdown-item dropdown-item-user danger-item" href="#" id="delete-account-button">
+                                <hr class="dropdown-divider-user">
+                            </li>
+                            <li>
+                                <a class="dropdown-item dropdown-item-user danger-item" href="#"
+                                    id="delete-account-button">
                                     <span class="icon"><i class="fas fa-trash"></i></span>
                                     <span>Excluir Conta</span>
                                 </a>

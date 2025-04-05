@@ -31,6 +31,7 @@ function logoutUser() {
 function setupUserAccountActions() {
     console.log("Configurando ações da conta de usuário");
 
+    // Configuração existente para logout
     const logoutButton = document.getElementById('logout-button');
     if (logoutButton) {
         logoutButton.addEventListener('click', (e) => {
@@ -42,15 +43,29 @@ function setupUserAccountActions() {
         console.log("Logout button event listener added");
     } else {
         console.error("Logout button not found in the DOM");
-        // Adicionar log para debug
-        console.log("DOM Elements:", {
-            logoutButton: document.getElementById('logout-button'),
-            deleteAccountButton: document.getElementById('delete-account-button'),
-            userMenu: document.getElementById('userMenu')
-        });
     }
 
-    // excluir conta
+    // Configuração para o botão Editar Perfil
+    const editProfileButton = document.getElementById('edit-profile-button');
+    if (editProfileButton) {
+        editProfileButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log("Edit profile button clicked");
+            // Importa dinamicamente o módulo para evitar problemas de carregamento
+            import('/src/controller/profile-modal.js')
+                .then(module => {
+                    module.openProfileModal();
+                })
+                .catch(error => {
+                    console.error("Error loading profile module:", error);
+                });
+        });
+        console.log("Edit profile button event listener added");
+    } else {
+        console.error("Edit profile button not found in the DOM");
+    }
+
+    // Configuração existente para excluir conta
     const deleteAccountButton = document.getElementById('delete-account-button');
     if (deleteAccountButton) {
         console.log("Delete account button found");
@@ -62,13 +77,6 @@ function setupUserAccountActions() {
     } else {
         console.error("Delete account button not found in the DOM");
     }
-
-    // Verificação adicional para encontrar e reportar todos os elementos do menu
-    document.querySelectorAll('[id]').forEach(el => {
-        if (el.id.includes('button') || el.id.includes('menu') || el.id.includes('user')) {
-            console.log(`Found element: #${el.id}`);
-        }
-    });
 }
 
 // mostra confirmação antes de excluir a conta

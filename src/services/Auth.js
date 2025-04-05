@@ -3,7 +3,10 @@ import {
     createUserWithEmailAndPassword,
     signOut,
     onAuthStateChanged,
-    deleteUser
+    deleteUser,
+    EmailAuthProvider,
+    reauthenticateWithCredential,
+    updatePassword as firebaseUpdatePassword
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 import { auth, db } from "../config/firebase.js";
@@ -57,12 +60,12 @@ class Auth {
     static async logout() {
         try {
             await signOut(auth);
-            
+
             // Verificar se o FirestoreService tem o método removeAllListeners antes de chamá-lo
             if (FirestoreService && typeof FirestoreService.removeAllListeners === 'function') {
                 FirestoreService.removeAllListeners();
             }
-            
+
             localStorage.removeItem('loggedInUser');
             window.location.href = 'login.html';
         } catch (error) {
@@ -101,6 +104,73 @@ class Auth {
             }
 
             throw error;
+        }
+    }
+
+    static async updateUserProfile(userData) {
+        try {
+            // Verifica se o usuário está autenticado
+            const currentUser = auth.currentUser;
+            if (!currentUser) {
+                console.error("No authenticated user found");
+                return false;
+            }
+
+            // Atualiza o documento do usuário no Firestore
+            await setDoc(doc(db, "users", currentUser.uid), userData, { merge: true });
+
+            // Atualiza os dados no localStorage
+            const storedUser = JSON.parse(localStorage.getItem('loggedInUser')) || {};
+            const updatedUser = {
+                ...storedUser,
+                ...userData
+            };
+            localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
+
+            return true;
+        } catch (error) {
+            console.error("Error updating user profile:", error);
+            throw error;
+        }
+    }
+
+    static async updatePassword(currentPassword, newPassword) {
+        try {
+            // Obter o usuário atual
+            const user = auth.currentUser;
+
+            if (!user) {
+                throw new Error('Usuário não autenticado');
+            }
+
+            // Verificar credenciais atuais para reautenticar o usuário
+            const credential = EmailAuthProvider.credential(
+                user.email,
+                currentPassword
+            );
+
+            // Reautenticar o usuário
+            await reauthenticateWithCredential(user, credential);
+
+            // Atualizar a senha usando a função importada do Firebase
+            await firebaseUpdatePassword(user, newPassword);
+
+            console.log('Senha atualizada com sucesso');
+            return true;
+        } catch (error) {
+            // Não registrar erros conhecidos no console
+            if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-login-credentials') {
+                // Silenciosamente lançar um erro com mensagem traduzida
+                throw new Error('Senha atual incorreta');
+            } else if (error.code === 'auth/weak-password') {
+                throw new Error('A nova senha é muito fraca');
+            } else if (error.code === 'auth/requires-recent-login') {
+                throw new Error('Esta operação requer autenticação recente. Por favor, faça login novamente.');
+            } else {
+                // Apenas registrar no console erros não conhecidos
+                console.error('Erro ao atualizar senha:', error);
+                throw new Error('Erro ao atualizar senha: ' + error.message);
+            }
         }
     }
 

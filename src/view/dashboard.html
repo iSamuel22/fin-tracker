@@ -45,36 +45,48 @@
                         <a class="nav-link" href="relatorio.html">Relatório</a>
                     </li>
                 </ul>
-                
+
                 <!-- Inspecione esta parte para garantir que os IDs estão corretos -->
                 <div class="user-menu-container ms-auto">
                     <ul class="navbar-nav">
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userMenu" role="button"
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                                <img src="https://ui-avatars.com/api/?name=Usuario&background=4e73df&color=fff&rounded=true" 
-                                     alt="Avatar" class="user-avatar">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userMenu"
+                                role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="https://ui-avatars.com/api/?name=Usuario&background=4e73df&color=fff&rounded=true"
+                                    alt="Avatar" class="user-avatar">
                                 <span class="d-none d-md-inline">Usuário</span>
                             </a>
+                            <!-- Modificação para o menu usuário em todas as páginas -->
                             <ul class="dropdown-menu dropdown-menu-end dropdown-menu-user" aria-labelledby="userMenu">
                                 <li class="dropdown-header-user">
-                                    <img src="https://ui-avatars.com/api/?name=Usuario&background=4e73df&color=fff&size=64&rounded=true" 
-                                         alt="Avatar" class="user-avatar">
+                                    <img src="https://ui-avatars.com/api/?name=Usuario&background=4e73df&color=fff&size=64&rounded=true"
+                                        alt="Avatar" class="user-avatar">
                                     <div class="user-info">
                                         <div class="user-name">Usuário</div>
                                         <div class="user-email">usuario@email.com</div>
                                     </div>
                                 </li>
-                                <li><hr class="dropdown-divider-user"></li>
+                                <li>
+                                    <hr class="dropdown-divider-user">
+                                </li>
+                                <li>
+                                    <a class="dropdown-item dropdown-item-user" href="profile.html">
+                                        <span class="icon"><i class="fas fa-user"></i></span>
+                                        <span>Meu Perfil</span>
+                                    </a>
+                                </li>
                                 <li>
                                     <a class="dropdown-item dropdown-item-user" href="#" id="logout-button">
                                         <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
                                         <span>Sair</span>
                                     </a>
                                 </li>
-                                <li><hr class="dropdown-divider-user"></li>
                                 <li>
-                                    <a class="dropdown-item dropdown-item-user danger-item" href="#" id="delete-account-button">
+                                    <hr class="dropdown-divider-user">
+                                </li>
+                                <li>
+                                    <a class="dropdown-item dropdown-item-user danger-item" href="#"
+                                        id="delete-account-button">
                                         <span class="icon"><i class="fas fa-trash"></i></span>
                                         <span>Excluir Conta</span>
                                     </a>
@@ -121,7 +133,8 @@
                                         R$ 1.200.000)
                                     </p>
                                     <p class="mb-0 small fst-italic text-secondary">
-                                        <i class="fas fa-mouse-pointer me-1 small"></i>Passe o cursor ou clique sobre os valores
+                                        <i class="fas fa-mouse-pointer me-1 small"></i>Passe o cursor ou clique sobre os
+                                        valores
                                         para visualizar o formato completo
                                     </p>
                                 </div>
@@ -176,11 +189,11 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-        
+
         // Tornando Firebase disponível globalmente para scripts não-modularizados
-        window.firebase = { 
-            initializeApp, 
-            getFirestore 
+        window.firebase = {
+            initializeApp,
+            getFirestore
         };
     </script>
     <script type="module" src="/src/controller/dashboard.js"></script>

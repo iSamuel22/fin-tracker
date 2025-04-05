@@ -7,42 +7,33 @@ if (!Auth.isAuthenticated()) {
 
 // menu usuário
 function setupUserAccountActions() {
+    console.log("Configurando ações da conta de usuário");
+
+    // Configuração existente para logout
     const logoutButton = document.getElementById('logout-button');
     if (logoutButton) {
         logoutButton.addEventListener('click', (e) => {
             e.preventDefault();
             console.log("Logout button clicked");
-            try {
-
-                const user = Auth.getLoggedInUser();
-                console.log("Current user before logout:", user);
-
-                localStorage.removeItem('loggedInUser');
-                console.log("Removed user from localStorage");
-
-                console.log("Redirecting to login page...");
-                window.location.href = 'login.html';
-            } catch (error) {
-                console.error('Erro ao fazer logout:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Erro ao sair',
-                    text: error.message || 'Tente novamente mais tarde',
-                });
-            }
+            // Usar a função de logout direta
+            logoutUser();
         });
         console.log("Logout button event listener added");
     } else {
         console.error("Logout button not found in the DOM");
     }
-
-    // exclui conta
+    
+    // Configuração existente para excluir conta
     const deleteAccountButton = document.getElementById('delete-account-button');
     if (deleteAccountButton) {
+        console.log("Delete account button found");
         deleteAccountButton.addEventListener('click', (e) => {
             e.preventDefault();
+            console.log("Delete account button clicked");
             showDeleteAccountConfirmation();
         });
+    } else {
+        console.error("Delete account button not found in the DOM");
     }
 }
 
