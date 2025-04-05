@@ -57,7 +57,12 @@ class Auth {
     static async logout() {
         try {
             await signOut(auth);
-            FirestoreService.removeAllListeners();
+            
+            // Verificar se o FirestoreService tem o método removeAllListeners antes de chamá-lo
+            if (FirestoreService && typeof FirestoreService.removeAllListeners === 'function') {
+                FirestoreService.removeAllListeners();
+            }
+            
             localStorage.removeItem('loggedInUser');
             window.location.href = 'login.html';
         } catch (error) {

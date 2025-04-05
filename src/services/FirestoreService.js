@@ -13,6 +13,9 @@ import {
 import { db } from "../config/firebase.js";
 import { Auth } from "./Auth.js";
 
+// Array para armazenar todas as inscrições (unsubscribe functions)
+const listeners = [];
+
 class FirestoreService {
     // inicializa coleções: método silencioso para evitar erros no console
     static async inicializarColecoes() {
@@ -38,6 +41,27 @@ class FirestoreService {
         } catch (error) {
             console.warn("Aviso: Erro ao inicializar coleções:", error);
             return false;
+        }
+    }
+
+    // Adicionar isso ao FirestoreService
+    static addListener(unsubscribeFunction) {
+        if (typeof unsubscribeFunction === 'function') {
+            listeners.push(unsubscribeFunction);
+        }
+    }
+
+    static removeAllListeners() {
+        console.log(`Removendo ${listeners.length} listeners do Firestore`);
+        while (listeners.length > 0) {
+            const unsubscribe = listeners.pop();
+            try {
+                if (typeof unsubscribe === 'function') {
+                    unsubscribe();
+                }
+            } catch (error) {
+                console.error("Erro ao remover listener:", error);
+            }
         }
     }
 

@@ -7,24 +7,47 @@ if (!Auth.isAuthenticated()) {
     window.location.href = 'login.html';
 }
 
+// Função de logout direta para contornar problemas com o Auth.logout()
+function logoutUser() {
+    try {
+        console.log("Executando logout direto");
+        localStorage.removeItem('loggedInUser');
+
+        // Limpar outros dados de sessão se necessário
+        const user = Auth.getLoggedInUser();
+        if (user && user.email) {
+            cleanupLocalStorage(user.email);
+        }
+
+        window.location.href = 'login.html';
+    } catch (error) {
+        console.error("Erro no logout direto:", error);
+        // Em último caso, forçar redirecionamento
+        window.location.href = 'login.html';
+    }
+}
+
 // menu user
 function setupUserAccountActions() {
     console.log("Configurando ações da conta de usuário");
-    
+
     const logoutButton = document.getElementById('logout-button');
     if (logoutButton) {
         logoutButton.addEventListener('click', (e) => {
             e.preventDefault();
             console.log("Logout button clicked");
-            try {
-                Auth.logout();
-            } catch (error) {
-                console.error("Error during logout:", error);
-            }
+            // Usar a função de logout direta
+            logoutUser();
         });
         console.log("Logout button event listener added");
     } else {
         console.error("Logout button not found in the DOM");
+        // Adicionar log para debug
+        console.log("DOM Elements:", {
+            logoutButton: document.getElementById('logout-button'),
+            deleteAccountButton: document.getElementById('delete-account-button'),
+            userMenu: document.getElementById('userMenu')
+        });
     }
 
     // excluir conta
@@ -39,6 +62,13 @@ function setupUserAccountActions() {
     } else {
         console.error("Delete account button not found in the DOM");
     }
+
+    // Verificação adicional para encontrar e reportar todos os elementos do menu
+    document.querySelectorAll('[id]').forEach(el => {
+        if (el.id.includes('button') || el.id.includes('menu') || el.id.includes('user')) {
+            console.log(`Found element: #${el.id}`);
+        }
+    });
 }
 
 // mostra confirmação antes de excluir a conta
@@ -73,10 +103,10 @@ function showDeleteAccountConfirmation() {
                         Swal.showLoading();
                     }
                 });
-                
+
                 // deleta conta do usuário
                 await deleteUserAccount();
-                
+
                 Swal.fire({
                     title: 'Conta Excluída',
                     text: 'Sua conta foi excluída com sucesso.',
@@ -388,18 +418,18 @@ function isMobileDevice() {
 function atualizarDadosUsuarioNoMenu() {
     try {
         const user = Auth.getLoggedInUser();
-        
+
         if (!user) {
             console.warn("Usuário não encontrado no localStorage");
             return;
         }
-        
+
         // Atualiza o nome do usuário na barra de navegação
         const userMenuName = document.querySelector('#userMenu span.d-none.d-md-inline');
         if (userMenuName) {
             userMenuName.textContent = user.name || 'Usuário';
         }
-        
+
         // Atualiza avatar com as iniciais do usuário real
         const userInitials = user.name ? encodeURIComponent(user.name) : 'Usuario';
         const avatarUrls = document.querySelectorAll('.user-avatar');
@@ -407,18 +437,18 @@ function atualizarDadosUsuarioNoMenu() {
             avatar.src = `https://ui-avatars.com/api/?name=${userInitials}&background=4e73df&color=fff&rounded=true${avatar.width >= 64 ? '&size=64' : ''}`;
             avatar.alt = `Avatar de ${user.name || 'Usuário'}`;
         });
-        
+
         // Atualiza informações no dropdown
         const userNameElement = document.querySelector('.user-info .user-name');
         if (userNameElement) {
             userNameElement.textContent = user.name || 'Usuário';
         }
-        
+
         const userEmailElement = document.querySelector('.user-info .user-email');
         if (userEmailElement) {
             userEmailElement.textContent = user.email || 'usuario@email.com';
         }
-        
+
         console.log("Informações do usuário atualizadas no menu");
     } catch (error) {
         console.error("Erro ao atualizar informações do usuário:", error);
@@ -427,9 +457,11 @@ function atualizarDadosUsuarioNoMenu() {
 
 // add isso à inicialização do seu documento
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM fully loaded"); // Adicionar log para confirmar que o evento está sendo disparado
+
     // configura botões de gerenciamento de conta
     setupUserAccountActions();
-    
+
     // Atualiza informações do usuário no menu
     atualizarDadosUsuarioNoMenu();
 
@@ -459,9 +491,8 @@ document.addEventListener('DOMContentLoaded', () => {
         subtree: true
     });
 
-    // add listener específico para facilitar fechamento em dispositivos móveis
+    // adicione listener específico para facilitar fechamento em dispositivos móveis
     if (isMobileDevice()) {
-        // toque em qualquer lugar fecha tooltips em dispositivos móveis
         document.addEventListener('touchend', function () {
             setTimeout(hideAllTooltips, 100);
         }, { passive: true });
@@ -822,38 +853,3 @@ function configurarAtualizacaoAutomatica() {
         }
     });
 }
-
-// modificação no evento DOMContentLoaded para inicializar tooltips
-document.addEventListener('DOMContentLoaded', () => {
-    // configura botões de gerenciamento de conta
-    setupUserAccountActions();
-    
-    // Atualiza informações do usuário no menu
-    atualizarDadosUsuarioNoMenu();
-
-    // configura a atualização automática
-    configurarAtualizacaoAutomatica();
-
-    // inicializa o dashboard
-    atualizarDashboard();
-
-    // inicializa tooltips
-    configurarTitulos();
-
-    // atualiza a cada minuto para garantir dados atualizados e reinicializa tooltips
-    setInterval(() => {
-        atualizarDashboard();
-        configurarTitulos();
-    }, 60000);
-
-    // adiciona observer para inicializar tooltips em elementos adicionados dinamicamente
-    const observer = new MutationObserver(function () {
-        configurarTitulos();
-    });
-
-    // observa mudanças no corpo do documento
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
-    });
-});

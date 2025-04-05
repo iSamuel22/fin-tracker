@@ -1,0 +1,66 @@
+<div class="filter-container mb-4">
+    <div class="card">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-filter me-2"></i>Filtrar
+            </h5>
+            <button type="button" class="btn-toggle-filter btn btn-sm btn-outline-primary" aria-expanded="false" aria-controls="filterCollapse">
+                <i class="fas fa-chevron-down"></i>
+            </button>
+        </div>
+        <div class="collapse" id="filterCollapse">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="filterText" class="form-label">Buscar por nome</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="filterText" placeholder="Digite para pesquisar...">
+                            <button class="btn btn-outline-secondary clear-filter" type="button" title="Limpar filtro" data-filter="text">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Período</label>
+                        <div class="d-flex gap-2">
+                            <div class="input-group">
+                                <span class="input-group-text">De</span>
+                                <input type="date" class="form-control" id="filterStartDate">
+                                <button class="btn btn-outline-secondary clear-filter" type="button" title="Limpar data inicial" data-filter="startDate">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text">Até</span>
+                                <input type="date" class="form-control" id="filterEndDate">
+                                <button class="btn btn-outline-secondary clear-filter" type="button" title="Limpar data final" data-filter="endDate">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="filterCategory" class="form-label">Categoria</label>
+                        <div class="input-group">
+                            <select class="form-select" id="filterCategory">
+                                <option value="">Todas</option>
+                                <!-- Categorias serão adicionadas dinamicamente -->
+                            </select>
+                            <button class="btn btn-outline-secondary clear-filter" type="button" title="Limpar categoria" data-filter="category">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end mt-2">
+                    <button class="btn btn-secondary me-2" id="clearAllFilters">
+                        <i class="fas fa-eraser me-2"></i>Limpar todos
+                    </button>
+                    <button class="btn btn-primary" id="applyFilters">
+                        <i class="fas fa-search me-2"></i>Aplicar filtros
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

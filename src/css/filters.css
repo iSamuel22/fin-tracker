@@ -1,0 +1,90 @@
+/* Estilos para os componentes de filtro */
+
+.filter-container {
+    margin-bottom: 1.5rem;
+}
+
+.filter-container .card-header {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    position: relative;
+}
+
+.btn-toggle-filter {
+    padding: 0.25rem 0.5rem;
+}
+
+.filter-container .input-group .btn-outline-secondary {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.filter-container .form-label {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+/* Animação para o colapso */
+#filterCollapse {
+    transition: all 0.3s ease-in-out;
+}
+
+/* Estilos para indicador de filtros ativos */
+.active-filter-indicator {
+    margin-bottom: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+}
+
+/* Botão de limpar filtro */
+.clear-filter {
+    color: #6c757d;
+    background-color: transparent;
+    border-color: #ced4da;
+}
+
+.clear-filter:hover {
+    color: #dc3545;
+    border-color: #dc3545;
+}
+
+/* Estilo específico para inputs de data com valores selecionados */
+input[type="date"]:not(:placeholder-shown) {
+    background-color: #e8f4ff;
+    border-color: #0d6efd;
+}
+
+/* Estilo para campos de texto com filtro aplicado */
+#filterText:not(:placeholder-shown) {
+    background-color: #e8f4ff;
+    border-color: #0d6efd;
+}
+
+/* Estilo para select de categoria com filtro aplicado */
+#filterCategory option:checked:not([value=""]) {
+    background-color: #0d6efd;
+    color: white;
+}
+
+#filterCategory:has(option:checked:not([value=""])) {
+    border-color: #0d6efd;
+    background-color: #e8f4ff;
+}
+
+/* Badge para indicador de filtro ativo */
+.filter-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

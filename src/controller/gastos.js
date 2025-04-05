@@ -12,15 +12,24 @@ if (!Auth.isAuthenticated()) {
 let gastos = [];
 let categorias = ['Alimentação', 'Transporte', 'Lazer', 'Moradia'];
 
+// variáveis para filtros
+let filtros = {
+    texto: '',
+    dataInicio: null,
+    dataFim: null,
+    categoria: ''
+};
+
 // função aprimorada para garantir que uma data seja válida e considerar o fuso horário
 function garantirDataValida(data) {
     if (!data) return new Date();
 
-    // se for string de data ISO, converter para Date com ajuste de fuso horário
+    // se for string de data ISO, converter para Date
     if (typeof data === 'string') {
         const d = new Date(data);
-        // Adicionar offset do fuso horário para garantir que a data exibida seja a mesma que foi inserida
-        return new Date(d.getTime() + d.getTimezoneOffset() * 60000);
+        if (!isNaN(d.getTime())) {
+            return d;
+        }
     }
 
     // se for timestamp do Firebase
@@ -47,6 +56,12 @@ function formatarDataParaInput(data) {
     const dia = String(dataObj.getDate()).padStart(2, '0');
 
     return `${ano}-${mes}-${dia}`;
+}
+
+// função para normalizar data para comparação (remove o componente de tempo)
+function normalizarDataParaComparacao(data) {
+    const dataObj = garantirDataValida(data);
+    return new Date(dataObj.getFullYear(), dataObj.getMonth(), dataObj.getDate());
 }
 
 // menu user
@@ -336,6 +351,7 @@ async function carregarDados() {
 
         // atualiza a interface
         atualizarSelectCategorias();
+        atualizarFilterCategorias();
         exibirGastos();
 
         notificarAlteracoesDados();
@@ -411,6 +427,35 @@ function atualizarSelectCategorias() {
     });
 }
 
+// função para atualizar o select de categorias do filtro
+function atualizarFilterCategorias() {
+    const filterCategorySelect = document.getElementById('filterCategory');
+    if (!filterCategorySelect) return;
+    
+    // preservar valor selecionado
+    const valorAtual = filterCategorySelect.value;
+    
+    // limpar opções existentes, exceto a primeira (Todas)
+    while (filterCategorySelect.options.length > 1) {
+        filterCategorySelect.remove(1);
+    }
+    
+    // adicionar categorias ao select de filtro (incluindo 'Outros')
+    const todasCategorias = [...new Set([...categorias, 'Outros'])];
+    
+    todasCategorias.forEach(categoria => {
+        const option = document.createElement('option');
+        option.value = categoria;
+        option.textContent = categoria;
+        filterCategorySelect.appendChild(option);
+    });
+    
+    // restaurar valor anterior
+    if (valorAtual && filterCategorySelect.querySelector(`option[value="${valorAtual}"]`)) {
+        filterCategorySelect.value = valorAtual;
+    }
+}
+
 // exibe os gastos na lista
 function exibirGastos() {
     const listaGastos = document.getElementById('expensesList');
@@ -422,9 +467,74 @@ function exibirGastos() {
 
     listaGastos.innerHTML = '';
 
-    if (gastos.length === 0) {
-        listaGastos.innerHTML = '<div class="alert alert-info">Nenhum gasto adicionado ainda.</div>';
+    // aplicar filtros
+    let gastosFiltrados = gastos;
+    
+    // filtrar por texto (descrição)
+    if (filtros.texto) {
+        gastosFiltrados = gastosFiltrados.filter(gasto => 
+            gasto.descricao.toLowerCase().includes(filtros.texto)
+        );
+    }
+    
+    // filtrar por data de início - usando normalização da data para comparação
+    if (filtros.dataInicio) {
+        const dataInicioNormalizada = normalizarDataParaComparacao(filtros.dataInicio);
+        gastosFiltrados = gastosFiltrados.filter(gasto => {
+            const dataGastoNormalizada = normalizarDataParaComparacao(gasto.data);
+            return dataGastoNormalizada >= dataInicioNormalizada;
+        });
+    }
+    
+    // filtrar por data de fim - usando normalização da data para comparação
+    if (filtros.dataFim) {
+        const dataFimNormalizada = normalizarDataParaComparacao(filtros.dataFim);
+        // Não precisamos mais ajustar para o fim do dia, pois estamos comparando apenas as datas
+        gastosFiltrados = gastosFiltrados.filter(gasto => {
+            const dataGastoNormalizada = normalizarDataParaComparacao(gasto.data);
+            return dataGastoNormalizada <= dataFimNormalizada;
+        });
+    }
+    
+    // filtrar por categoria
+    if (filtros.categoria) {
+        gastosFiltrados = gastosFiltrados.filter(gasto => 
+            gasto.categoria === filtros.categoria
+        );
+    }
+
+    if (gastosFiltrados.length === 0) {
+        if (temFiltrosAtivos()) {
+            listaGastos.innerHTML = `
+                <div class="alert alert-info">
+                    <i class="fas fa-filter me-2"></i>
+                    Nenhum gasto encontrado para os filtros aplicados.
+                    <button class="btn btn-link p-0 ms-2" onclick="window.limparTodosFiltros()">Limpar filtros</button>
+                </div>
+            `;
+        } else {
+            listaGastos.innerHTML = '<div class="alert alert-info">Nenhum gasto adicionado ainda.</div>';
+        }
         return;
+    }
+
+    // mostrar indicador de filtros ativos
+    if (temFiltrosAtivos()) {
+        const filtroInfo = document.createElement('div');
+        filtroInfo.className = 'alert alert-info mb-3';
+        filtroInfo.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fas fa-filter me-2"></i>
+                    <strong>${gastosFiltrados.length}</strong> ${gastosFiltrados.length === 1 ? 'gasto encontrado' : 'gastos encontrados'} 
+                    para os filtros aplicados.
+                </div>
+                <button class="btn btn-sm btn-outline-primary" onclick="window.limparTodosFiltros()">
+                    Limpar filtros
+                </button>
+            </div>
+        `;
+        listaGastos.appendChild(filtroInfo);
     }
 
     // cria tabela para exibir os gastos
@@ -447,7 +557,7 @@ function exibirGastos() {
     const tbody = table.querySelector('tbody');
 
     // ordena gastos por data (mais recente primeiro)
-    const gastosOrdenados = [...gastos].sort((a, b) => new Date(b.data) - new Date(a.data));
+    const gastosOrdenados = [...gastosFiltrados].sort((a, b) => new Date(b.data) - new Date(a.data));
 
     gastosOrdenados.forEach((gasto) => {
         const tr = document.createElement('tr');
@@ -473,6 +583,46 @@ function exibirGastos() {
     });
 
     listaGastos.appendChild(table);
+}
+
+// função para verificar se há filtros ativos
+function temFiltrosAtivos() {
+    return (
+        filtros.texto !== '' || 
+        filtros.dataInicio !== null || 
+        filtros.dataFim !== null || 
+        filtros.categoria !== ''
+    );
+}
+
+// função para contar quantos filtros estão ativos
+function contarFiltrosAtivos() {
+    let count = 0;
+    if (filtros.texto) count++;
+    if (filtros.dataInicio) count++;
+    if (filtros.dataFim) count++;
+    if (filtros.categoria) count++;
+    return count;
+}
+
+// função para atualizar o badge de filtros ativos
+function atualizarBadgeFiltros() {
+    const filterCount = contarFiltrosAtivos();
+    const cardHeader = document.querySelector('.filter-container .card-header');
+    
+    // Remove any existing badge
+    const existingBadge = cardHeader.querySelector('.filter-badge');
+    if (existingBadge) {
+        existingBadge.remove();
+    }
+    
+    // Add badge if there are active filters
+    if (filterCount > 0) {
+        const badge = document.createElement('span');
+        badge.className = 'filter-badge';
+        badge.textContent = filterCount;
+        cardHeader.appendChild(badge);
+    }
 }
 
 // add um novo gasto
@@ -517,6 +667,7 @@ async function adicionarGasto(evento) {
                 categorias.push(categoria);
                 salvarCategorias();
                 atualizarSelectCategorias();
+                atualizarFilterCategorias(); // Adicionar esta linha
             }
         }
 
@@ -711,6 +862,7 @@ async function salvarEdicaoGasto(evento) {
                 categorias.push(categoria);
                 salvarCategorias();
                 atualizarSelectCategorias();
+                atualizarFilterCategorias(); // Adicionar esta linha
             }
         }
 
@@ -856,6 +1008,128 @@ function alternarCampoNovaCategoria() {
     }
 }
 
+// função para configurar eventos dos filtros
+function setupFilters() {
+    // botão para mostrar/esconder filtros
+    const btnToggleFilter = document.querySelector('.btn-toggle-filter');
+    const filterCollapse = document.getElementById('filterCollapse');
+    
+    if (btnToggleFilter) {
+        btnToggleFilter.addEventListener('click', () => {
+            const isExpanded = btnToggleFilter.getAttribute('aria-expanded') === 'true';
+            btnToggleFilter.setAttribute('aria-expanded', !isExpanded);
+            btnToggleFilter.querySelector('i').classList.toggle('fa-chevron-down');
+            btnToggleFilter.querySelector('i').classList.toggle('fa-chevron-up');
+            
+            if (filterCollapse) {
+                filterCollapse.classList.toggle('show');
+            }
+        });
+    }
+    
+    // popular select de categorias com as categorias disponíveis
+    atualizarFilterCategorias();
+    
+    // botões para limpar filtros individuais
+    document.querySelectorAll('.clear-filter').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const filtro = e.target.closest('button').dataset.filter;
+            limparFiltro(filtro);
+        });
+    });
+    
+    // botão para limpar todos os filtros
+    const clearAllBtn = document.getElementById('clearAllFilters');
+    if (clearAllBtn) {
+        clearAllBtn.addEventListener('click', limparTodosFiltros);
+    }
+    
+    // botão para aplicar filtros
+    const applyFiltersBtn = document.getElementById('applyFilters');
+    if (applyFiltersBtn) {
+        applyFiltersBtn.addEventListener('click', aplicarFiltros);
+    }
+    
+    // aplicar filtros ao pressionar Enter no campo de texto
+    const filterTextInput = document.getElementById('filterText');
+    if (filterTextInput) {
+        filterTextInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                aplicarFiltros();
+            }
+        });
+    }
+}
+
+// função para limpar um filtro específico
+function limparFiltro(filtro) {
+    switch (filtro) {
+        case 'text':
+            document.getElementById('filterText').value = '';
+            filtros.texto = '';
+            break;
+        case 'startDate':
+            document.getElementById('filterStartDate').value = '';
+            filtros.dataInicio = null;
+            break;
+        case 'endDate':
+            document.getElementById('filterEndDate').value = '';
+            filtros.dataFim = null;
+            break;
+        case 'category':
+            document.getElementById('filterCategory').value = '';
+            filtros.categoria = '';
+            break;
+    }
+    
+    // Atualizar o badge de filtros
+    atualizarBadgeFiltros();
+    
+    // aplicar os filtros imediatamente ao limpar um filtro
+    aplicarFiltros();
+}
+
+// função para limpar todos os filtros
+function limparTodosFiltros() {
+    document.getElementById('filterText').value = '';
+    document.getElementById('filterStartDate').value = '';
+    document.getElementById('filterEndDate').value = '';
+    document.getElementById('filterCategory').value = '';
+    
+    filtros = {
+        texto: '',
+        dataInicio: null,
+        dataFim: null,
+        categoria: ''
+    };
+    
+    // Atualizar o badge de filtros
+    atualizarBadgeFiltros();
+    
+    // aplicar os filtros (agora limpos)
+    aplicarFiltros();
+}
+
+// função para aplicar os filtros
+function aplicarFiltros() {
+    // coletar valores dos campos de filtro
+    filtros.texto = document.getElementById('filterText').value.toLowerCase().trim();
+    
+    const startDateValue = document.getElementById('filterStartDate').value;
+    filtros.dataInicio = startDateValue ? new Date(startDateValue) : null;
+    
+    const endDateValue = document.getElementById('filterEndDate').value;
+    filtros.dataFim = endDateValue ? new Date(endDateValue) : null;
+    
+    filtros.categoria = document.getElementById('filterCategory').value;
+    
+    // Atualizar o badge de filtros
+    atualizarBadgeFiltros();
+    
+    // exibir gastos filtrados
+    exibirGastos();
+}
+
 // atualiza as informações do usuário no menu
 function atualizarDadosUsuarioNoMenu() {
     try {
@@ -903,6 +1177,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     atualizarDadosUsuarioNoMenu();
     try {
         await carregarDados();
+        
+        // configurar filtros
+        setupFilters();
+        
+        // inicializar o indicador de filtros
+        atualizarBadgeFiltros();
+        
         exibirGastos();
 
         // verifica se os elementos de nova categoria existem, caso contrário, cria
@@ -973,6 +1254,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.abrirModalEdicao = abrirModalEdicao;
         window.excluirGasto = excluirGasto;
         window.fecharModalEdicao = fecharModalEdicao;
+        window.limparTodosFiltros = limparTodosFiltros; // expor para uso no HTML
+        window.limparFiltro = limparFiltro; // expor para uso no HTML
     } catch (error) {
         console.error("Erro na inicialização:", error);
         Swal.fire({

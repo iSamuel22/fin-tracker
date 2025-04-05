@@ -46,7 +46,7 @@
                     </li>
                 </ul>
                 
-                <!-- Menu de usuário aprimorado -->
+                <!-- Inspecione esta parte para garantir que os IDs estão corretos -->
                 <div class="user-menu-container ms-auto">
                     <ul class="navbar-nav">
                         <li class="nav-item dropdown">
@@ -65,7 +65,6 @@
                                         <div class="user-email">usuario@email.com</div>
                                     </div>
                                 </li>
-                                <li><hr class="dropdown-divider-user"></li>
                                 <li><hr class="dropdown-divider-user"></li>
                                 <li>
                                     <a class="dropdown-item dropdown-item-user" href="#" id="logout-button">
@@ -174,10 +173,16 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
-    <script src="/src/controller/footer-modals.js"></script>
-
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        
+        // Tornando Firebase disponível globalmente para scripts não-modularizados
+        window.firebase = { 
+            initializeApp, 
+            getFirestore 
+        };
+    </script>
     <script type="module" src="/src/controller/dashboard.js"></script>
 </body>
 

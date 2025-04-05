@@ -175,6 +175,32 @@ function cleanupLocalStorage(userEmail) {
     localStorage.removeItem('loggedInUser');
 }
 
+// função aprimorada para garantir que uma data seja válida
+function garantirDataValida(data) {
+    if (!data) return new Date();
+
+    // se for string de data ISO, converter para Date
+    if (typeof data === 'string') {
+        const d = new Date(data);
+        if (!isNaN(d.getTime())) {
+            return d;
+        }
+    }
+
+    // se for timestamp do Firebase
+    if (data && typeof data === 'object' && data.toDate) {
+        return data.toDate();
+    }
+
+    // se já for um objeto Date válido
+    if (data instanceof Date && !isNaN(data)) {
+        return data;
+    }
+
+    // fallback para data atual
+    return new Date();
+}
+
 // array para armazenar as metas
 let metas = [];
 
@@ -182,6 +208,12 @@ let metas = [];
 let saldoMensal = 0;
 let receitasMensais = 0;
 let gastosMensais = 0;
+
+// variáveis para filtros
+let filtros = {
+    texto: '',
+    valorMaximo: null
+};
 
 // carrega metas do localStorage e Firestore
 async function carregarDados() {
@@ -207,26 +239,28 @@ async function carregarDados() {
     return true;
 }
 
-// carrega apenas do localStorage (rápido)
+// carrega metas do localStorage
 function carregarLocalStorage(userEmail) {
-    // carrega metas
-    const metasStorage = localStorage.getItem(`metas_${userEmail}`);
-    if (metasStorage) {
-        const metasData = JSON.parse(metasStorage);
-        metas = metasData.map(data => {
-            try {
-                const meta = new Meta(data.nome, data.descricao, data.valor, data.dataCriacao);
-                if (data.id) meta.id = data.id;
-                return meta;
-            } catch (erro) {
-                console.error('Erro ao carregar meta:', erro);
-                return null;
+    const metasLocalStorage = localStorage.getItem(`metas_${userEmail}`);
+    if (metasLocalStorage) {
+        metas = JSON.parse(metasLocalStorage);
+        
+        // Garantir que todas as metas tenham datas
+        const agora = new Date();
+        metas.forEach(meta => {
+            if (!meta.dataCriacao) {
+                meta.dataCriacao = agora;
             }
-        }).filter(meta => meta !== null);
+            if (!meta.ultimaAtualizacao) {
+                meta.ultimaAtualizacao = agora;
+            }
+        });
+        
+        // Salvar as metas atualizadas
+        salvarDados();
+    } else {
+        metas = [];
     }
-
-    // carrega dados financeiros do localStorage
-    carregarDadosFinanceirosLocais(userEmail);
 }
 
 // carrega os dados financeiros do localStorage
@@ -504,9 +538,56 @@ function exibirMetas() {
 
     listaMetas.innerHTML = '';
 
-    if (metas.length === 0) {
-        listaMetas.innerHTML = '<div class="alert alert-info">Nenhuma meta adicionada ainda.</div>';
+    // aplicar filtros
+    let metasFiltradas = metas;
+    
+    // filtrar por texto (nome ou descrição)
+    if (filtros.texto) {
+        metasFiltradas = metasFiltradas.filter(meta => 
+            meta.nome.toLowerCase().includes(filtros.texto) || 
+            (meta.descricao && meta.descricao.toLowerCase().includes(filtros.texto))
+        );
+    }
+    
+    // filtrar por valor máximo
+    if (filtros.valorMaximo) {
+        metasFiltradas = metasFiltradas.filter(meta => 
+            parseFloat(meta.valor) <= filtros.valorMaximo
+        );
+    }
+
+    if (metasFiltradas.length === 0) {
+        if (temFiltrosAtivos()) {
+            listaMetas.innerHTML = `
+                <div class="alert alert-info">
+                    <i class="fas fa-filter me-2"></i>
+                    Nenhuma meta encontrada para os filtros aplicados.
+                    <button class="btn btn-link p-0 ms-2" onclick="window.limparTodosFiltros()">Limpar filtros</button>
+                </div>
+            `;
+        } else {
+            listaMetas.innerHTML = '<div class="alert alert-info">Nenhuma meta adicionada ainda.</div>';
+        }
         return;
+    }
+
+    // mostrar indicador de filtros ativos
+    if (temFiltrosAtivos()) {
+        const filtroInfo = document.createElement('div');
+        filtroInfo.className = 'alert alert-info mb-3';
+        filtroInfo.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fas fa-filter me-2"></i>
+                    <strong>${metasFiltradas.length}</strong> ${metasFiltradas.length === 1 ? 'meta encontrada' : 'metas encontradas'} 
+                    para os filtros aplicados.
+                </div>
+                <button class="btn btn-sm btn-outline-primary" onclick="window.limparTodosFiltros()">
+                    Limpar filtros
+                </button>
+            </div>
+        `;
+        listaMetas.appendChild(filtroInfo);
     }
 
     // cria tabela para exibir as metas
@@ -518,7 +599,6 @@ function exibirMetas() {
                 <th>Nome</th>
                 <th>Descrição</th>
                 <th>Valor</th>
-                <th>Data</th>
                 <th>Ações</th>
             </tr>
         </thead>
@@ -528,13 +608,23 @@ function exibirMetas() {
 
     const tbody = table.querySelector('tbody');
 
-    metas.forEach((meta, index) => {
+    // ordena por valor (maior para menor)
+    const metasOrdenadas = [...metasFiltradas].sort((a, b) => parseFloat(b.valor) - parseFloat(a.valor));
+
+    metasOrdenadas.forEach((meta, index) => {
         const tr = document.createElement('tr');
+        
+        // Formatar datas para exibição
+        const dataCriacao = meta.dataCriacao ? garantirDataValida(meta.dataCriacao).toLocaleDateString() : 'Não disponível';
+        const ultimaAtualizacao = meta.ultimaAtualizacao ? garantirDataValida(meta.ultimaAtualizacao).toLocaleDateString() : 'Não disponível';
+        
+        // Adicionar tooltip com informações adicionais
+        const tooltipInfo = `Criada em: ${dataCriacao}\nÚltima atualização: ${ultimaAtualizacao}`;
+        
         tr.innerHTML = `
-            <td>${meta.nome}</td>
-            <td>${meta.descricao}</td>
-            <td>R$ ${meta.valor.toFixed(2)}</td>
-            <td>${new Date(meta.dataCriacao).toLocaleDateString()}</td>
+            <td title="${tooltipInfo}">${meta.nome}</td>
+            <td>${meta.descricao || '-'}</td>
+            <td>R$ ${parseFloat(meta.valor).toFixed(2)}</td>
             <td>
                 <button class="btn btn-sm btn-outline-primary" onclick="window.abrirModalEdicao(${index})">
                     <i class="fas fa-edit"></i> Editar
@@ -550,73 +640,71 @@ function exibirMetas() {
     listaMetas.appendChild(table);
 }
 
+// função para verificar se há filtros ativos
+function temFiltrosAtivos() {
+    return filtros.texto !== '' || filtros.valorMaximo !== null;
+}
+
 // add uma nova meta
 async function adicionarMeta(evento) {
     evento.preventDefault();
 
     try {
-        const nomeInput = document.getElementById('name');
-        const descricaoInput = document.getElementById('description');
-        const valorInput = document.getElementById('amount');
+        // Obter valores do formulário
+        const nome = document.getElementById('name').value;
+        const descricao = document.getElementById('description').value;
+        const valor = parseFloat(document.getElementById('amount').value);
 
-        // Validação básica
-        if (!nomeInput.value.trim()) {
-            throw new Error('O nome da meta é obrigatório');
-        }
+        // Validar os dados
+        if (!nome) throw new Error('Nome da meta é obrigatório.');
+        if (isNaN(valor) || valor <= 0) throw new Error('Valor da meta deve ser um número positivo.');
 
-        if (!valorInput.value || isNaN(parseFloat(valorInput.value)) || parseFloat(valorInput.value) <= 0) {
-            throw new Error('O valor da meta deve ser um número positivo');
-        }
-
-        const meta = new Meta(
-            nomeInput.value.trim(),
-            descricaoInput.value.trim(),
-            parseFloat(valorInput.value)
-        );
-
-        // Adicionar ao Firebase silenciosamente
-        const metaData = {
-            nome: meta.nome,
-            descricao: meta.descricao,
-            valor: meta.valor,
-            dataCriacao: meta.dataCriacao
+        // Criar objeto meta
+        const meta = {
+            nome: nome,
+            descricao: descricao,
+            valor: valor,
+            dataCriacao: new Date(), // Adicionando data de criação
+            ultimaAtualizacao: new Date() // Adicionando data de última atualização
         };
 
-        const novaMeta = await FirestoreService.addMeta(metaData);
-        
-        // Se bem-sucedido, atribui o ID e adiciona ao array local
-        if (novaMeta && novaMeta.id) {
-            meta.id = novaMeta.id;
+        // Salvar no Firestore
+        try {
+            const userEmail = localStorage.getItem('userEmail');
+            if (!userEmail) throw new Error('Usuário não autenticado.');
+
+            // Adicionar ao Firestore
+            const metaRef = await FirestoreService.addMeta(meta);
+            meta.id = metaRef.id; // Adicionar o ID retornado do Firestore
+            
+            // Adicionar ao array local
+            metas.push(meta);
+            
+            // Salvar no localStorage
+            salvarDados();
+
+            // Limpar o formulário
+            document.getElementById('name').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('amount').value = '';
+
+            // Exibir mensagem de sucesso
+            Swal.fire({
+                title: 'Sucesso!',
+                text: 'Meta adicionada com sucesso.',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            });
+
+            // Atualizar a exibição
+            exibirMetas();
+            calcularEstimativas();
+
+        } catch (err) {
+            console.error("Erro ao adicionar meta ao Firestore:", err);
+            throw new Error(`Erro ao salvar meta: ${err.message}`);
         }
-        
-        metas.push(meta);
-        salvarDados();
-
-        // limpar formulário
-        nomeInput.value = '';
-        descricaoInput.value = '';
-        valorInput.value = '';
-
-        exibirMetas();
-        calcularEstimativas();
-
-        // mostra mensagem de sucesso
-        const alertElement = document.createElement('div');
-        alertElement.className = 'alert alert-success alert-dismissible fade show';
-        alertElement.innerHTML = `
-            <strong>Sucesso!</strong> Meta "${meta.nome}" adicionada com sucesso.
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `;
-
-        // insere alerta após o formulário
-        const formContainer = document.querySelector('.form-container');
-        formContainer.appendChild(alertElement);
-
-        setTimeout(() => {
-            if (alertElement.parentNode) {
-                alertElement.parentNode.removeChild(alertElement);
-            }
-        }, 3000);
     } catch (erro) {
         Swal.fire({
             title: 'Erro!',
@@ -658,44 +746,54 @@ async function salvarEdicaoMeta(evento) {
     evento.preventDefault();
 
     try {
-        const meta = new Meta(
-            inputNomeEdicao.value,
-            inputDescricaoEdicao.value,
-            parseFloat(inputValorEdicao.value)
-        );
+        // obter valores do formulário
+        const nome = document.getElementById('editName').value;
+        const descricao = document.getElementById('editDescription').value;
+        const valor = parseFloat(document.getElementById('editAmount').value);
 
-        // Obter ID do Firestore da meta atual se existir
+        // validar os dados
+        if (!nome) throw new Error('Nome da meta é obrigatório.');
+        if (isNaN(valor) || valor <= 0) throw new Error('Valor da meta deve ser um número positivo.');
+
+        // atualizar o objeto meta
+        const metaAtualizada = {
+            nome: nome,
+            descricao: descricao,
+            valor: valor,
+            ultimaAtualizacao: new Date() // Atualizar a data de última atualização
+        };
+
+        // obter o ID da meta atual
         const metaAtual = metas[indiceMetaAtual];
-        if (metaAtual.id) {
-            meta.id = metaAtual.id;
+        const metaId = metaAtual.id;
         
-            // Atualizar no Firestore silenciosamente
-            const metaData = {
-                nome: meta.nome,
-                descricao: meta.descricao,
-                valor: meta.valor,
-                dataCriacao: meta.dataCriacao
-            };
+        // preservar a data de criação original
+        metaAtualizada.dataCriacao = metaAtual.dataCriacao || new Date();
 
-            await FirestoreService.updateMeta(meta.id, metaData);
-        }
+        // atualizar no Firestore
+        await FirestoreService.updateMeta(metaId, metaAtualizada);
         
-        metas[indiceMetaAtual] = meta;
+        // atualizar o objeto local
+        Object.assign(metas[indiceMetaAtual], metaAtualizada);
+        
+        // salvar no localStorage
         salvarDados();
-        fecharModalEdicao();
-        exibirMetas();
-        setTimeout(() => {
-            calcularEstimativas();
-        }, 100);
 
-        // msg de sucesso com SweetAlert
+        // exibir mensagem de sucesso
         Swal.fire({
             title: 'Sucesso!',
-            text: 'A meta foi editada com sucesso.',
+            text: 'Meta atualizada com sucesso.',
             icon: 'success',
             timer: 2000,
             showConfirmButton: false
         });
+
+        // fechar o modal
+        fecharModalEdicao();
+        
+        // atualizar a exibição
+        exibirMetas();
+        calcularEstimativas();
 
     } catch (erro) {
         Swal.fire({
@@ -797,11 +895,108 @@ function atualizarDadosUsuarioNoMenu() {
     }
 }
 
+// função para configurar eventos dos filtros
+function setupFilters() {
+    // botão para mostrar/esconder filtros
+    const btnToggleFilter = document.querySelector('.btn-toggle-filter');
+    const filterCollapse = document.getElementById('filterCollapse');
+    
+    if (btnToggleFilter) {
+        btnToggleFilter.addEventListener('click', () => {
+            const isExpanded = btnToggleFilter.getAttribute('aria-expanded') === 'true';
+            btnToggleFilter.setAttribute('aria-expanded', !isExpanded);
+            btnToggleFilter.querySelector('i').classList.toggle('fa-chevron-down');
+            btnToggleFilter.querySelector('i').classList.toggle('fa-chevron-up');
+            
+            if (filterCollapse) {
+                filterCollapse.classList.toggle('show');
+            }
+        });
+    }
+    
+    // botões para limpar filtros individuais
+    document.querySelectorAll('.clear-filter').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const filtro = e.target.closest('button').dataset.filter;
+            limparFiltro(filtro);
+        });
+    });
+    
+    // botão para limpar todos os filtros
+    const clearAllBtn = document.getElementById('clearAllFilters');
+    if (clearAllBtn) {
+        clearAllBtn.addEventListener('click', limparTodosFiltros);
+    }
+    
+    // botão para aplicar filtros
+    const applyFiltersBtn = document.getElementById('applyFilters');
+    if (applyFiltersBtn) {
+        applyFiltersBtn.addEventListener('click', aplicarFiltros);
+    }
+    
+    // aplicar filtros ao pressionar Enter no campo de texto
+    const filterTextInput = document.getElementById('filterText');
+    if (filterTextInput) {
+        filterTextInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                aplicarFiltros();
+            }
+        });
+    }
+}
+
+// função para limpar um filtro específico
+function limparFiltro(filtro) {
+    switch (filtro) {
+        case 'text':
+            document.getElementById('filterText').value = '';
+            filtros.texto = '';
+            break;
+        case 'amount':
+            document.getElementById('filterAmount').value = '';
+            filtros.valorMaximo = null;
+            break;
+    }
+    
+    // aplicar os filtros imediatamente ao limpar um filtro
+    aplicarFiltros();
+}
+
+// função para limpar todos os filtros
+function limparTodosFiltros() {
+    document.getElementById('filterText').value = '';
+    document.getElementById('filterAmount').value = '';
+    
+    filtros = {
+        texto: '',
+        valorMaximo: null
+    };
+    
+    // aplicar os filtros (agora limpos)
+    aplicarFiltros();
+}
+
+// função para aplicar os filtros
+function aplicarFiltros() {
+    // coletar valores dos campos de filtro
+    filtros.texto = document.getElementById('filterText').value.toLowerCase().trim();
+    
+    const amountValue = document.getElementById('filterAmount').value;
+    filtros.valorMaximo = amountValue ? parseFloat(amountValue) : null;
+    
+    // exibir metas filtradas
+    exibirMetas();
+}
+
 // inicialização
 document.addEventListener('DOMContentLoaded', async () => {
     setupUserAccountActions();
     atualizarDadosUsuarioNoMenu();
     await carregarDados();
+    
+    // configurar filtros
+    setupFilters();
+    
     exibirMetas();
     calcularEstimativas();
 
@@ -830,4 +1025,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.abrirModalEdicao = abrirModalEdicao;
     window.excluirMeta = excluirMeta;
     window.fecharModalEdicao = fecharModalEdicao;
+    window.limparTodosFiltros = limparTodosFiltros; // expor para uso no HTML
+    window.limparFiltro = limparFiltro; // expor para uso no HTML
 });
