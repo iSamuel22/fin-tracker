@@ -222,9 +222,18 @@ function setupProfileForm() {
                 title: 'Sucesso!',
                 text: 'Perfil atualizado com sucesso',
                 icon: 'success',
-                timer: 3000,               // Alterado para 3 segundos
-                timerProgressBar: true,    // Adicionado barra de progresso 
+                timer: 2000,
+                timerProgressBar: true,
                 showConfirmButton: false
+            }).then(() => {
+                // Verificar se há uma página para retornar
+                const returnPage = localStorage.getItem('returnPage');
+                if (returnPage && returnPage !== '/src/view/profile.html') {
+                    // Limpar o returnPage do localStorage
+                    localStorage.removeItem('returnPage');
+                    // Redirecionar para a página de origem
+                    window.location.href = returnPage;
+                }
             });
             
         } catch (error) {
@@ -246,64 +255,30 @@ function setupProfileForm() {
     });
 }
 
-// Função para configurar as ações da conta do usuário
-function setupUserAccountActions() {
-    // Configuração para logout
-    const logoutButton = document.getElementById('logout-button');
-    if (logoutButton) {
-        logoutButton.addEventListener('click', (e) => {
+// Configurar o botão de cancelar para voltar à página anterior
+function setupCancelButton() {
+    const cancelButton = document.querySelector('a.btn-secondary[href="dashboard.html"]');
+    if (cancelButton) {
+        cancelButton.addEventListener('click', function(e) {
             e.preventDefault();
-            Auth.logout();
+            const returnPage = localStorage.getItem('returnPage');
+            if (returnPage && returnPage !== '/src/view/profile.html') {
+                localStorage.removeItem('returnPage');
+                window.location.href = returnPage;
+            } else {
+                window.location.href = 'dashboard.html';
+            }
         });
-    }
-    
-    // Configuração para excluir conta
-    const deleteAccountButton = document.getElementById('delete-account-button');
-    if (deleteAccountButton) {
-        deleteAccountButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            showDeleteAccountConfirmation();
-        });
-    }
-}
-
-// Função para mostrar confirmação de exclusão de conta
-function showDeleteAccountConfirmation() {
-    Swal.fire({
-        title: 'Excluir Conta',
-        html: `
-            <p>Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.</p>
-            <p class="text-danger fw-bold">Todos os seus dados serão permanentemente excluídos:</p>
-            <ul class="text-start">
-                <li>Gastos</li>
-                <li>Receitas</li>
-                <li>Metas</li>
-            </ul>
-        `,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc3545',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: '<i class="fas fa-trash me-2"></i>Sim, excluir minha conta',
-        cancelButtonText: 'Cancelar',
-        reverseButtons: true
-    }).then(async (result) => {
-        if (result.isConfirmed) {
-            try {
-                await Auth.deleteUserAccount();
-                window.location.href = 'login.html';
-            } catch (error) {
-                Swal.fire({
-                    title: 'Erro',
-                    text: 'Não foi possível excluir sua conta. Tente novamente.',
-                    icon: 'error',
-                    timer: 3000,
-                    timerProgressBar: true,
-                    showConfirmButton: false
-                });
+        
+        // Atualizar o texto do botão se houver uma página para retornar
+        const returnPage = localStorage.getItem('returnPage');
+        if (returnPage) {
+            const pageName = returnPage.split('/').pop().replace('.html', '');
+            if (pageName) {
+                cancelButton.textContent = `Voltar para ${pageName.charAt(0).toUpperCase() + pageName.slice(1)}`;
             }
         }
-    });
+    }
 }
 
 // Inicialização
@@ -313,5 +288,11 @@ document.addEventListener('DOMContentLoaded', () => {
     setupPasswordToggle();
     setupPasswordVisibilityTogglers();
     setupProfileForm();
-    setupUserAccountActions();
+    setupCancelButton();
+    
+    // Se esta é a primeira vez que a página de perfil é carregada e não há página de retorno definida,
+    // definir a página atual como página de retorno (dashboard)
+    if (!localStorage.getItem('returnPage')) {
+        localStorage.setItem('returnPage', '/src/view/dashboard.html');
+    }
 });

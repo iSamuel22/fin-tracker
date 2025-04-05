@@ -197,6 +197,10 @@
         };
     </script>
     <script type="module" src="/src/controller/dashboard.js"></script>
+    <script type="module">
+        import { setupUserMenu } from '/src/controller/user-menu.js';
+        document.addEventListener('DOMContentLoaded', setupUserMenu);
+    </script>
 </body>
 
 </html>

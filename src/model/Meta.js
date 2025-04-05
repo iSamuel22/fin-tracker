@@ -76,11 +76,21 @@ export class Meta {
     }
 
     toJSON() {
+        // Verificar se a data é válida antes de converter
+        let dataCriacaoString;
+        try {
+            dataCriacaoString = this.#dataCriacao instanceof Date && !isNaN(this.#dataCriacao.getTime()) 
+                ? this.#dataCriacao.toISOString() 
+                : new Date().toISOString();
+        } catch (e) {
+            dataCriacaoString = new Date().toISOString();
+        }
+        
         return {
             nome: this.#nome,
             descricao: this.#descricao,
             valor: this.#valor,
-            dataCriacao: this.#dataCriacao.toISOString()
+            dataCriacao: dataCriacaoString
         };
     }
 }

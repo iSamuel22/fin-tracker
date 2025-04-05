@@ -73,10 +73,22 @@ class Auth {
         }
     }
 
-    // método para deletar a conta do usuário
-    static async deleteUserAccount() {
+    // Método para verificar senha do usuário
+    static async verifyPassword(email, password) {
         try {
-            // verifica se o usuário está autenticado
+            // Tenta fazer login com as credenciais fornecidas
+            await signInWithEmailAndPassword(auth, email, password);
+            return true;
+        } catch (error) {
+            console.error("Erro na verificação de senha:", error);
+            return false;
+        }
+    }
+
+    // método atualizado para deletar a conta do usuário
+    static async deleteUserAccount(password) {
+        try {
+            // Verifica se o usuário está autenticado
             const currentUser = auth.currentUser;
 
             if (!currentUser) {
@@ -84,9 +96,18 @@ class Auth {
                 return false;
             }
 
+            // Reautenticar o usuário antes de excluir a conta
+            const credential = EmailAuthProvider.credential(
+                currentUser.email,
+                password
+            );
+
+            // Reautenticar
+            await reauthenticateWithCredential(currentUser, credential);
+
             console.log("Deleting user from Firebase Authentication:", currentUser.uid);
 
-            // deleta o usuário do Firebase Authentication
+            // Exclui o usuário do Firebase Authentication
             await deleteUser(currentUser);
 
             return true;
@@ -101,6 +122,8 @@ class Auth {
                     confirmButtonText: 'OK'
                 });
                 this.logout();
+            } else if (error.code === 'auth/wrong-password') {
+                throw new Error('A senha informada está incorreta');
             }
 
             throw error;

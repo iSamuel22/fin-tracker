@@ -8,181 +8,47 @@ if (!Auth.isAuthenticated()) {
     window.location.href = 'login.html';
 }
 
-// menu user
-function setupUserAccountActions() {
-    console.log("Configurando ações da conta de usuário");
-
-    // Configuração existente para logout
-    const logoutButton = document.getElementById('logout-button');
-    if (logoutButton) {
-        logoutButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            console.log("Logout button clicked");
-            // Usar a função de logout direta
-            logoutUser();
-        });
-        console.log("Logout button event listener added");
-    } else {
-        console.error("Logout button not found in the DOM");
-    }
-
-    // Configuração existente para excluir conta
-    const deleteAccountButton = document.getElementById('delete-account-button');
-    if (deleteAccountButton) {
-        console.log("Delete account button found");
-        deleteAccountButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            console.log("Delete account button clicked");
-            showDeleteAccountConfirmation();
-        });
-    } else {
-        console.error("Delete account button not found in the DOM");
-    }
-}
-
-// mostra confirmação antes de excluir a conta
-function showDeleteAccountConfirmation() {
-    // cria modal de confirmação
-    const modal = document.createElement('div');
-    modal.className = 'modal fade show';
-    modal.style.display = 'block';
-    modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
-
-    modal.innerHTML = `
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title">Excluir Conta</h5>
-                    <button type="button" class="btn-close btn-close-white" id="close-delete-modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.</p>
-                    <p class="text-danger fw-bold">Todos os seus dados serão permanentemente excluídos:</p>
-                    <ul>
-                        <li>Gastos</li>
-                        <li>Receitas</li>
-                        <li>Metas</li>
-                    </ul>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" id="cancel-delete-account">Cancelar</button>
-                    <button type="button" class="btn btn-danger" id="confirm-delete-account">
-                        <i class="fas fa-trash me-2"></i>Sim, excluir minha conta
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-
-    document.body.appendChild(modal);
-    document.body.classList.add('modal-open');
-
-    // event listeners para botões do modal
-    document.getElementById('close-delete-modal').addEventListener('click', () => {
-        closeDeleteModal(modal);
-    });
-
-    document.getElementById('cancel-delete-account').addEventListener('click', () => {
-        closeDeleteModal(modal);
-    });
-
-    document.getElementById('confirm-delete-account').addEventListener('click', async () => {
-        try {
-            const confirmButton = document.getElementById('confirm-delete-account');
-            const originalText = confirmButton.innerHTML;
-            confirmButton.disabled = true;
-            confirmButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processando...';
-
-            await deleteUserAccount();
-
-            alert('Sua conta foi excluída com sucesso.');
-
-            window.location.href = 'login.html';
-        } catch (error) {
-            console.error('Erro ao excluir conta:', error);
-            alert('Ocorreu um erro ao excluir sua conta: ' + (error.message || 'Tente novamente mais tarde'));
-
-            const confirmButton = document.getElementById('confirm-delete-account');
-            confirmButton.disabled = false;
-            confirmButton.innerHTML = originalText;
-        } finally {
-            closeDeleteModal(modal);
-        }
-    });
-}
-
-// fecha modal de confirmação
-function closeDeleteModal(modal) {
-    document.body.removeChild(modal);
-    document.body.classList.remove('modal-open');
-}
-
-// exclui conta do usuário com cascata
-async function deleteUserAccount() {
-    const user = Auth.getLoggedInUser();
-    if (!user || !user.uid) {
-        throw new Error('Usuário não encontrado');
-    }
-
-    try {
-        console.log("Iniciando processo de exclusão de conta");
-
-        const userId = user.uid;
-        const userEmail = user.email;
-
-        console.log("Excluindo usuário do Firebase Authentication");
-        await Auth.deleteUserAccount();
-
-        console.log("Excluindo dados do Firestore");
-        await FirestoreService.deleteUserData(userId);
-
-        console.log("Limpando dados do localStorage");
-        cleanupLocalStorage(userEmail);
-
-        console.log("Exclusão de conta completa");
-        return true;
-    } catch (error) {
-        console.error("Erro completo na exclusão da conta:", error);
-        throw error;
-    }
-}
-
-// clear no localStorage
-function cleanupLocalStorage(userEmail) {
-    if (!userEmail) return;
-
-    const prefixes = ['gastos_', 'receitas_', 'metas_', 'configuracoes_'];
-
-    prefixes.forEach(prefix => {
-        localStorage.removeItem(`${prefix}${userEmail}`);
-    });
-
-    localStorage.removeItem('loggedInUser');
-}
-
 // função aprimorada para garantir que uma data seja válida
 function garantirDataValida(data) {
+    // Se não receber um valor, retornar a data atual
     if (!data) return new Date();
 
-    // se for string de data ISO, converter para Date
-    if (typeof data === 'string') {
-        const d = new Date(data);
-        if (!isNaN(d.getTime())) {
-            return d;
+    try {
+        // se for string de data ISO, converter para Date
+        if (typeof data === 'string') {
+            const d = new Date(data);
+            if (!isNaN(d.getTime())) {
+                return d;
+            }
         }
+
+        // se for timestamp do Firebase
+        if (data && typeof data === 'object' && data.toDate) {
+            try {
+                return data.toDate();
+            } catch (e) {
+                return new Date();
+            }
+        }
+
+        // se já for um objeto Date válido
+        if (data instanceof Date && !isNaN(data.getTime())) {
+            return data;
+        }
+
+        // Testar uma estrutura possível data.seconds do Firestore
+        if (data && typeof data === 'object' && 'seconds' in data) {
+            try {
+                return new Date(data.seconds * 1000);
+            } catch (e) {
+                return new Date();
+            }
+        }
+    } catch (e) {
+        console.warn("Erro ao processar data:", e);
     }
 
-    // se for timestamp do Firebase
-    if (data && typeof data === 'object' && data.toDate) {
-        return data.toDate();
-    }
-
-    // se já for um objeto Date válido
-    if (data instanceof Date && !isNaN(data)) {
-        return data;
-    }
-
-    // fallback para data atual
+    // fallback para data atual em caso de qualquer erro
     return new Date();
 }
 
@@ -208,6 +74,9 @@ async function carregarDados() {
         return;
     }
 
+    // Carregar dados financeiros PRIMEIRO para atualizar saldoMensal
+    carregarDadosFinanceirosLocais(user.email);
+    
     // carrega imediatamente do localStorage
     carregarLocalStorage(user.email);
     
@@ -250,12 +119,15 @@ function carregarLocalStorage(userEmail) {
 
 // carrega os dados financeiros do localStorage
 function carregarDadosFinanceirosLocais(userEmail) {
+    console.log("Carregando dados financeiros para cálculo de saldo mensal");
+    
     // carrega receitas
     const receitasStorage = localStorage.getItem(`receitas_${userEmail}`);
     if (receitasStorage) {
         try {
             const receitas = JSON.parse(receitasStorage);
             receitasMensais = calcularMediaMensal(receitas);
+            console.log(`Receitas mensais calculadas: ${receitasMensais}`);
         } catch (erro) {
             console.error('Erro ao carregar receitas:', erro);
             receitasMensais = 0;
@@ -268,6 +140,7 @@ function carregarDadosFinanceirosLocais(userEmail) {
         try {
             const gastos = JSON.parse(gastosStorage);
             gastosMensais = calcularMediaMensal(gastos);
+            console.log(`Gastos mensais calculados: ${gastosMensais}`);
         } catch (erro) {
             console.error('Erro ao carregar gastos:', erro);
             gastosMensais = 0;
@@ -276,6 +149,9 @@ function carregarDadosFinanceirosLocais(userEmail) {
 
     // calcula saldo mensal
     saldoMensal = receitasMensais - gastosMensais;
+    console.log(`Saldo mensal calculado: ${saldoMensal}`);
+    
+    // Atualiza o display imediatamente
     atualizarSaldoMensal();
 }
 
@@ -363,6 +239,9 @@ function atualizarSaldoMensal() {
 
 // calcula e exibir estimativas para as metas
 function calcularEstimativas() {
+    // Garantir que o saldo mensal esteja atualizado visualmente
+    atualizarSaldoMensal();
+    
     const container = document.getElementById('estimativas-container');
     const placeholder = document.getElementById('estimativas-placeholder');
 
@@ -498,19 +377,46 @@ function salvarDados() {
     
     // Incluir os IDs do Firestore ao salvar no localStorage
     const metasData = metas.map(meta => {
-        const metaObj = {
-            nome: meta.nome,
-            descricao: meta.descricao,
-            valor: meta.valor,
-            dataCriacao: meta.dataCriacao
-        };
-        
-        // adiciona ID se existir (para sincronização com Firestore)
-        if (meta.id) {
-            metaObj.id = meta.id;
+        try {
+            const metaObj = {
+                nome: meta.nome,
+                descricao: meta.descricao,
+                valor: meta.valor
+            };
+            
+            // Tratamento seguro para datas
+            try {
+                const dataCriacao = garantirDataValida(meta.dataCriacao);
+                metaObj.dataCriacao = dataCriacao.toISOString();
+            } catch (e) {
+                metaObj.dataCriacao = new Date().toISOString();
+            }
+            
+            try {
+                const ultimaAtualizacao = garantirDataValida(meta.ultimaAtualizacao);
+                metaObj.ultimaAtualizacao = ultimaAtualizacao.toISOString();
+            } catch (e) {
+                metaObj.ultimaAtualizacao = new Date().toISOString();
+            }
+            
+            // adiciona ID se existir (para sincronização com Firestore)
+            if (meta.id) {
+                metaObj.id = meta.id;
+            }
+            
+            return metaObj;
+        } catch (e) {
+            console.error("Erro ao processar meta para salvar:", e);
+            // Retorna uma meta minimamente válida
+            return {
+                nome: meta.nome || 'Meta sem nome',
+                descricao: meta.descricao || '',
+                valor: parseFloat(meta.valor) || 0,
+                dataCriacao: new Date().toISOString(),
+                ultimaAtualizacao: new Date().toISOString(),
+                id: meta.id
+            };
         }
-        
-        return metaObj;
     });
     
     localStorage.setItem(`metas_${user.email}`, JSON.stringify(metasData));
@@ -635,6 +541,11 @@ async function adicionarMeta(evento) {
     evento.preventDefault();
 
     try {
+        const user = Auth.getLoggedInUser();
+        if (!user || !user.email) {
+            throw new Error('Você precisa estar logado para adicionar metas.');
+        }
+
         // Obter valores do formulário
         const nome = document.getElementById('name').value;
         const descricao = document.getElementById('description').value;
@@ -655,12 +566,12 @@ async function adicionarMeta(evento) {
 
         // Salvar no Firestore
         try {
-            const userEmail = localStorage.getItem('userEmail');
-            if (!userEmail) throw new Error('Usuário não autenticado.');
+            const user = Auth.getLoggedInUser();
+            if (!user || !user.email) throw new Error('Usuário não autenticado.');
 
             // Adicionar ao Firestore
             const metaRef = await FirestoreService.addMeta(meta);
-            meta.id = metaRef.id; // Adicionar o ID retornado do Firestore
+            meta.id = metaRef.id;
             
             // Adicionar ao array local
             metas.push(meta);
@@ -740,26 +651,36 @@ async function salvarEdicaoMeta(evento) {
         if (!nome) throw new Error('Nome da meta é obrigatório.');
         if (isNaN(valor) || valor <= 0) throw new Error('Valor da meta deve ser um número positivo.');
 
-        // atualizar o objeto meta
-        const metaAtualizada = {
-            nome: nome,
-            descricao: descricao,
-            valor: valor,
-            ultimaAtualizacao: new Date() // Atualizar a data de última atualização
-        };
-
         // obter o ID da meta atual
         const metaAtual = metas[indiceMetaAtual];
         const metaId = metaAtual.id;
         
-        // preservar a data de criação original
-        metaAtualizada.dataCriacao = metaAtual.dataCriacao || new Date();
+        // preservar a data de criação original ou usar data atual se inválida
+        const dataCriacaoOriginal = metaAtual.dataCriacao;
+        const dataCriacao = garantirDataValida(dataCriacaoOriginal);
+        const ultimaAtualizacao = new Date();
 
-        // atualizar no Firestore
-        await FirestoreService.updateMeta(metaId, metaAtualizada);
+        // Criar um novo objeto de meta em vez de tentar modificar o existente
+        const metaAtualizada = {
+            id: metaId,
+            nome: nome,
+            descricao: descricao,
+            valor: valor,
+            dataCriacao: dataCriacao,
+            ultimaAtualizacao: ultimaAtualizacao
+        };
+
+        // atualizar no Firestore - Enviar objeto simples sem métodos de Date
+        await FirestoreService.updateMeta(metaId, {
+            nome: nome,
+            descricao: descricao,
+            valor: valor,
+            dataCriacao: dataCriacao.toISOString(),
+            ultimaAtualizacao: ultimaAtualizacao.toISOString()
+        });
         
-        // atualizar o objeto local
-        Object.assign(metas[indiceMetaAtual], metaAtualizada);
+        // Substituir o objeto antigo pelo novo
+        metas[indiceMetaAtual] = metaAtualizada;
         
         // salvar no localStorage
         salvarDados();
@@ -781,6 +702,7 @@ async function salvarEdicaoMeta(evento) {
         calcularEstimativas();
 
     } catch (erro) {
+        console.error("Erro ao salvar edição:", erro);
         Swal.fire({
             title: 'Erro!',
             text: erro.message,
@@ -837,47 +759,6 @@ async function excluirMeta(indice) {
             }
         }
     });
-}
-
-// Função para atualizar as informações do usuário no menu
-function atualizarDadosUsuarioNoMenu() {
-    try {
-        const user = Auth.getLoggedInUser();
-
-        if (!user) {
-            console.warn("Usuário não encontrado no localStorage");
-            return;
-        }
-
-        // Atualiza o nome do usuário na barra de navegação
-        const userMenuName = document.querySelector('#userMenu span.d-none.d-md-inline');
-        if (userMenuName) {
-            userMenuName.textContent = user.name || 'Usuário';
-        }
-
-        // Atualiza avatar com as iniciais do usuário real
-        const userInitials = user.name ? encodeURIComponent(user.name) : 'Usuario';
-        const avatarUrls = document.querySelectorAll('.user-avatar');
-        avatarUrls.forEach(avatar => {
-            avatar.src = `https://ui-avatars.com/api/?name=${userInitials}&background=4e73df&color=fff&rounded=true${avatar.width >= 64 ? '&size=64' : ''}`;
-            avatar.alt = `Avatar de ${user.name || 'Usuário'}`;
-        });
-
-        // Atualiza informações no dropdown
-        const userNameElement = document.querySelector('.user-info .user-name');
-        if (userNameElement) {
-            userNameElement.textContent = user.name || 'Usuário';
-        }
-
-        const userEmailElement = document.querySelector('.user-info .user-email');
-        if (userEmailElement) {
-            userEmailElement.textContent = user.email || 'usuario@email.com';
-        }
-
-        console.log("Informações do usuário atualizadas no menu");
-    } catch (error) {
-        console.error("Erro ao atualizar informações do usuário:", error);
-    }
 }
 
 // função para configurar eventos dos filtros
@@ -973,14 +854,38 @@ function aplicarFiltros() {
     exibirMetas();
 }
 
+// Adicionar estas funções para atualizações automáticas
+function setupAutoUpdates() {
+    // Escutar eventos de atualização de gastos
+    document.addEventListener('dadosGastosAtualizados', () => {
+        console.log("Atualizando metas devido a mudanças em gastos");
+        const user = Auth.getLoggedInUser();
+        if (user && user.email) {
+            carregarDadosFinanceirosLocais(user.email);
+            calcularEstimativas();
+        }
+    });
+    
+    // Escutar eventos de atualização de receitas
+    document.addEventListener('dadosReceitasAtualizados', () => {
+        console.log("Atualizando metas devido a mudanças em receitas");
+        const user = Auth.getLoggedInUser();
+        if (user && user.email) {
+            carregarDadosFinanceirosLocais(user.email);
+            calcularEstimativas();
+        }
+    });
+}
+
 // inicialização
 document.addEventListener('DOMContentLoaded', async () => {
-    setupUserAccountActions();
-    atualizarDadosUsuarioNoMenu();
     await carregarDados();
     
     // configurar filtros
     setupFilters();
+    
+    // configurar atualizações automáticas
+    setupAutoUpdates();
     
     exibirMetas();
     calcularEstimativas();
