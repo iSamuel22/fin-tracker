@@ -258,25 +258,25 @@ function atualizarSelectCategorias() {
 function atualizarFilterCategorias() {
     const filterCategorySelect = document.getElementById('filterCategory');
     if (!filterCategorySelect) return;
-    
+
     // preservar valor selecionado
     const valorAtual = filterCategorySelect.value;
-    
+
     // limpar opções existentes, exceto a primeira (Todas)
     while (filterCategorySelect.options.length > 1) {
         filterCategorySelect.remove(1);
     }
-    
+
     // adicionar categorias ao select de filtro (incluindo 'Outros')
     const todasCategorias = [...new Set([...categorias, 'Outros'])];
-    
+
     todasCategorias.forEach(categoria => {
         const option = document.createElement('option');
         option.value = categoria;
         option.textContent = categoria;
         filterCategorySelect.appendChild(option);
     });
-    
+
     // restaurar valor anterior
     if (valorAtual && filterCategorySelect.querySelector(`option[value="${valorAtual}"]`)) {
         filterCategorySelect.value = valorAtual;
@@ -296,15 +296,15 @@ function exibirGastos() {
 
     // aplicar filtros
     let gastosFiltrados = gastos;
-    
+
     // filtrar por texto (descrição)
     if (filtros.texto) {
         const termoFiltro = filtros.texto.toLowerCase().trim();
-        gastosFiltrados = gastosFiltrados.filter(gasto => 
+        gastosFiltrados = gastosFiltrados.filter(gasto =>
             gasto.descricao.toLowerCase().includes(termoFiltro)
         );
     }
-    
+
     // filtrar por data de início - usando normalização da data para comparação
     if (filtros.dataInicio) {
         const dataInicioNormalizada = normalizarDataParaComparacao(filtros.dataInicio);
@@ -313,7 +313,7 @@ function exibirGastos() {
             return dataGastoNormalizada >= dataInicioNormalizada;
         });
     }
-    
+
     // filtrar por data de fim - usando normalização da data para comparação
     if (filtros.dataFim) {
         const dataFimNormalizada = normalizarDataParaComparacao(filtros.dataFim);
@@ -323,10 +323,10 @@ function exibirGastos() {
             return dataGastoNormalizada <= dataFimNormalizada;
         });
     }
-    
+
     // filtrar por categoria
     if (filtros.categoria) {
-        gastosFiltrados = gastosFiltrados.filter(gasto => 
+        gastosFiltrados = gastosFiltrados.filter(gasto =>
             gasto.categoria === filtros.categoria
         );
     }
@@ -416,9 +416,9 @@ function exibirGastos() {
 // função para verificar se há filtros ativos
 function temFiltrosAtivos() {
     return (
-        filtros.texto !== '' || 
-        filtros.dataInicio !== null || 
-        filtros.dataFim !== null || 
+        filtros.texto !== '' ||
+        filtros.dataInicio !== null ||
+        filtros.dataFim !== null ||
         filtros.categoria !== ''
     );
 }
@@ -437,13 +437,13 @@ function contarFiltrosAtivos() {
 function atualizarBadgeFiltros() {
     const filterCount = contarFiltrosAtivos();
     const cardHeader = document.querySelector('.filter-container .card-header');
-    
+
     // Remove any existing badge
     const existingBadge = cardHeader.querySelector('.filter-badge');
     if (existingBadge) {
         existingBadge.remove();
     }
-    
+
     // Add badge if there are active filters
     if (filterCount > 0) {
         const badge = document.createElement('span');
@@ -842,11 +842,11 @@ function setupFilters() {
     const btnToggleFilter = document.querySelector('.btn-toggle-filter');
     const filterCardHeader = document.querySelector('.filter-container .card-header');
     const filterCollapse = document.getElementById('filterCollapse');
-    
+
     const bsCollapse = new bootstrap.Collapse(filterCollapse, {
         toggle: false
     });
-    
+
     if (filterCardHeader) {
         filterCardHeader.style.cursor = 'pointer';
         filterCardHeader.addEventListener('click', (e) => {
@@ -855,7 +855,7 @@ function setupFilters() {
                 return;
             }
             bsCollapse.toggle();
-            
+
             // Atualizar o ícone da seta
             const icon = filterCardHeader.querySelector('.btn-toggle-filter i');
             if (icon) {
@@ -864,12 +864,12 @@ function setupFilters() {
             }
         });
     }
-    
+
     if (btnToggleFilter) {
         btnToggleFilter.addEventListener('click', (e) => {
             e.stopPropagation(); // Impedir propagação para o card-header
             bsCollapse.toggle();
-            
+
             // Atualizar o ícone da seta
             const icon = btnToggleFilter.querySelector('i');
             if (icon) {
@@ -878,10 +878,10 @@ function setupFilters() {
             }
         });
     }
-    
+
     // popular select de categorias com as categorias disponíveis
     atualizarFilterCategorias();
-    
+
     // botões para limpar filtros individuais
     document.querySelectorAll('.clear-filter').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -889,19 +889,19 @@ function setupFilters() {
             limparFiltro(filtro);
         });
     });
-    
+
     // botão para limpar todos os filtros
     const clearAllBtn = document.getElementById('clearAllFilters');
     if (clearAllBtn) {
         clearAllBtn.addEventListener('click', limparTodosFiltros);
     }
-    
+
     // botão para aplicar filtros
     const applyFiltersBtn = document.getElementById('applyFilters');
     if (applyFiltersBtn) {
         applyFiltersBtn.addEventListener('click', aplicarFiltros);
     }
-    
+
     // aplicar filtros ao pressionar Enter no campo de texto
     const filterTextInput = document.getElementById('filterText');
     if (filterTextInput) {
@@ -933,10 +933,10 @@ function limparFiltro(filtro) {
             filtros.categoria = '';
             break;
     }
-    
+
     // Atualizar o badge de filtros
     atualizarBadgeFiltros();
-    
+
     // aplicar os filtros imediatamente ao limpar um filtro
     aplicarFiltros();
 }
@@ -947,17 +947,17 @@ function limparTodosFiltros() {
     document.getElementById('filterStartDate').value = '';
     document.getElementById('filterEndDate').value = '';
     document.getElementById('filterCategory').value = '';
-    
+
     filtros = {
         texto: '',
         dataInicio: null,
         dataFim: null,
         categoria: ''
     };
-    
+
     // Atualizar o badge de filtros
     atualizarBadgeFiltros();
-    
+
     // aplicar os filtros (agora limpos)
     aplicarFiltros();
 }
@@ -966,34 +966,107 @@ function limparTodosFiltros() {
 function aplicarFiltros() {
     // coletar valores dos campos de filtro
     filtros.texto = document.getElementById('filterText').value.toLowerCase().trim();
-    
+
     const startDateValue = document.getElementById('filterStartDate').value;
     filtros.dataInicio = startDateValue ? new Date(startDateValue) : null;
-    
+
     const endDateValue = document.getElementById('filterEndDate').value;
     filtros.dataFim = endDateValue ? new Date(endDateValue) : null;
-    
+
     filtros.categoria = document.getElementById('filterCategory').value;
-    
+
     // Atualizar o badge de filtros
     atualizarBadgeFiltros();
-    
+
     // exibir gastos filtrados
     exibirGastos();
 }
+
+// Função para converter inputs de data padrão para inputs personalizados com melhor comportamento
+function melhorarInputsData() {
+    // Selecionar todos os inputs de data dos formulários principais (não os do filtro)
+    const dateInputs = document.querySelectorAll('#expenseForm input[type="date"], #editExpenseForm input[type="date"]');
+
+    dateInputs.forEach(input => {
+        // Preservar o ID, classes e outros atributos importantes
+        const id = input.id;
+        const name = input.name || '';
+        const required = input.required;
+        const value = input.value;
+        const parentElement = input.parentElement;
+
+        // Criar container para o novo input
+        const inputGroup = document.createElement('div');
+        inputGroup.className = 'input-group date-input-group';
+
+        // Criar o ícone
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'input-group-text';
+        iconSpan.innerHTML = '<i class="fas fa-calendar-alt fa-lg"></i>';
+
+        // Criar o novo input com as mesmas propriedades
+        const newInput = document.createElement('input');
+        newInput.type = 'date';
+        newInput.id = id;
+        newInput.name = name;
+        newInput.className = 'form-control';
+        newInput.required = required;
+        if (value) newInput.value = value;
+
+        // Adicionar comportamento específico para controlar melhor o calendário
+        newInput.addEventListener('click', function (e) {
+            // Evitando que o clique se propague para o documento
+            e.stopPropagation();
+        });
+
+        newInput.addEventListener('blur', function () {
+            // Usar setTimeout para garantir que o blur funcione
+            setTimeout(() => {
+                this.blur();
+            }, 100);
+        });
+
+        // Construir a estrutura
+        inputGroup.appendChild(iconSpan);
+        inputGroup.appendChild(newInput);
+
+        // Substituir o input original pelo grupo personalizado
+        parentElement.replaceChild(inputGroup, input);
+    });
+
+    // Adicionar tratamento global para fechar calendários ao clicar fora
+    document.addEventListener('click', function (e) {
+        // Todos os elementos relacionados ao calendário que devem ser ignorados
+        const isCalendarElement = e.target.closest('.date-input-group') ||
+            e.target.matches('.date-input-group') ||
+            e.target.closest('.calendar') ||
+            e.target.matches('input[type="date"]');
+
+        if (!isCalendarElement) {
+            // Forçar todos os inputs de data a perderem o foco
+            document.querySelectorAll('input[type="date"]').forEach(input => {
+                input.blur();
+            });
+        }
+    }, true); // Use capture phase para garantir que seja executado primeiro
+}
+
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', async () => {
 
     try {
         await carregarDados();
-        
+
         // configurar filtros
         setupFilters();
-        
+
+        // melhorar inputs de data
+        melhorarInputsData();
+
         // inicializar o indicador de filtros
         atualizarBadgeFiltros();
-        
+
         exibirGastos();
 
         // verifica se os elementos de nova categoria existem, caso contrário, cria

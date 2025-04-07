@@ -1033,17 +1033,17 @@ document.addEventListener('DOMContentLoaded', function () {
                                                     </thead>
                                                     <tbody>
                                                         <tr>
-                                                            <td>15/07/2023</td>
+                                                            <td>09/04/2025</td>
                                                             <td>Salário</td>
                                                             <td><span class="text-success">R$ 3.500,00</span></td>
                                                         </tr>
                                                         <tr>
-                                                            <td>10/07/2023</td>
+                                                            <td>09/04/2025</td>
                                                             <td>Aluguel</td>
                                                             <td><span class="text-danger">R$ 1.200,00</span></td>
                                                         </tr>
                                                         <tr>
-                                                            <td>05/07/2023</td>
+                                                            <td>09/04/2025</td>
                                                             <td>Mercado</td>
                                                             <td><span class="text-danger">R$ 320,50</span></td>
                                                         </tr>
