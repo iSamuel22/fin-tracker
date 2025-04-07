@@ -1185,6 +1185,13 @@ footer a:hover {
     }
 }
 
+/* metas no dashboard */
+
+#metas-container {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
 /* Accessibility Improvements */
 .dropdown-item-user:focus {
     outline: 2px solid #4e73df;
@@ -1358,4 +1365,24 @@ footer a:hover {
     align-items: center;
     z-index: 9999;
     font-weight: bold;
+}
+
+/* força da senha */
+
+.password-strength {
+    margin-top: 8px;
+}
+
+.password-strength .progress {
+    height: 5px;
+    border-radius: 2px;
+}
+
+.password-strength-label {
+    font-size: 12px;
+    transition: color 0.3s;
+}
+
+.password-requirements {
+    font-size: 12px;
 }
