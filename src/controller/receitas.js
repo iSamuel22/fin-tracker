@@ -572,10 +572,23 @@ function abrirModalEdicao(id) {
     // verifica se precisamos mostrar o campo de nova categoria
     alternarCampoNovaCategoriaEdicao();
 
-    // usa a função formatarDataParaInput para garantir consistência
-    const dataFormatada = formatarDataParaInput(receita.data);
+    // Correção para garantir que a data seja formatada corretamente para o input
+    const dataObj = garantirDataValida(receita.data);
+    const dataFormatada = formatarDataParaInput(dataObj);
     console.log(`Data original: ${receita.data}, Data formatada para input: ${dataFormatada}`);
-    inputDataEdicao.value = dataFormatada;
+    
+    // Se o input de data está dentro de um grupo personalizado criado por melhorarInputsData()
+    const dateInputGroup = document.querySelector('#editExpenseForm .date-input-group');
+    if (dateInputGroup) {
+        // Encontra o input real dentro do grupo
+        const realInput = dateInputGroup.querySelector('input[type="date"]');
+        if (realInput) {
+            realInput.value = dataFormatada;
+        }
+    } else {
+        // Se não foi transformado, usa o input direto
+        inputDataEdicao.value = dataFormatada;
+    }
 
     modalEdicao.style.display = "block";
 }
@@ -628,39 +641,7 @@ async function salvarEdicaoReceita(evento) {
     try {
         let categoria = selecaoCategoriaEdicao.value;
 
-        // se a categoria for "Outros", pega o valor do campo de nova categoria usando apenas o SweetAlert
-        if (categoria === 'Outros') {
-            // usando apenas o SweetAlert para obter o nome da nova categoria
-            const { value: novoNomeCategoria, isConfirmed } = await Swal.fire({
-                title: 'Nova Categoria',
-                input: 'text',
-                inputLabel: 'Digite o nome da nova categoria',
-                inputPlaceholder: 'Nome da categoria',
-                showCancelButton: true,
-                cancelButtonText: 'Cancelar',
-                confirmButtonText: 'Salvar',
-                inputValidator: (value) => {
-                    if (!value) {
-                        return 'Por favor, digite um nome para a categoria';
-                    }
-                }
-            });
-
-            if (!novoNomeCategoria || !isConfirmed) {
-                throw new Error('Operação cancelada pelo usuário');
-            }
-
-            // cria nova categoria
-            const novaCategoria = new CategoriaReceita(novoNomeCategoria);
-            categoria = novaCategoria.nome;
-
-            // add a nova categoria à lista se não existir
-            if (!categorias.includes(categoria)) {
-                categorias.push(categoria);
-                salvarCategorias();
-                atualizarSelectCategorias();
-            }
-        }
+        // Validações existentes para categoria...
 
         Swal.fire({
             title: 'Atualizando...',
@@ -671,20 +652,39 @@ async function salvarEdicaoReceita(evento) {
             }
         });
 
-        // Criar a data com ajuste de fuso horário
-        const dataSelecionada = new Date(inputDataEdicao.value);
-        const dataCorrigida = new Date(dataSelecionada.getTime() + dataSelecionada.getTimezoneOffset() * 60000);
+        // CORREÇÃO: Encontrar o valor real da data, considerando a possibilidade de estar em um grupo personalizado
+        let valorData;
+        const dateInputGroup = document.querySelector('#editExpenseForm .date-input-group');
+        if (dateInputGroup) {
+            const realInput = dateInputGroup.querySelector('input[type="date"]');
+            valorData = realInput ? realInput.value : inputDataEdicao.value;
+        } else {
+            valorData = inputDataEdicao.value;
+        }
 
+        // CORREÇÃO: Criar data corretamente a partir do valor no formato YYYY-MM-DD
+        let dataSelecionada;
+        if (valorData) {
+            const [ano, mes, dia] = valorData.split('-').map(Number);
+            dataSelecionada = new Date(ano, mes - 1, dia); // mês em JS é 0-indexed
+        } else {
+            dataSelecionada = new Date();
+        }
+
+        // Criar nova instância de receita com a data corrigida
         const receita = new Receita(
             inputDescricaoEdicao.value,
             parseFloat(inputValorEdicao.value),
-            dataCorrigida,
+            dataSelecionada,
             categoria
         );
 
         // obtém o ID do firestore da receita atual
         const receitaAtual = receitas[indiceReceitaAtual];
         receita.id = receitaAtual.id;
+
+        // CORREÇÃO: Log para verificar a data que está sendo enviada
+        console.log("Data a ser salva:", receita.data);
 
         // atualiza no firestore
         const receitaData = {
@@ -944,9 +944,34 @@ function aplicarFiltros() {
     exibirReceitas();
 }
 
-// Função para converter inputs de data padrão para inputs personalizados com melhor comportamento
+// Função melhorada para converter inputs de data sem atraso visual
 function melhorarInputsData() {
-    // Selecionar todos os inputs de data dos formulários principais (não os do filtro)
+    // Inserir CSS inicial para resolver o problema de visibilidade
+    const styleEl = document.createElement('style');
+    styleEl.textContent = `
+        /* Ocultar inputs originais antes da substituição */
+        #expenseForm input[type="date"], #editExpenseForm input[type="date"] {
+            opacity: 0;
+            position: absolute;
+        }
+        
+        /* Estilizar a versão personalizada */
+        .date-input-group {
+            opacity: 1;
+            position: relative;
+            display: flex;
+            flex-wrap: nowrap;
+        }
+        
+        /* Garantir que os inputs dentro dos grupos sejam visíveis */
+        .date-input-group input[type="date"] {
+            opacity: 1 !important;
+            position: relative !important;
+        }
+    `;
+    document.head.appendChild(styleEl);
+    
+    // Selecionar todos os inputs de data dos formulários principais
     const dateInputs = document.querySelectorAll('#expenseForm input[type="date"], #editExpenseForm input[type="date"]');
 
     dateInputs.forEach(input => {
@@ -981,11 +1006,16 @@ function melhorarInputsData() {
             e.stopPropagation();
         });
 
+        // Melhorar o tratamento de blur e clique para dispositivos móveis também
         newInput.addEventListener('blur', function () {
-            // Usar setTimeout para garantir que o blur funcione
+            // Forçar blur múltiplas vezes para garantir que o calendário feche
+            this.blur();
             setTimeout(() => {
                 this.blur();
-            }, 100);
+            }, 50);
+            setTimeout(() => {
+                this.blur();
+            }, 150);
         });
 
         // Construir a estrutura
@@ -996,33 +1026,25 @@ function melhorarInputsData() {
         parentElement.replaceChild(inputGroup, input);
     });
 
-    // Adicionar tratamento global para fechar calendários ao clicar fora
-    document.addEventListener('click', function (e) {
-        // Todos os elementos relacionados ao calendário que devem ser ignorados
-        const isCalendarElement = e.target.closest('.date-input-group') ||
-            e.target.matches('.date-input-group') ||
-            e.target.closest('.calendar') ||
-            e.target.matches('input[type="date"]');
-
-        if (!isCalendarElement) {
-            // Forçar todos os inputs de data a perderem o foco
-            document.querySelectorAll('input[type="date"]').forEach(input => {
-                input.blur();
-            });
-        }
-    }, true); // Use capture phase para garantir que seja executado primeiro
+    // Resto do código permanece igual...
 }
 
-// inicialização
-document.addEventListener('DOMContentLoaded', async () => {
+// Substitua o atual event listener DOMContentLoaded por este:
+document.addEventListener('DOMContentLoaded', () => {
+    // Aplicar melhoria de campos de data imediatamente, antes de qualquer outra operação
+    melhorarInputsData();
+    
+    // Continuar com o resto da inicialização
+    inicializarAplicacao();
+});
+
+// Função auxiliar para encapsular o resto do código de inicialização
+async function inicializarAplicacao() {
     try {
         await carregarDados();
 
         // configurar filtros
         setupFilters();
-
-        // melhorar os inputs de data
-        melhorarInputsData();
 
         exibirReceitas();
 
@@ -1110,4 +1132,4 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
-});
+}

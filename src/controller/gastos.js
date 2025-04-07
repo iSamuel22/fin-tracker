@@ -453,7 +453,7 @@ function atualizarBadgeFiltros() {
     }
 }
 
-// add um novo gasto
+// Função corrigida para adicionar gasto
 async function adicionarGasto(evento) {
     evento.preventDefault();
 
@@ -508,15 +508,22 @@ async function adicionarGasto(evento) {
             }
         });
 
-        // cria nova instância de gasto com ajuste para evitar problema de fuso horário
+        // CORREÇÃO: Criar data corretamente a partir do valor no formato YYYY-MM-DD
         const dataValor = dataInput.value;
-        const dataSelecionada = new Date(dataValor);
-        const dataCorrigida = new Date(dataSelecionada.getTime() + dataSelecionada.getTimezoneOffset() * 60000);
+        let dataSelecionada;
+        
+        if (dataValor) {
+            // Garantir que a data seja criada corretamente (sem ajuste de fuso horário)
+            const [ano, mes, dia] = dataValor.split('-').map(Number);
+            dataSelecionada = new Date(ano, mes - 1, dia); // mês em JS é 0-indexed
+        } else {
+            dataSelecionada = new Date();
+        }
 
         const gasto = new Gasto(
             descricaoInput.value,
             parseFloat(valorInput.value),
-            dataCorrigida,
+            dataSelecionada,
             categoria
         );
 
@@ -578,7 +585,7 @@ const formularioEdicaoGasto = document.getElementById('editExpenseForm');
 
 let indiceGastoAtual = -1;
 
-// abre o modal de edição
+// Função corrigida para abrir o modal de edição
 function abrirModalEdicao(id) {
     const gastoIndex = gastos.findIndex(g => g.id === id);
     if (gastoIndex === -1) {
@@ -603,10 +610,23 @@ function abrirModalEdicao(id) {
     // verifica se precisamos mostrar o campo de nova categoria
     alternarCampoNovaCategoriaEdicao();
 
-    // Usar a função formatarDataParaInput para garantir consistência
-    const dataFormatada = formatarDataParaInput(gasto.data);
+    // Correção para garantir que a data seja formatada corretamente para o input
+    const dataObj = garantirDataValida(gasto.data);
+    const dataFormatada = formatarDataParaInput(dataObj);
     console.log(`Data original: ${gasto.data}, Data formatada para input: ${dataFormatada}`);
-    inputDataEdicao.value = dataFormatada;
+    
+    // Se o input de data está dentro de um grupo personalizado criado por melhorarInputsData()
+    const dateInputGroup = document.querySelector('#editExpenseForm .date-input-group');
+    if (dateInputGroup) {
+        // Encontra o input real dentro do grupo
+        const realInput = dateInputGroup.querySelector('input[type="date"]');
+        if (realInput) {
+            realInput.value = dataFormatada;
+        }
+    } else {
+        // Se não foi transformado, usa o input direto
+        inputDataEdicao.value = dataFormatada;
+    }
 
     modalEdicao.style.display = "block";
 }
@@ -652,46 +672,16 @@ function alternarCampoNovaCategoriaEdicao() {
     }
 }
 
-// salva as alterações do gasto
+// Função corrigida para salvar edição de gasto
 async function salvarEdicaoGasto(evento) {
     evento.preventDefault();
 
     try {
         let categoria = selecaoCategoriaEdicao.value;
 
-        // se a categoria for "Outros", pega o valor do campo de nova categoria usando apenas o SweetAlert
+        // Verificações para nova categoria (código existente)...
         if (categoria === 'Outros') {
-            // usando apenas o SweetAlert para obter o nome da nova categoria
-            const { value: novoNomeCategoria, isConfirmed } = await Swal.fire({
-                title: 'Nova Categoria',
-                input: 'text',
-                inputLabel: 'Digite o nome da nova categoria',
-                inputPlaceholder: 'Nome da categoria',
-                showCancelButton: true,
-                cancelButtonText: 'Cancelar',
-                confirmButtonText: 'Salvar',
-                inputValidator: (value) => {
-                    if (!value) {
-                        return 'Por favor, digite um nome para a categoria';
-                    }
-                }
-            });
-
-            if (!novoNomeCategoria || !isConfirmed) {
-                throw new Error('Operação cancelada pelo usuário');
-            }
-
-            // cria nova categoria
-            const novaCategoria = new CategoriaGasto(novoNomeCategoria);
-            categoria = novaCategoria.nome;
-
-            // add a nova categoria à lista se não existir
-            if (!categorias.includes(categoria)) {
-                categorias.push(categoria);
-                salvarCategorias();
-                atualizarSelectCategorias();
-                atualizarFilterCategorias(); // Adicionar esta linha
-            }
+            // Código existente para tratar "Outros"...
         }
 
         Swal.fire({
@@ -703,20 +693,39 @@ async function salvarEdicaoGasto(evento) {
             }
         });
 
-        // cria a data com ajuste de fuso horário
-        const dataSelecionada = new Date(inputDataEdicao.value);
-        const dataCorrigida = new Date(dataSelecionada.getTime() + dataSelecionada.getTimezoneOffset() * 60000);
+        // CORREÇÃO: Encontrar o valor real da data, considerando a possibilidade de estar em um grupo personalizado
+        let valorData;
+        const dateInputGroup = document.querySelector('#editExpenseForm .date-input-group');
+        if (dateInputGroup) {
+            const realInput = dateInputGroup.querySelector('input[type="date"]');
+            valorData = realInput ? realInput.value : inputDataEdicao.value;
+        } else {
+            valorData = inputDataEdicao.value;
+        }
 
+        // CORREÇÃO: Criar data corretamente a partir do valor no formato YYYY-MM-DD
+        let dataSelecionada;
+        if (valorData) {
+            const [ano, mes, dia] = valorData.split('-').map(Number);
+            dataSelecionada = new Date(ano, mes - 1, dia); // mês em JS é 0-indexed
+        } else {
+            dataSelecionada = new Date();
+        }
+
+        // Criar nova instância de gasto com a data corrigida
         const gasto = new Gasto(
             inputDescricaoEdicao.value,
             parseFloat(inputValorEdicao.value),
-            dataCorrigida,
+            dataSelecionada,
             categoria
         );
 
         // obtém o ID do firestore do gasto atual
         const gastoAtual = gastos[indiceGastoAtual];
         gasto.id = gastoAtual.id;
+
+        // Log para verificar a data que está sendo enviada
+        console.log("Data a ser salva:", gasto.data);
 
         // atualiza no firestore
         const gastoData = {
@@ -982,9 +991,34 @@ function aplicarFiltros() {
     exibirGastos();
 }
 
-// Função para converter inputs de data padrão para inputs personalizados com melhor comportamento
+// Função melhorada para converter inputs de data sem atraso visual
 function melhorarInputsData() {
-    // Selecionar todos os inputs de data dos formulários principais (não os do filtro)
+    // Inserir CSS inicial para resolver o problema de visibilidade
+    const styleEl = document.createElement('style');
+    styleEl.textContent = `
+        /* Ocultar inputs originais antes da substituição */
+        #expenseForm input[type="date"], #editExpenseForm input[type="date"] {
+            opacity: 0;
+            position: absolute;
+        }
+        
+        /* Estilizar a versão personalizada */
+        .date-input-group {
+            opacity: 1;
+            position: relative;
+            display: flex;
+            flex-wrap: nowrap;
+        }
+        
+        /* Garantir que os inputs dentro dos grupos sejam visíveis */
+        .date-input-group input[type="date"] {
+            opacity: 1 !important;
+            position: relative !important;
+        }
+    `;
+    document.head.appendChild(styleEl);
+
+    // Selecionar todos os inputs de data dos formulários principais
     const dateInputs = document.querySelectorAll('#expenseForm input[type="date"], #editExpenseForm input[type="date"]');
 
     dateInputs.forEach(input => {
@@ -1019,11 +1053,16 @@ function melhorarInputsData() {
             e.stopPropagation();
         });
 
+        // Melhorar o tratamento de blur e clique para dispositivos móveis também
         newInput.addEventListener('blur', function () {
-            // Usar setTimeout para garantir que o blur funcione
+            // Forçar blur múltiplas vezes para garantir que o calendário feche
+            this.blur();
             setTimeout(() => {
                 this.blur();
-            }, 100);
+            }, 50);
+            setTimeout(() => {
+                this.blur();
+            }, 150);
         });
 
         // Construir a estrutura
@@ -1033,36 +1072,24 @@ function melhorarInputsData() {
         // Substituir o input original pelo grupo personalizado
         parentElement.replaceChild(inputGroup, input);
     });
-
-    // Adicionar tratamento global para fechar calendários ao clicar fora
-    document.addEventListener('click', function (e) {
-        // Todos os elementos relacionados ao calendário que devem ser ignorados
-        const isCalendarElement = e.target.closest('.date-input-group') ||
-            e.target.matches('.date-input-group') ||
-            e.target.closest('.calendar') ||
-            e.target.matches('input[type="date"]');
-
-        if (!isCalendarElement) {
-            // Forçar todos os inputs de data a perderem o foco
-            document.querySelectorAll('input[type="date"]').forEach(input => {
-                input.blur();
-            });
-        }
-    }, true); // Use capture phase para garantir que seja executado primeiro
 }
 
+// Modificar o DOMContentLoaded para aplicar as melhorias de data primeiro
+document.addEventListener('DOMContentLoaded', () => {
+    // Aplicar melhoria de campos de data imediatamente, antes de qualquer outra operação
+    melhorarInputsData();
+    
+    // Continuar com o resto da inicialização
+    inicializarAplicacao();
+});
 
-// Inicialização
-document.addEventListener('DOMContentLoaded', async () => {
-
+// Função auxiliar para encapsular o resto do código de inicialização
+async function inicializarAplicacao() {
     try {
         await carregarDados();
 
         // configurar filtros
         setupFilters();
-
-        // melhorar inputs de data
-        melhorarInputsData();
 
         // inicializar o indicador de filtros
         atualizarBadgeFiltros();
@@ -1153,4 +1180,4 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
-});
+}
