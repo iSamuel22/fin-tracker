@@ -1,11 +1,7 @@
-/**
- * Script para controlar os modais do footer
- * Implementa funcionalidades interativas para os links do rodapé
- */
 document.addEventListener('DOMContentLoaded', function () {
-    // Criar os modais dinamicamente
+    // cria os modais dinamicamente
     const modalsHTML = `
-    <!-- Modal de Ajuda -->
+    <!-- Modal "Ajuda" -->
     <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
@@ -27,21 +23,108 @@ document.addEventListener('DOMContentLoaded', function () {
                     <div class="help-content">
                         <!-- Seção Início -->
                         <div class="help-section mb-4 active" id="inicio-section">
-                            <h4><i class="fas fa-home me-2"></i>Página Inicial</h4>
-                            <p>A página inicial do FinTracker apresenta uma visão geral das suas finanças. Aqui você poderá visualizar:</p>
-                            <ul>
-                                <li>Saldo atual</li>
-                                <li>Resumo de receitas e gastos</li>
-                                <li>Progresso de suas metas</li>
-                                <li>Gráficos de transações recentes</li>
-                            </ul>
-                            <div class="text-center mt-3 mb-3">
-                                <img src="/src/assets/images/help/dashboard-example.jpg" alt="Exemplo de Dashboard" class="img-fluid rounded shadow-sm border" style="max-height: 300px;">
+                            <h4><i class="fas fa-home me-2"></i>Página Inicial (Dashboard)</h4>
+                            <p>A página inicial do FinTracker apresenta uma visão geral completa das suas finanças. Aqui você poderá visualizar:</p>
+                            
+                            <div class="card mb-3 border-primary">
+                                <div class="card-header bg-primary text-white">
+                                    <i class="fas fa-calculator me-2"></i>Resumo Financeiro
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-7">
+                                            <p>Um painel de controle centralizado que exibe:</p>
+                                            <ul>
+                                                <li><strong>Receitas totais:</strong> Soma de todas suas entradas financeiras</li>
+                                                <li><strong>Gastos totais:</strong> Soma de todas suas despesas</li>
+                                                <li><strong>Saldo atual:</strong> Diferença entre receitas e gastos</li>
+                                            </ul>
+                                            <p class="small text-muted mb-0">Os valores são apresentados com formatação inteligente para grandes quantias (K para milhares, M para milhões). Passe o cursor ou toque nos valores para ver o montante exato.</p>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div class="p-3 bg-light rounded border">
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span class="text-success">Receitas:</span>
+                                                    <span class="fw-bold">R$ 3,5K</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span class="text-danger">Gastos:</span>
+                                                    <span class="fw-bold">R$ 2,7K</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between border-top pt-2">
+                                                    <span class="text-primary">Saldo:</span>
+                                                    <span class="fw-bold">R$ 800</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <p>O gráfico principal mostra a distribuição dos seus gastos por categoria, permitindo identificar rapidamente os principais focos de despesas.</p>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-header bg-light">
+                                            <i class="fas fa-bullseye me-2 text-primary"></i>Acompanhamento de Metas
+                                        </div>
+                                        <div class="card-body">
+                                            <p>Visualize o progresso das suas 3 metas mais recentes, incluindo:</p>
+                                            <ul>
+                                                <li>Nome e valor da meta</li>
+                                                <li>Barra de progresso colorida baseada no seu saldo mensal</li>
+                                                <li>Estimativa de tempo para alcançar cada meta</li>
+                                            </ul>
+                                            <div class="alert alert-info small">
+                                                <i class="fas fa-info-circle me-1"></i> A estimativa é calculada usando seu saldo mensal (diferença entre receitas e gastos).
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-header bg-light">
+                                            <i class="fas fa-chart-pie me-2 text-danger"></i>Distribuição de Gastos
+                                        </div>
+                                        <div class="card-body">
+                                            <p>Gráfico em formato de rosca que revela como seus gastos estão distribuídos por categoria, permitindo identificar rapidamente seus principais focos de despesas.</p>
+                                            <p class="small text-muted">Cada categoria recebe uma cor distinta para fácil visualização. Passe o mouse sobre cada seção para ver o valor exato gasto em cada categoria.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">
+                                    <i class="fas fa-chart-bar me-2 text-success"></i>Comparativo de Gastos e Receitas
+                                </div>
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-8">
+                                            <p>Um gráfico de barras mostra a evolução dos seus gastos e receitas nos últimos 6 meses, permitindo:</p>
+                                            <ul>
+                                                <li>Comparar o equilíbrio financeiro mês a mês</li>
+                                                <li>Identificar tendências de aumento ou redução de receitas</li>
+                                                <li>Detectar meses com gastos extraordinários</li>
+                                                <li>Visualizar o impacto de decisões financeiras ao longo do tempo</li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-4 text-center">
+                                            <div class="border rounded p-2 bg-light">
+                                                <div style="height: 100px; background: linear-gradient(180deg, rgba(75,192,192,0.2) 0%, rgba(255,99,132,0.2) 100%); border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                                    <i class="fa fa-bar-chart fa-3x text-muted opacity-25"></i>
+                                                </div>
+                                                <div class="mt-2 small text-muted">Exemplo de gráfico comparativo</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="alert alert-success mt-3 mb-0">
+                                        <i class="fas fa-sync-alt me-2"></i> <strong>Atualização automática:</strong> Todos os gráficos e indicadores são atualizados em tempo real sempre que você adiciona, edita ou remove transações.
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         
-                        <!-- Seção Transações - ATUALIZADA -->
+                        <!-- Seção Transações -->
                         <div class="help-section mb-4" id="transacoes-section" style="display: none;">
                             <h4 class="mb-3"><i class="fas fa-exchange-alt me-2"></i>Gerenciando Transações</h4>
                             
@@ -70,7 +153,12 @@ document.addEventListener('DOMContentLoaded', function () {
                                         </div>
                                     </div>
                                     <div class="alert alert-info mt-3 mb-0">
-                                        <i class="fas fa-sync-alt me-2"></i> Todas as suas transações são armazenadas com segurança e sincronizadas automaticamente entre seus dispositivos.
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-sync-alt me-2 fs-4"></i>
+                                            <div>
+                                                <strong>Sincronização automática:</strong> Suas transações são armazenadas localmente e sincronizadas com o servidor quando houver conexão, permitindo acesso mesmo offline.
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -87,8 +175,8 @@ document.addEventListener('DOMContentLoaded', function () {
                                     </button>
                                 </li>
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="categories-tab" data-bs-toggle="tab" data-bs-target="#categories-content" type="button" role="tab">
-                                        <i class="fas fa-tags text-primary me-2"></i>Categorias
+                                    <button class="nav-link" id="filter-tab" data-bs-toggle="tab" data-bs-target="#filter-content" type="button" role="tab">
+                                        <i class="fas fa-filter text-primary me-2"></i>Filtros
                                     </button>
                                 </li>
                             </ul>
@@ -168,7 +256,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                                 <i class="fas fa-lightbulb"></i>
                                             </div>
                                             <div>
-                                                <strong>Dica:</strong> Os gastos são automaticamente considerados nos relatórios assim que você os adiciona, sem necessidade de sincronização manual.
+                                                <strong>Visualização no Dashboard:</strong> Os gastos são automaticamente considerados nos gráficos e indicadores do Dashboard, incluindo o resumo financeiro, a distribuição por categorias e os gráficos mensais.
                                             </div>
                                         </div>
                                     </div>
@@ -248,7 +336,89 @@ document.addEventListener('DOMContentLoaded', function () {
                                                 <i class="fas fa-lightbulb"></i>
                                             </div>
                                             <div>
-                                                <strong>Dica:</strong> Ao registrar receitas recorrentes (como salário), você pode copiar uma transação existente e apenas alterar a data para poupar tempo.
+                                                <strong>Impacto nas Metas:</strong> As receitas adicionadas contribuem diretamente para o cálculo das estimativas de tempo para alcançar suas metas financeiras, pois melhoram seu saldo mensal.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Conteúdo da aba Filtros -->
+                                <div class="tab-pane fade" id="filter-content" role="tabpanel">
+                                    <h5 class="mb-3"><i class="fas fa-filter text-primary me-2"></i>Filtragem Avançada</h5>
+                                    
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <p>O FinTracker oferece um sistema avançado de filtros para encontrar facilmente suas transações:</p>
+                                            
+                                            <div class="row mt-3">
+                                                <div class="col-md-6 mb-3">
+                                                    <div class="card h-100">
+                                                        <div class="card-header bg-light">Opções de Filtro Disponíveis</div>
+                                                        <div class="card-body">
+                                                            <ul class="small mb-0">
+                                                                <li><strong>Texto:</strong> Busca por palavras na descrição</li>
+                                                                <li><strong>Período:</strong> Filtra por data de início e fim</li>
+                                                                <li><strong>Categoria:</strong> Filtra por categoria específica</li>
+                                                                <li><strong>Combinações:</strong> Permite usar múltiplos filtros simultaneamente</li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <div class="card h-100">
+                                                        <div class="card-header bg-light">Como Usar</div>
+                                                        <div class="card-body">
+                                                            <ol class="small mb-0">
+                                                                <li>Clique no cabeçalho "Filtros" ou no ícone para expandir o painel</li>
+                                                                <li>Preencha os critérios desejados</li>
+                                                                <li>Clique em "Aplicar filtros" ou pressione Enter</li>
+                                                                <li>Para limpar, use os botões "x" individuais ou "Limpar todos"</li>
+                                                            </ol>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="border p-3 rounded mt-3 bg-light">
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <div class="me-2"><strong>Filtros <span class="badge bg-primary">2</span></strong></div>
+                                                    <div class="flex-grow-1">
+                                                        <hr class="my-0">
+                                                    </div>
+                                                    <div class="ms-2">
+                                                        <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-chevron-up"></i></button>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="row g-2">
+                                                    <div class="col-md-6">
+                                                        <div class="input-group input-group-sm">
+                                                            <span class="input-group-text">Texto</span>
+                                                            <input type="text" class="form-control" value="supermercado" disabled>
+                                                            <button class="btn btn-outline-secondary" disabled><i class="fas fa-times"></i></button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="input-group input-group-sm">
+                                                            <span class="input-group-text">Categoria</span>
+                                                            <select class="form-control" disabled>
+                                                                <option>Alimentação</option>
+                                                            </select>
+                                                            <button class="btn btn-outline-secondary" disabled><i class="fas fa-times"></i></button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="alert alert-info">
+                                        <div class="d-flex">
+                                            <div class="me-3">
+                                                <i class="fas fa-info-circle"></i>
+                                            </div>
+                                            <div>
+                                                <p class="mb-0"><strong>Contagem de resultados:</strong> O sistema mostra claramente quantas transações correspondem aos filtros aplicados, facilitando sua busca.</p>
                                             </div>
                                         </div>
                                     </div>
@@ -297,8 +467,8 @@ document.addEventListener('DOMContentLoaded', function () {
                                                         <div class="card-body">
                                                             <ol class="small mb-0">
                                                                 <li>Ao adicionar uma nova transação, selecione <strong>"Outros"</strong> no campo categoria</li>
-                                                                <li>Um novo campo aparecerá para você digitar o nome da categoria</li>
-                                                                <li>A nova categoria estará disponível para uso futuro</li>
+                                                                <li>Um campo adicional aparecerá para você inserir o nome da nova categoria</li>
+                                                                <li>A categoria será salva automaticamente e estará disponível para uso futuro</li>
                                                             </ol>
                                                         </div>
                                                     </div>
@@ -318,7 +488,47 @@ document.addEventListener('DOMContentLoaded', function () {
                                             </div>
                                             
                                             <div class="alert alert-info mt-3 mb-0">
-                                                <i class="fas fa-info-circle me-2"></i> <strong>Importante:</strong> Categorizar corretamente suas transações é fundamental para obter relatórios precisos e análises financeiras úteis.
+                                                <div class="d-flex">
+                                                    <div class="me-3">
+                                                        <i class="fas fa-chart-pie"></i>
+                                                    </div>
+                                                    <div>
+                                                        <strong>Visualização nos Gráficos:</strong> As categorias são fundamentais para os gráficos de distribuição de gastos no Dashboard, permitindo identificar padrões e áreas que demandam atenção.
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card bg-light mt-4">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="fas fa-sync-alt text-primary me-2"></i>Atualização Automática</h5>
+                                    <p class="mb-0">Todas as suas transações acionam atualizações em tempo real em todos os componentes do sistema:</p>
+                                    <div class="row mt-3">
+                                        <div class="col-md-4 mb-2">
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-2 text-primary">
+                                                    <i class="fas fa-tachometer-alt"></i>
+                                                </div>
+                                                <div class="small">Dashboard com indicadores atualizados</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 mb-2">
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-2 text-primary">
+                                                    <i class="fas fa-chart-pie"></i>
+                                                </div>
+                                                <div class="small">Gráficos e distribuição por categorias</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 mb-2">
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-2 text-primary">
+                                                    <i class="fas fa-bullseye"></i>
+                                                </div>
+                                                <div class="small">Estimativas para alcançar metas</div>
                                             </div>
                                         </div>
                                     </div>
@@ -326,11 +536,10 @@ document.addEventListener('DOMContentLoaded', function () {
                             </div>
                         </div>
                         
-                        <!-- Seção Metas - ATUALIZADA -->
+                        <!-- Seção Metas -->
                         <div class="help-section mb-4" id="metas-section" style="display: none;">
                             <h4 class="d-flex align-items-center mb-3">
                                 <i class="fas fa-bullseye me-2"></i>Planejamento de Metas
-                                <span class="badge bg-primary ms-2 fs-6">Atualizado</span>
                             </h4>
                             
                             <p>O sistema de metas financeiras do FinTracker ajuda você a planejar e acompanhar seus objetivos financeiros de forma clara e motivadora.</p>
@@ -503,6 +712,46 @@ document.addEventListener('DOMContentLoaded', function () {
                                 </div>
                             </div>
                             
+                            <h5 class="mb-3"><i class="fas fa-filter me-2"></i>Filtrando suas Metas</h5>
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-7">
+                                            <p>O FinTracker permite que você filtre suas metas para encontrar rapidamente as informações desejadas:</p>
+                                            <ul>
+                                                <li><strong>Filtro por texto:</strong> Busca no nome e descrição das metas</li>
+                                                <li><strong>Filtro por valor máximo:</strong> Exibe apenas metas até um determinado valor</li>
+                                            </ul>
+                                            <div class="alert alert-info small mb-0">
+                                                <i class="fas fa-lightbulb me-2"></i> <strong>Dica:</strong> Use os filtros para identificar metas mais acessíveis quando seu saldo mensal estiver reduzido.
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div class="border rounded p-3 bg-light">
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <div class="me-2"><strong>Filtros <span class="badge bg-primary">2</span></strong></div>
+                                                    <div class="flex-grow-1">
+                                                        <hr class="my-0">
+                                                    </div>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text">Texto</span>
+                                                        <input type="text" class="form-control" placeholder="N/Desc" disabled>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text">Valor máximo</span>
+                                                        <input type="number" class="form-control" value="5000" disabled>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <h5 class="mb-3"><i class="fas fa-edit me-2"></i>Gerenciando Suas Metas</h5>
                             <div class="card mb-3">
                                 <div class="card-body">
@@ -553,6 +802,26 @@ document.addEventListener('DOMContentLoaded', function () {
                                 </div>
                             </div>
                             
+                            <h5 class="mb-3"><i class="fas fa-sync-alt me-2"></i>Atualização Automática</h5>
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <p>O sistema de metas do FinTracker foi projetado para se manter sempre atualizado:</p>
+                                    <ul>
+                                        <li><strong>Recálculo automático:</strong> As estimativas são recalculadas sempre que você adiciona, edita ou remove transações de gastos e receitas</li>
+                                        <li><strong>Dados persistentes:</strong> Suas metas são salvas localmente e sincronizadas com a nuvem quando há conexão</li>
+                                    <div class="alert alert-success mb-0">
+                                        <div class="d-flex">
+                                            <div class="me-3">
+                                                <i class="fas fa-check-circle"></i>
+                                            </div>
+                                            <div>
+                                                <strong>Tempo real:</strong> As metas são atualizadas instantaneamente em todas as seções do aplicativo, incluindo o Dashboard principal.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <div class="alert alert-info mt-4">
                                 <div class="d-flex">
                                     <div class="me-3 fs-4">
@@ -573,11 +842,10 @@ document.addEventListener('DOMContentLoaded', function () {
                             </div>
                         </div>
                         
-                        <!-- Seção Relatórios - MELHORADA E ATUALIZADA -->
+                        <!-- Seção Relatórios -->
                         <div class="help-section mb-4" id="relatorios-section" style="display: none;">
                             <h4 class="d-flex align-items-center">
                                 <i class="fas fa-chart-pie me-2"></i>Relatórios Financeiros
-                                <span class="badge bg-primary ms-2 fs-6">Atualizado</span>
                             </h4>
                             
                             <p>A seção de relatórios proporciona uma visão completa da sua vida financeira através de gráficos interativos e análises detalhadas de seus dados.</p>
@@ -801,11 +1069,10 @@ document.addEventListener('DOMContentLoaded', function () {
                             </div>
                         </div>
                         
-                        <!-- Seção Conta - ATUALIZADA -->
+                        <!-- Seção Conta -->
                         <div class="help-section" id="conta-section" style="display: none;">
                             <h4 class="d-flex align-items-center mb-3">
                                 <i class="fas fa-user-circle me-2"></i>Sua Conta
-                                <span class="badge bg-primary ms-2 fs-6">Atualizado</span>
                             </h4>
                             
                             <p>O menu "Sua Conta" está disponível em todas as páginas do sistema e oferece acesso rápido às ações relacionadas à sua conta.</p>
@@ -838,6 +1105,9 @@ document.addEventListener('DOMContentLoaded', function () {
                                                     </div>
                                                     <div class="dropdown-divider"></div>
                                                     <a href="#" class="dropdown-item px-4 py-2">
+                                                        <i class="fas fa-user-edit me-2 text-primary"></i>Editar Perfil
+                                                    </a>
+                                                    <a href="#" class="dropdown-item px-4 py-2">
                                                         <i class="fas fa-sign-out-alt me-2 text-primary"></i>Sair
                                                     </a>
                                                     <a href="#" class="dropdown-item px-4 py-2 text-danger">
@@ -846,6 +1116,55 @@ document.addEventListener('DOMContentLoaded', function () {
                                                 </div>
                                                 <div class="text-center mt-2">
                                                     <small class="text-muted">Exemplo do menu da conta</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h5 class="mb-3"><i class="fas fa-user-edit me-2"></i>Edição de Perfil</h5>
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-7">
+                                            <p>Na página de perfil, você pode personalizar suas informações:</p>
+                                            <ul>
+                                                <li><strong>Nome:</strong> Atualize seu nome de exibição no sistema</li>
+                                                <li><strong>Senha:</strong> Altere sua senha de acesso quando necessário</li>
+                                            </ul>
+                                            <p>Para acessar esta funcionalidade:</p>
+                                            <ol>
+                                                <li>Clique no menu da sua conta</li>
+                                                <li>Selecione a opção <strong>"Editar Perfil"</strong></li>
+                                                <li>Modifique as informações desejadas</li>
+                                                <li>Clique em <strong>"Salvar"</strong> para aplicar as alterações</li>
+                                            </ol>
+                                            <div class="alert alert-info mb-0">
+                                                <i class="fas fa-lightbulb me-2"></i> <strong>Dica:</strong> Mantenha sua senha forte usando letras maiúsculas, minúsculas, números e símbolos.
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div class="border rounded p-3 bg-light h-100">
+                                                <div class="text-center mb-3">
+                                                    <img src="https://ui-avatars.com/api/?name=Usuario&background=4e73df&color=fff&size=80&rounded=true" alt="Avatar" class="rounded-circle mb-2">
+                                                    <h6 class="mb-0">Edição de Perfil</h6>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label small">Nome</label>
+                                                    <input type="text" class="form-control form-control-sm" value="Usuário Exemplo" disabled>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="changePasswordDemo" disabled>
+                                                        <label class="form-check-label" for="changePasswordDemo">
+                                                            Alterar senha
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex justify-content-between">
+                                                    <button class="btn btn-sm btn-secondary" disabled>Cancelar</button>
+                                                    <button class="btn btn-sm btn-primary" disabled>Salvar</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -885,7 +1204,8 @@ document.addEventListener('DOMContentLoaded', function () {
                                             <ol>
                                                 <li>Clique no seu nome ou ícone de perfil</li>
                                                 <li>Selecione a opção <strong>"Excluir Conta"</strong></li>
-                                                <li>Confirme sua decisão na janela de confirmação</li>
+                                                <li>Confirme sua decisão e digite sua senha para verificação</li>
+                                                <li>Confirme novamente para concluir o processo</li>
                                             </ol>
                                             <p class="small text-danger mb-0"><strong>Nota:</strong> Todos os seus dados, incluindo transações, metas e relatórios serão permanentemente excluídos.</p>
                                         </div>
@@ -971,18 +1291,56 @@ document.addEventListener('DOMContentLoaded', function () {
                                 </div>
                             </div>
                             
+                            <div class="alert alert-success mt-4">
+                                <div class="d-flex">
+                                    <div class="me-3 fs-4">
+                                        <i class="fas fa-user-shield"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="alert-heading">Indicador de Força de Senha</h5>
+                                        <p>Ao criar ou alterar sua senha, utilize o indicador de força que mostra visualmente a segurança da senha escolhida:</p>
+                                        <div class="row mt-3">
+                                            <div class="col-md-4 mb-2">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 30%;" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                    <span class="small text-danger">Fraca</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 mb-2">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                                                        <div class="progress-bar bg-warning" role="progressbar" style="width: 60%;" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                    <span class="small text-warning">Média</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 mb-2">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                                                        <div class="progress-bar bg-success" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                    <span class="small text-success">Forte</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="alert alert-info mt-4 d-flex">
                                 <div class="me-3 fs-4">
                                     <i class="fas fa-info-circle"></i>
                                 </div>
                                 <div>
                                     <h5 class="alert-heading">Recursos em desenvolvimento</h5>
-                                    <p>Estamos trabalhando em novas funcionalidades para o menu "Sua Conta", incluindo:</p>
+                                    <p>Continuamos trabalhando em novas funcionalidades para o menu "Sua Conta", incluindo:</p>
                                     <ul class="mb-0">
-                                        <li>Edição de informações de perfil</li>
-                                        <li>Alteração de senha</li>
-                                        <li>Personalização da interface</li>
-                                        <li>Configurações de notificações</li>
+                                        <li><strong>Foto de perfil personalizada:</strong> Adicione sua própria imagem de avatar</li>
+                                        <li><strong>Autenticação em duas etapas:</strong> Para mais segurança na sua conta</li>
+                                        <li><strong>Temas de interface:</strong> Escolha entre modo claro e escuro</li>
+                                        <li><strong>Configurações de notificações:</strong> Personalize alertas e lembretes</li>
                                     </ul>
                                     <hr>
                                     <p class="mb-0">Fique atento às atualizações futuras para aproveitar esses recursos.</p>
@@ -993,13 +1351,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                    <a href="#" class="btn btn-primary" id="help-download-pdf"><i class="fas fa-file-pdf me-2"></i>Baixar Manual Completo</a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal Sobre -->
+    <!-- Modal "Sobre" -->
     <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -1023,11 +1380,10 @@ document.addEventListener('DOMContentLoaded', function () {
                         <h4>Como Funciona</h4>
                         <p>O FinTracker utiliza uma abordagem baseada em categorias para ajudar você a organizar suas transações financeiras. O sistema permite:</p>
                         <ul>
-                            <li>Registrar receitas e despesas</li>
+                            <li>Registrar receitas e gastos</li>
                             <li>Categorizar transações automaticamente</li>
                             <li>Criar e monitorar orçamentos mensais</li>
                             <li>Gerar relatórios e gráficos detalhados</li>
-                            <li>Receber alertas para pagamentos programados</li>
                             <li>Estabelecer e acompanhar metas financeiras</li>
                         </ul>
                     </div>
@@ -1047,7 +1403,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 <div class="card mb-3">
                                     <div class="card-body">
                                         <h5 class="card-title"><i class="fas fa-tags text-success me-2"></i>Categorização Inteligente</h5>
-                                        <p class="card-text">Organize suas despesas em categorias personalizáveis para análises mais precisas.</p>
+                                        <p class="card-text">Organize seus gastos em categorias personalizáveis para análises mais precisas.</p>
                                     </div>
                                 </div>
                             </div>
@@ -1080,6 +1436,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             <span class="badge bg-info me-2">JavaScript</span>
                             <span class="badge bg-warning text-dark me-2">Bootstrap 5</span>
                             <span class="badge bg-danger me-2">Chart.js</span>
+                            <span class="badge bg-light text-dark me-2">Firebase</span>
                         </div>
                     </div>
                 </div>
@@ -1091,7 +1448,7 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
     </div>
 
-    <!-- Modal de Privacidade -->
+    <!-- Modal "Privacidade" -->
     <div class="modal fade" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
@@ -1223,14 +1580,6 @@ document.addEventListener('DOMContentLoaded', function () {
                             <li>Solicitar a exclusão de seus dados</li>
                             <li>Revogar o consentimento a qualquer momento</li>
                         </ul>
-                        <div class="text-center mt-4">
-                            <button type="button" class="btn btn-outline-danger" id="request-data-btn">
-                                <i class="fas fa-download me-2"></i>Solicitar Meus Dados
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary ms-2" id="delete-data-btn">
-                                <i class="fas fa-trash-alt me-2"></i>Solicitar Exclusão de Dados
-                            </button>
-                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -1244,10 +1593,10 @@ document.addEventListener('DOMContentLoaded', function () {
     </div>
     `;
 
-    // Adicionar os modais ao final do body
+    // add os modais ao final do body
     document.body.insertAdjacentHTML('beforeend', modalsHTML);
 
-    // Configurar os event listeners para os links do footer
+    // configura os event listeners para os links do footer
     document.querySelectorAll('.footer-links a').forEach(link => {
         link.addEventListener('click', function (e) {
             e.preventDefault();
@@ -1274,15 +1623,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // implementar navegação por abas no modal de ajuda
     document.querySelectorAll('.help-nav button').forEach(button => {
         button.addEventListener('click', function () {
-            // Remover classe ativa de todos os botões
+            // remove classe ativa de todos os botões
             document.querySelectorAll('.help-nav button').forEach(btn => {
                 btn.classList.remove('active');
             });
 
-            // Adicionar classe ativa ao botão clicado
+            // add classe ativa ao botão clicado
             this.classList.add('active');
 
-            // Mostrar a seção correspondente
+            // exibe a seção correspondente
             const sectionToShow = this.getAttribute('data-section');
             document.querySelectorAll('.help-section').forEach(section => {
                 section.style.display = 'none';
@@ -1291,51 +1640,36 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Configurar o botão de download do manual em PDF
-    document.getElementById('help-download-pdf').addEventListener('click', function (e) {
-        e.preventDefault();
-        // Simular o download do PDF
-        alert('O manual completo será baixado em breve. Por favor, aguarde...');
-        // Em um cenário real, aqui você redirecionaria para um endpoint que geraria o PDF
-    });
-
-    // Configurar o botão de contato com a equipe
+    // configura o botão de contato com a equipe
     document.getElementById('contact-team-btn').addEventListener('click', function (e) {
         e.preventDefault();
         window.location.href = 'mailto:suporte@fintracker.com?subject=Contato%20FinTracker';
     });
 
-    // Configurar botões da seção de privacidade
-    document.getElementById('request-data-btn').addEventListener('click', function (e) {
-        e.preventDefault();
-        // Em um sistema real, isso abriria um formulário de solicitação de dados
-        alert('Esta funcionalidade enviará seus dados pessoais para o e-mail cadastrado após verificação de segurança.');
-    });
-
-    document.getElementById('delete-data-btn').addEventListener('click', function (e) {
-        e.preventDefault();
-        // Em um sistema real, isso abriria um formulário de confirmação de exclusão
-        alert('Atenção! Esta ação não pode ser desfeita. Você receberá um e-mail com instruções para confirmar a exclusão dos seus dados.');
-    });
-
     document.getElementById('privacy-accept-btn').addEventListener('click', function (e) {
-        // Salvar a preferência do usuário em localStorage
+        // salva a preferência do usuário em localStorage
         localStorage.setItem('privacyAccepted', 'true');
         localStorage.setItem('privacyAcceptedDate', new Date().toISOString());
 
-        // Fechar o modal
+        // close no modal
         const modalElement = document.getElementById('privacyModal');
         const modalInstance = bootstrap.Modal.getInstance(modalElement);
         modalInstance.hide();
 
-        // Mostrar confirmação
-        alert('Obrigado por aceitar nossa política de privacidade!');
+        // exibe confirmação
+        Swal.fire({
+            icon: 'success',
+            title: 'Obrigado!',
+            text: 'Obrigado por aceitar nossa política de privacidade!',
+            timer: 2000,
+            showConfirmButton: false         
+        });
     });
 
-    // Inicializar os tabs dentro das seções de ajuda
+    // inicializa os tabs dentro das seções de ajuda
     document.addEventListener('shown.bs.modal', function (e) {
         if (e.target.id === 'helpModal') {
-            // Tentar inicializar tabs Bootstrap manualmente se necessário
+            // tenta inicializar tabs Bootstrap manualmente se necessário
             const transactionTabEls = document.querySelectorAll('#transaction-tabs [data-bs-toggle="tab"]');
             if (transactionTabEls.length > 0) {
                 transactionTabEls.forEach(tabEl => {
@@ -1343,7 +1677,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         e.preventDefault();
                         const targetId = this.getAttribute('data-bs-target');
 
-                        // Remover classe active de todas as abas e conteúdos
+                        // remove classe active de todas as abas e conteúdos
                         document.querySelectorAll('#transaction-tabs .nav-link').forEach(el => {
                             el.classList.remove('active');
                         });
@@ -1351,7 +1685,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             el.classList.remove('show', 'active');
                         });
 
-                        // Adicionar classe active à aba clicada e seu conteúdo
+                        // add classe active à aba clicada e seu conteúdo
                         this.classList.add('active');
                         document.querySelector(targetId).classList.add('show', 'active');
                     });

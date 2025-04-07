@@ -14,7 +14,13 @@ async function loadSweetAlert() {
         // fallback para alert padrão caso o SweetAlert falhe
         return {
             fire: (config) => {
-                alert(config.title + "\n\n" + config.text);
+                Swal.fire({
+                    title: config.title || '',
+                    text: config.text || '',
+                    icon: config.icon || 'info',
+                    confirmButtonText: config.confirmButtonText || 'OK',
+                    confirmButtonColor: config.confirmButtonColor || '#3085d6'
+                });
                 return Promise.resolve();
             }
         };

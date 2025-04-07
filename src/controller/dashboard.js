@@ -1,30 +1,8 @@
 import { Auth } from "../services/Auth.js";
-import { FirestoreService } from "../services/FirestoreService.js";
-import Swal from 'https://cdn.jsdelivr.net/npm/sweetalert2@11/+esm';
 
 // verifica autenticação
 if (!Auth.isAuthenticated()) {
     window.location.href = 'login.html';
-}
-
-// Função de logout direta para contornar problemas com o Auth.logout()
-function logoutUser() {
-    try {
-        console.log("Executando logout direto");
-        localStorage.removeItem('loggedInUser');
-
-        // Limpar outros dados de sessão se necessário
-        const user = Auth.getLoggedInUser();
-        if (user && user.email) {
-            cleanupLocalStorage(user.email);
-        }
-
-        window.location.href = 'login.html';
-    } catch (error) {
-        console.error("Erro no logout direto:", error);
-        // Em último caso, forçar redirecionamento
-        window.location.href = 'login.html';
-    }
 }
 
 // formata valores monetários, permitindo exibição abreviada com tooltip para valores completos
