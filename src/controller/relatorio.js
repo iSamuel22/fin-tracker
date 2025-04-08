@@ -115,10 +115,10 @@ function criarGraficoEvolucaoFinanceira(dataInicio, dataFim) {
     const { gastos, receitas } = obterDados();
     const ctx = document.getElementById('evolucaoFinanceiraChart').getContext('2d');
 
-    // determinar se devemos usar todas as datas
+    // determina se devemos usar todas as datas
     const useAllData = !dataInicio || !dataFim;
 
-    // definir o intervalo de datas
+    // define o intervalo de datas
     let datas = [];
 
     if (useAllData) {
@@ -128,22 +128,22 @@ function criarGraficoEvolucaoFinanceira(dataInicio, dataFim) {
             const dataMinima = new Date(Math.min(...todasDatas));
             const dataMaxima = new Date(Math.max(...todasDatas));
 
-            // ajustar para garantir um período razoável
+            // ajusta para garantir um período razoável
             const umAnoAtras = new Date();
             umAnoAtras.setFullYear(umAnoAtras.getFullYear() - 1);
 
-            // usar o que for mais recente: data mínima ou um ano atrás
+            // usa o que for mais recente: data mínima ou um ano atrás
             const dataInicial = dataMinima < umAnoAtras ? umAnoAtras : dataMinima;
 
-            // criar array de datas
+            // cria array de datas
             let dataAtual = new Date(dataInicial);
             while (dataAtual <= dataMaxima) {
                 datas.push(new Date(dataAtual));
-                dataAtual.setDate(dataAtual.getDate() + 7); // incrementar por semana para reduzir pontos
+                dataAtual.setDate(dataAtual.getDate() + 7); // incrementa por semana para reduzir pontos
             }
         }
     } else {
-        // usar o período especificado
+        // usa o período especificado
         let dataAtual = new Date(dataInicio);
         while (dataAtual <= dataFim) {
             datas.push(new Date(dataAtual));
@@ -158,7 +158,7 @@ function criarGraficoEvolucaoFinanceira(dataInicio, dataFim) {
         }
     }
 
-    // adicionar mensagem informativa se não houver restrição de data
+    // add mensagem informativa se não houver restrição de data
     const infoElement = document.getElementById('data-info');
     if (infoElement) {
         if (useAllData) {
@@ -168,20 +168,20 @@ function criarGraficoEvolucaoFinanceira(dataInicio, dataFim) {
             infoElement.style.display = "none";
         }
     } else if (useAllData) {
-        // criar o elemento de info se não existir
+        // cria o elemento de info se não existir
         const newInfoElement = document.createElement('div');
         newInfoElement.id = 'data-info';
         newInfoElement.className = 'alert alert-info';
         newInfoElement.textContent = "Mostrando todos os dados disponíveis sem restrição de data.";
 
-        // inserir antes do primeiro gráfico
+        // insere antes do primeiro gráfico
         const chartContainer = document.querySelector('.chart-container');
         if (chartContainer) {
             chartContainer.parentNode.insertBefore(newInfoElement, chartContainer);
         }
     }
 
-    // calcular saldo acumulado para cada data
+    // calcula saldo acumulado para cada data
     const saldos = datas.map(data => {
         const gastosAte = gastos.filter(g => new Date(g.data) <= data)
             .reduce((total, g) => total + parseFloat(g.valor), 0);
@@ -194,7 +194,7 @@ function criarGraficoEvolucaoFinanceira(dataInicio, dataFim) {
         evolucaoFinanceiraChart.destroy();
     }
 
-    // formatar datas de acordo com o período
+    // formata datas de acordo com o período
     const formatarLabel = (data) => {
         if (datas.length > 30) {
             return data.toLocaleString('pt-BR', { day: '2-digit', month: 'short' });
@@ -217,7 +217,7 @@ function criarGraficoEvolucaoFinanceira(dataInicio, dataFim) {
             responsive: true,
             scales: {
                 y: {
-                    beginAtZero: false, // permitir valores negativos
+                    beginAtZero: false, // permite valores negativos
                     ticks: {
                         callback: value => formatarMoeda(value)
                     }
@@ -238,7 +238,7 @@ function criarGraficoEvolucaoFinanceira(dataInicio, dataFim) {
 function criarGraficoTopCategorias(dataInicio, dataFim) {
     const { gastos } = obterDados();
 
-    // determinar se devemos usar todas as datas
+    // determina se devemos usar todas as datas
     const useAllData = !dataInicio || !dataFim;
 
     const gastosFiltrados = useAllData ? gastos : filtrarDadosPorPeriodo(gastos, dataInicio, dataFim);
@@ -296,10 +296,10 @@ function criarGraficoTendencias(dataInicio, dataFim) {
     const { gastos, receitas } = obterDados();
     const ctx = document.getElementById('tendenciasChart').getContext('2d');
 
-    // determinar se devemos usar todas as datas
+    // determina se devemos usar todas as datas
     const useAllData = !dataInicio || !dataFim;
 
-    // filtrar dados se necessário
+    // filtra dados se necessário
     const gastosFiltrados = useAllData ? gastos : filtrarDadosPorPeriodo(gastos, dataInicio, dataFim);
     const receitasFiltradas = useAllData ? receitas : filtrarDadosPorPeriodo(receitas, dataInicio, dataFim);
 
@@ -377,10 +377,10 @@ function criarGraficoComparativoMensal(dataInicio, dataFim) {
     const { gastos } = obterDados();
     const ctx = document.getElementById('comparativoMensalChart').getContext('2d');
 
-    // determinar se devemos usar todas as datas
+    // determina se devemos usar todas as datas
     const useAllData = !dataInicio || !dataFim;
 
-    // filtrar dados se necessário
+    // filtra dados se necessário
     const gastosFiltrados = useAllData ? gastos : filtrarDadosPorPeriodo(gastos, dataInicio, dataFim);
 
     // agrupa gastos por categoria e mês
@@ -403,14 +403,14 @@ function criarGraficoComparativoMensal(dataInicio, dataFim) {
     // prepara dados para o gráfico
     const categorias = Object.keys(dadosPorCategoria);
 
-    // usar meses únicos e ordená-los
+    // usa meses únicos e ordená-los
     const mesesSet = new Set();
     gastosFiltrados.forEach(g => {
         const data = new Date(g.data);
         mesesSet.add(`${data.getFullYear()}-${data.getMonth()}`);
     });
 
-    // ordenar os meses cronologicamente
+    // ordena os meses cronologicamente
     const mesesOrdenados = Array.from(mesesSet)
         .sort()
         .map(mesKey => {
@@ -461,7 +461,7 @@ function atualizarTabelaTransacoes(dataInicio, dataFim) {
     const { gastos, receitas } = obterDados();
     const tbody = document.getElementById('tabelaTransacoes');
 
-    // determinar se devemos usar todas as datas
+    // determina se devemos usar todas as datas
     const useAllData = !dataInicio || !dataFim;
 
     // combina e ordena transações
@@ -470,7 +470,7 @@ function atualizarTabelaTransacoes(dataInicio, dataFim) {
         ...receitas.map(r => ({ ...r, tipo: 'Receita' }))
     ];
 
-    // filtrar se necessário
+    // filtra se necessário
     const transacoesFiltradas = useAllData
         ? transacoes
         : transacoes.filter(t => {
@@ -478,10 +478,10 @@ function atualizarTabelaTransacoes(dataInicio, dataFim) {
             return data >= dataInicio && data <= dataFim;
         });
 
-    // ordenar por data (mais recente primeiro)
+    // ordena por data (mais recente primeiro)
     transacoesFiltradas.sort((a, b) => new Date(b.data) - new Date(a.data));
 
-    // limpar a tabela
+    // limpa a tabela
     tbody.innerHTML = '';
 
     // preenche tabela
@@ -518,7 +518,7 @@ function atualizarRelatorios() {
         dataInicio.disabled = true;
         dataFim.disabled = true;
 
-        // chamar funções sem passar datas (null)
+        // chama funções sem passar datas (null)
         calcularTotaisPeriodo(null, null);
         criarGraficoEvolucaoFinanceira(null, null);
         criarGraficoTopCategorias(null, null);
@@ -588,15 +588,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const dataInicio = document.getElementById('dataInicio');
     const dataFim = document.getElementById('dataFim');
 
-    // adicionar opção "sem restrição de data"
+    // add opção "sem restrição de data"
     const semRestricaoOption = document.createElement('option');
     semRestricaoOption.value = 'semrestrição';
     semRestricaoOption.textContent = 'Todos os dados (sem restrição de data)';
     periodoSelect.insertBefore(semRestricaoOption, periodoSelect.firstChild);
 
-    // configurar data inicial como hoje menos 180 dias (6 meses)
+    // configura data inicial como hoje menos 180 dias (6 meses)
     const hoje = new Date();
-    // adicionar alguns dias para incluir transações futuras (ex: +30 dias)
+    // add alguns dias para incluir transações futuras (ex: +30 dias)
     const futuro = new Date();
     futuro.setDate(hoje.getDate() + 365);
     dataFim.valueAsDate = futuro;
@@ -619,12 +619,12 @@ document.addEventListener('DOMContentLoaded', () => {
     dataInicio.addEventListener('change', atualizarRelatorios);
     dataFim.addEventListener('change', atualizarRelatorios);
 
-    // selecionar a opção "sem restrição de data" por padrão
+    // seleciona a opção "sem restrição de data" por padrão
     periodoSelect.value = 'semrestrição';
 
     // inicializa relatórios
     atualizarRelatorios();
 
-    // atualizar a cada minuto para garantir dados atualizados
+    // atualiza a cada minuto para garantir dados atualizados
     setInterval(atualizarRelatorios, 60000);
 });

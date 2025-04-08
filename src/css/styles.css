@@ -1,3 +1,5 @@
+/* ========== CSS PRINCIPAL (TODAS AS PÁGINAS) ========== */
+
 /* paleta de cores em variáveis */
 :root {
     --primary-color: #3498db;
@@ -615,7 +617,8 @@ footer a:hover {
 .modal {
     display: none;
     position: fixed !important;
-    z-index: 9999 !important; /* Valor muito alto para garantir que fique acima de tudo */
+    z-index: 9999 !important;
+    /* Valor muito alto para garantir que fique acima de tudo */
     left: 0;
     top: 0;
     width: 100%;
@@ -628,7 +631,8 @@ footer a:hover {
 
 .modal-backdrop {
     position: fixed !important;
-    z-index: 9990 !important; /* abaixo do modal, mas acima de outros elementos */
+    z-index: 9990 !important;
+    /* abaixo do modal, mas acima de outros elementos */
     top: 0 !important;
     left: 0 !important;
     width: 100vw !important;
@@ -900,26 +904,27 @@ footer a:hover {
 
     /* visualização alternativa para tabelas em telas muito pequenas */
     @media (max-width: 576px) {
+
         /* Texto abreviado para cabeçalhos em mobile */
         table.table th .mobile-header-text {
             display: inline;
         }
-        
+
         table.table th .desktop-header-text {
             display: none;
         }
-        
+
         /* Ícones para ações em mobile */
         .btn-sm .btn-text {
             display: none;
         }
-        
+
         .btn-sm .btn-icon {
             margin-right: 0;
         }
-        
+
         /* Reduzir espaçamento em células para economizar espaço */
-        table.table td, 
+        table.table td,
         table.table th {
             padding: 0.5rem;
         }
@@ -931,11 +936,11 @@ footer a:hover {
     table.table th .mobile-header-text {
         display: none;
     }
-    
+
     table.table th .desktop-header-text {
         display: inline;
     }
-    
+
     .btn-sm .btn-icon {
         margin-right: 0.25rem;
     }
@@ -953,7 +958,7 @@ footer a:hover {
         margin-bottom: 0;
         border-radius: 0.5rem;
     }
-    
+
     table.table td:last-child {
         white-space: nowrap;
     }

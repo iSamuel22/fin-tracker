@@ -1,4 +1,4 @@
-/* Estilos para os componentes de filtro */
+/* ========== FILTROS DE TABELAS ========== */
 
 .filter-container {
     margin-bottom: 1.5rem;
@@ -24,12 +24,12 @@
     margin-bottom: 0.25rem;
 }
 
-/* Animação para o colapso */
+/* animação para o colapso */
 #filterCollapse {
     transition: all 0.3s ease-in-out;
 }
 
-/* Estilos para indicador de filtros ativos */
+/* estilos para indicador de filtros ativos */
 .active-filter-indicator {
     margin-bottom: 1rem;
     padding: 0.5rem 1rem;
@@ -38,7 +38,7 @@
     border: 1px solid #dee2e6;
 }
 
-/* Botão de limpar filtro */
+/* botão de limpar filtro */
 .clear-filter {
     color: #6c757d;
     background-color: transparent;
@@ -50,7 +50,7 @@
     border-color: #dc3545;
 }
 
-/* Versão menor para os botões de limpar em campos de data */
+/* versão menor para os botões de limpar em campos de data */
 .date-input-group .clear-filter {
     padding: 0.25rem 0.4rem;
     font-size: 0.75rem;
@@ -61,30 +61,30 @@
         padding: 0.15rem 0.3rem;
         font-size: 0.7rem;
     }
-    
+
     .date-input-group .clear-filter i {
         font-size: 0.7rem;
     }
-    
-    /* Aumentar a área visível para o campo de data */
+
+    /* aumenta a área visível para o campo de data */
     .date-input-group .form-control {
         min-width: 60%;
     }
 }
 
-/* Estilo específico para inputs de data com valores selecionados */
+/* estilo específico para inputs de data com valores selecionados */
 input[type="date"]:not(:placeholder-shown) {
     background-color: #e8f4ff;
     border-color: #0d6efd;
 }
 
-/* Estilo para campos de texto com filtro aplicado */
+/* estilo para campos de texto com filtro aplicado */
 #filterText:not(:placeholder-shown) {
     background-color: #e8f4ff;
     border-color: #0d6efd;
 }
 
-/* Estilo para select de categoria com filtro aplicado */
+/* estilo para select de categoria com filtro aplicado */
 #filterCategory option:checked:not([value=""]) {
     background-color: #0d6efd;
     color: white;
@@ -95,7 +95,7 @@ input[type="date"]:not(:placeholder-shown) {
     background-color: #e8f4ff;
 }
 
-/* Badge para indicador de filtro ativo */
+/* badge para indicador de filtro ativo */
 .filter-badge {
     position: absolute;
     top: -8px;
@@ -111,7 +111,7 @@ input[type="date"]:not(:placeholder-shown) {
     justify-content: center;
 }
 
-/* Estilos para os campos de data */
+/* estilo para os campos de data */
 .date-input-group .input-group-text {
     background-color: #f8f9fa;
     border-right: none;
@@ -125,10 +125,11 @@ input[type="date"]:not(:placeholder-shown) {
 }
 
 .date-input-group .fa-calendar-alt {
-    font-size: 1.25rem;  /* Ícone maior */
+    font-size: 1.25rem;
+    /* ícone maior */
 }
 
-/* Melhorar a aparência em foco */
+/* melhora a aparência em foco */
 .date-input-group .form-control:focus {
     box-shadow: none;
     border-color: #ced4da;
@@ -140,7 +141,7 @@ input[type="date"]:not(:placeholder-shown) {
     background-color: #e9ecef;
 }
 
-/* Estilo para o calendário nativo */
+/* estilo para o calendário nativo */
 input[type="date"]::-webkit-calendar-picker-indicator {
     opacity: 0;
     width: 100%;
@@ -151,14 +152,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
 }
 
-/* Ajuste para melhor alinhamento em dispositivos móveis */
+/* ajuste para melhor alinhamento em dispositivos móveis */
 @media (max-width: 767.98px) {
     .date-input-group {
         margin-bottom: 0.5rem;
     }
 }
 
-/* Indicador visual de que o cabeçalho é clicável */
+/* indicador visual de que o cabeçalho é clicável */
 .filter-container .card-header {
     cursor: pointer;
     transition: background-color 0.2s ease;
@@ -168,22 +169,23 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     background-color: #e9ecef;
 }
 
-/* Estilo para o botão de toggle - MODIFICADO/REMOVIDO */
+/* estilo para o botão de toggle - MODIFICADO/REMOVIDO */
 .filter-container .btn-toggle-filter {
-    display: none; /* Oculta o botão de toggle com a seta */
+    display: none;
+    /* Oculta o botão de toggle com a seta */
 }
 
-/* Remover a rotação da seta (caso seja necessário manter o elemento no HTML) */
+/* remove a rotação da seta (caso seja necessário manter o elemento no HTML) */
 .filter-container .btn-toggle-filter i.fa-chevron-up {
     transform: none;
 }
 
-/* Animação suave para o collapse */
+/* animação suave para o collapse */
 .filter-container .collapse {
     transition: all 0.3s ease;
 }
 
-/* Destacar título do filtro ao passar o mouse */
+/* destaca título do filtro ao passar o mouse */
 .filter-container .card-header h5 {
     transition: color 0.2s ease;
 }
@@ -192,85 +194,85 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     color: #0d6efd;
 }
 
-/* Melhorias para responsividade de filtros */
+/* responsividade de filtros */
 
-/* Espaçamento adequado em dispositivos pequenos */
+/* espaçamento adequado em dispositivos pequenos */
 @media (max-width: 767.98px) {
     .filter-container .card-body {
         padding: 0.75rem;
     }
-    
+
     .filter-container .form-label {
         margin-bottom: 0.2rem;
         font-size: 0.9rem;
     }
-    
+
     .date-input-group {
         margin-bottom: 0.5rem;
     }
-    
-    /* Melhorar visualização da tabela em telas pequenas */
+
+    /* melhora visualização da tabela em telas pequenas */
     .table {
         font-size: 0.9rem;
     }
-    
-    /* Ajuste para botões de ação em linha */
+
+    /* ajuste para botões de ação em linha */
     .btn-sm {
         padding: 0.2rem 0.4rem;
         font-size: 0.75rem;
     }
 }
 
-/* Adicionar rolagem horizontal para tabelas em telas pequenas */
+/* add rolagem horizontal para tabelas em telas pequenas */
 .expense-list {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
 }
 
-/* Destacar linha da tabela quando hover em dispositivos touch */
+/* destaca linha da tabela quando hover em dispositivos touch */
 @media (hover: hover) {
     .table-hover tbody tr:hover {
         background-color: rgba(0, 123, 255, 0.1);
     }
 }
 
-/* Melhorar visualização de botões de filtro em dispositivos pequenos */
+/* melhora visualização de botões de filtro em dispositivos pequenos */
 @media (max-width: 575.98px) {
     #applyFilters, #clearAllFilters {
         width: 100%;
         margin-bottom: 0.5rem;
     }
-    
+
     .filter-container .d-flex.justify-content-end {
         flex-direction: column;
     }
-    
+
     .filter-container .btn {
         margin-right: 0 !important;
     }
 }
 
-/* Melhorar layout do cabeçalho de filtro em dispositivos pequenos */
+/* melhora layout do cabeçalho de filtro em dispositivos pequenos */
 @media (max-width: 575.98px) {
     .filter-container .card-header {
         padding: 0.5rem;
     }
-    
+
     .filter-container .card-header h5 {
         font-size: 1rem;
     }
-    
+
     .btn-toggle-filter {
         padding: 0.15rem 0.3rem;
     }
 }
 
-/* Garantir que os inputs de data tenham altura adequada em dispositivos móveis */
+/* garante que os inputs de data tenham altura adequada em dispositivos móveis */
 .date-input-group .form-control {
     min-height: 38px;
 }
 
-/* Melhorar responsividade do modal */
+/* melhora responsividade do modal */
 .modal {
     position: fixed;
     top: 0;
@@ -297,46 +299,46 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     margin: 1.75rem auto;
 }
 
-/* Ajustes para dispositivos pequenos */
+/* ajustes para dispositivos pequenos */
 @media (max-width: 575.98px) {
     .modal-content {
         padding: 15px;
         margin: 0.5rem;
     }
-    
+
     .modal {
         padding: 10px;
     }
-    
+
     .modal .close {
         font-size: 1.5rem;
         padding: 0.25rem;
     }
-    
+
     .modal h2 {
         font-size: 1.25rem;
         margin-bottom: 0.75rem;
     }
 }
 
-/* Melhorar responsividade do formulário principal */
+/* melhora responsividade do formulário principal */
 @media (max-width: 767.98px) {
     .form-container {
         padding: 1rem;
         margin-bottom: 1.5rem;
     }
-    
+
     .form-container .form-label {
         margin-bottom: 0.25rem;
     }
-    
-    /* Melhorar visualização em telas pequenas */
+
+    /* melhora visualização em telas pequenas */
     .form-container .btn {
         width: 100%;
         margin-top: 0.5rem;
     }
-    
-    /* Ajustar campos de valor para melhor visualização */
+
+    /* ajusta campos de valor para melhor visualização */
     .form-container .input-group {
         width: 100%;
     }

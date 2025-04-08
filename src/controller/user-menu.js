@@ -1,26 +1,26 @@
 import { Auth } from "../services/Auth.js";
 import { FirestoreService } from "../services/FirestoreService.js";
 
-// Função para setup completo do menu de usuário
+// setup completo do menu de usuário
 export function setupUserMenu() {
-    // Verificar autenticação
+    // verifica autenticação
     if (!Auth.isAuthenticated()) {
         window.location.href = 'login.html';
         return;
     }
     
-    // Configurar ações da conta
+    // configura ações da conta
     setupUserAccountActions();
     
-    // Atualizar informações do usuário no menu
+    // atualiza informações do usuário no menu
     updateUserInfo();
     
     console.log("Menu do usuário configurado com sucesso");
 }
 
-// Exportar a função para que possa ser importada em outros arquivos
+// exporta a função para que possa ser importada em outros arquivos
 export function setupUserAccountActions() {
-    // Configuração para logout
+    // config. para logout
     const logoutButton = document.getElementById('logout-button');
     if (logoutButton) {
         logoutButton.addEventListener('click', (e) => {
@@ -32,7 +32,7 @@ export function setupUserAccountActions() {
         console.warn("Logout button not found");
     }
     
-    // Configuração para excluir conta
+    // config. para excluir conta
     const deleteAccountButton = document.getElementById('delete-account-button');
     if (deleteAccountButton) {
         deleteAccountButton.addEventListener('click', (e) => {
@@ -45,19 +45,19 @@ export function setupUserAccountActions() {
     }
 }
 
-// Função para atualizar as informações do usuário no menu
+// atualiza as informações do usuário no menu
 function updateUserInfo() {
     try {
         const user = Auth.getLoggedInUser();
         if (!user) return;
 
-        // Atualiza o nome do usuário na barra de navegação
+        // atualiza o nome do usuário na barra de navegação
         const userMenuName = document.querySelector('#userMenu span.d-none.d-md-inline');
         if (userMenuName) {
             userMenuName.textContent = user.name || 'Usuário';
         }
 
-        // Atualiza avatar com as iniciais do usuário real
+        // atualiza avatar com as iniciais do usuário real
         const userInitials = user.name ? encodeURIComponent(user.name) : 'Usuario';
         const avatarUrls = document.querySelectorAll('.user-avatar');
         avatarUrls.forEach(avatar => {
@@ -66,7 +66,7 @@ function updateUserInfo() {
             avatar.alt = `Avatar de ${user.name || 'Usuário'}`;
         });
 
-        // Atualiza informações no dropdown
+        // atualiza informações no dropdown
         const userNameElement = document.querySelector('.user-info .user-name');
         if (userNameElement) {
             userNameElement.textContent = user.name || 'Usuário';
@@ -77,19 +77,19 @@ function updateUserInfo() {
             userEmailElement.textContent = user.email || '';
         }
         
-        // Configurar link de perfil para armazenar página atual
+        // configura link de perfil para armazenar página atual
         configurarLinkPerfil();
     } catch (error) {
         console.error("Erro ao atualizar informações do usuário:", error);
     }
 }
 
-// Função para configurar o link de perfil
+// configura o link de perfil
 function configurarLinkPerfil() {
     const profileLink = document.querySelector('.dropdown-item[href="profile.html"]');
     if (profileLink) {
         profileLink.addEventListener('click', function(e) {
-            // Armazenar a página atual no localStorage
+            // armazena a página atual no localStorage
             const currentPage = window.location.pathname;
             localStorage.setItem('returnPage', currentPage);
             console.log(`Página de retorno definida: ${currentPage}`);
@@ -97,13 +97,13 @@ function configurarLinkPerfil() {
     }
 }
 
-// Função de logout direta
+// função de logout direta
 function logoutUser() {
     try {
         console.log("Executando logout direto");
         localStorage.removeItem('loggedInUser');
 
-        // Limpar outros dados de sessão se necessário
+        // limpa outros dados de sessão se necessário
         const user = Auth.getLoggedInUser();
         if (user && user.email) {
             cleanupLocalStorage(user.email);
@@ -112,21 +112,21 @@ function logoutUser() {
         window.location.href = 'login.html';
     } catch (error) {
         console.error("Erro no logout direto:", error);
-        // Força redirecionamento em caso de erro
+        // força redirecionamento em caso de erro
         window.location.href = 'login.html';
     }
 }
 
-// Função para mostrar confirmação de exclusão de conta
+// exibe confirmação de exclusão de conta
 function showDeleteAccountConfirmation() {
-    // Verificar se Swal está disponível
+    // verifica se Swal está disponível
     if (typeof Swal === 'undefined') {
         console.error("SweetAlert2 não está disponível");
         alert("Erro: biblioteca de diálogos não carregada. Por favor, recarregue a página.");
         return;
     }
 
-    // Primeiro diálogo: confirmação inicial e solicitação de senha
+    // primeiro diálogo: confirmação inicial e solicitação de senha
     Swal.fire({
         title: 'Confirmar exclusão de conta',
         html: `
@@ -155,13 +155,13 @@ function showDeleteAccountConfirmation() {
         if (result.isConfirmed) {
             const password = result.value;
             
-            // Verificar a senha antes de prosseguir
+            // verifica a senha antes de prosseguir
             verifyPasswordAndProceed(password);
         }
     });
 }
 
-// Função para verificar senha e prosseguir com a exclusão
+// verifica senha e prosseguir com a exclusão
 async function verifyPasswordAndProceed(password) {
     try {
         Swal.fire({
@@ -178,7 +178,7 @@ async function verifyPasswordAndProceed(password) {
             throw new Error('Usuário não encontrado');
         }
 
-        // Verificar a senha usando o Auth
+        // verifica a senha usando o Auth
         const isPasswordValid = await Auth.verifyPassword(user.email, password);
         
         if (!isPasswordValid) {
@@ -191,7 +191,7 @@ async function verifyPasswordAndProceed(password) {
             return;
         }
 
-        // Se a senha estiver correta, mostrar confirmação final
+        // se a senha estiver correta, mostrar confirmação final
         showFinalConfirmation(password);
     } catch (error) {
         console.error('Erro ao verificar senha:', error);
@@ -204,7 +204,7 @@ async function verifyPasswordAndProceed(password) {
     }
 }
 
-// Função para mostrar confirmação final
+// mostra confirmação final
 function showFinalConfirmation(password) {
     Swal.fire({
         title: 'Excluir Conta',
@@ -236,7 +236,7 @@ function showFinalConfirmation(password) {
                     }
                 });
 
-                // Deleta conta do usuário com a senha verificada
+                // deleta conta do usuário com a senha verificada
                 await deleteUserAccount(password);
 
                 Swal.fire({
@@ -264,7 +264,7 @@ function showFinalConfirmation(password) {
     });
 }
 
-// Função para excluir conta
+// excluir conta
 async function deleteUserAccount(password) {
     const user = Auth.getLoggedInUser();
     if (!user || !user.uid) {
@@ -294,7 +294,7 @@ async function deleteUserAccount(password) {
     }
 }
 
-// Função para limpar dados do localStorage
+// limpa dados do localStorage
 function cleanupLocalStorage(userEmail) {
     if (!userEmail) return;
 

@@ -53,7 +53,7 @@ function formatarDataParaInput(data) {
 
     // usa formatação manual para garantir que não haja problemas com fuso horário
     const ano = dataObj.getFullYear();
-    const mes = String(dataObj.getMonth() + 1).padStart(2, '0'); // Mês começa do zero
+    const mes = String(dataObj.getMonth() + 1).padStart(2, '0'); // mês começa do zero
     const dia = String(dataObj.getDate()).padStart(2, '0');
 
     return `${ano}-${mes}-${dia}`;
@@ -73,7 +73,7 @@ function salvarReceitasLocalStorage() {
             id: r.id,
             descricao: r.descricao,
             valor: r.valor,
-            // Garantir que a data seja salva como string ISO
+            // garante que a data seja salva como string ISO
             data: garantirDataValida(r.data).toISOString(),
             categoria: r.categoria
         }));
@@ -94,7 +94,7 @@ function carregarReceitasLocalStorage() {
                     const receita = new Receita(
                         data.descricao,
                         parseFloat(data.valor),
-                        // Garantir conversão correta da data
+                        // garante conversão correta da data
                         garantirDataValida(data.data),
                         data.categoria
                     );
@@ -147,11 +147,11 @@ async function carregarDados() {
 
         console.log("Receitas carregadas do Firestore:", receitasData);
 
-        // fiktra documentos que não são de inicialização do sistema
+        // filtra documentos que não são de inicialização do sistema
         receitas = receitasData
             .filter(data => !data.isSystemGenerated)
             .map(data => {
-                // Correção na conversão de datas
+                // correção na conversão de datas
                 const data_formatada = garantirDataValida(data.data);
 
                 // cria nova instância de Receita com ID do Firestore
@@ -179,7 +179,7 @@ async function carregarDados() {
 
         // atualiza a interface
         atualizarSelectCategorias();
-        atualizarFilterCategorias(); // Adicionar esta linha
+        atualizarFilterCategorias();
         exibirReceitas();
 
         notificarAlteracoesDados();
@@ -203,7 +203,7 @@ async function carregarDados() {
         } else {
             // para outros casos (incluindo quando não há dados), apenas exibir a interface vazia
             console.log("Sem dados ou erro não crítico, exibindo interface vazia");
-            exibirReceitas(); // Isso vai mostrar "Nenhuma receita adicionada ainda."
+            exibirReceitas(); // ssso vai mostrar "Nenhuma receita adicionada ainda."
             notificarAlteracoesDados();
         }
     }
@@ -260,15 +260,15 @@ function atualizarFilterCategorias() {
     const filterCategorySelect = document.getElementById('filterCategory');
     if (!filterCategorySelect) return;
 
-    // Preservar valor selecionado
+    // preserva valor selecionado
     const valorAtual = filterCategorySelect.value;
 
-    // Limpar opções existentes, exceto a primeira (Todas)
+    // limpa opções existentes, exceto a primeira (todas)
     while (filterCategorySelect.options.length > 1) {
         filterCategorySelect.remove(1);
     }
 
-    // Adicionar categorias ao select de filtro (incluindo 'Outros')
+    // add categorias ao select de filtro (incluindo 'Outros')
     const todasCategorias = [...new Set([...categorias, 'Outros'])];
 
     todasCategorias.forEach(categoria => {
@@ -278,7 +278,7 @@ function atualizarFilterCategorias() {
         filterCategorySelect.appendChild(option);
     });
 
-    // Restaurar valor anterior
+    // restaura valor anterior
     if (valorAtual && filterCategorySelect.querySelector(`option[value="${valorAtual}"]`)) {
         filterCategorySelect.value = valorAtual;
     }
@@ -295,10 +295,10 @@ function exibirReceitas() {
 
     listaReceitas.innerHTML = '';
 
-    // aplicar filtros
+    // aplica filtros
     let receitasFiltradas = receitas;
 
-    // filtrar por texto (descrição)
+    // filtra por texto (descrição)
     if (filtros.texto) {
         const termoFiltro = filtros.texto.toLowerCase().trim();
         receitasFiltradas = receitasFiltradas.filter(receita =>
@@ -306,7 +306,7 @@ function exibirReceitas() {
         );
     }
 
-    // filtrar por data de início - usando normalização da data para comparação
+    // filtra por data de início - usando normalização da data para comparação
     if (filtros.dataInicio) {
         const dataInicioNormalizada = normalizarDataParaComparacao(filtros.dataInicio);
         receitasFiltradas = receitasFiltradas.filter(receita => {
@@ -315,7 +315,7 @@ function exibirReceitas() {
         });
     }
 
-    // filtrar por data de fim - usando normalização da data para comparação
+    // filtra por data de fim - usando normalização da data para comparação
     if (filtros.dataFim) {
         const dataFimNormalizada = normalizarDataParaComparacao(filtros.dataFim);
         receitasFiltradas = receitasFiltradas.filter(receita => {
@@ -324,7 +324,7 @@ function exibirReceitas() {
         });
     }
 
-    // filtrar por categoria
+    // filtra por categoria
     if (filtros.categoria) {
         receitasFiltradas = receitasFiltradas.filter(receita =>
             receita.categoria === filtros.categoria
@@ -346,7 +346,7 @@ function exibirReceitas() {
         return;
     }
 
-    // mostrar indicador de filtros ativos
+    // mostra indicador de filtros ativos
     if (temFiltrosAtivos()) {
         const filtroInfo = document.createElement('div');
         filtroInfo.className = 'alert alert-info mb-3';
@@ -412,7 +412,7 @@ function exibirReceitas() {
 
     listaReceitas.appendChild(table);
 
-    // Adicione esta linha para aplicar responsividade às tabelas
+    // responsividade da tabela
     inicializarResponsividadeTabelas();
 }
 
@@ -468,7 +468,7 @@ async function adicionarReceita(evento) {
                 categorias.push(categoria);
                 salvarCategorias();
                 atualizarSelectCategorias();
-                atualizarFilterCategorias(); // Adicionar esta linha
+                atualizarFilterCategorias();
             }
         }
 
@@ -576,21 +576,21 @@ function abrirModalEdicao(id) {
     // verifica se precisamos mostrar o campo de nova categoria
     alternarCampoNovaCategoriaEdicao();
 
-    // Correção para garantir que a data seja formatada corretamente para o input
+    // correção para garantir que a data seja formatada corretamente para o input
     const dataObj = garantirDataValida(receita.data);
     const dataFormatada = formatarDataParaInput(dataObj);
     console.log(`Data original: ${receita.data}, Data formatada para input: ${dataFormatada}`);
     
-    // Se o input de data está dentro de um grupo personalizado criado por melhorarInputsData()
+    // se o input de data está dentro de um grupo personalizado criado por melhorarInputsData()
     const dateInputGroup = document.querySelector('#editExpenseForm .date-input-group');
     if (dateInputGroup) {
-        // Encontra o input real dentro do grupo
+        // encontra o input real dentro do grupo
         const realInput = dateInputGroup.querySelector('input[type="date"]');
         if (realInput) {
             realInput.value = dataFormatada;
         }
     } else {
-        // Se não foi transformado, usa o input direto
+        // se não foi transformado, usa o input direto
         inputDataEdicao.value = dataFormatada;
     }
 
@@ -645,7 +645,7 @@ async function salvarEdicaoReceita(evento) {
     try {
         let categoria = selecaoCategoriaEdicao.value;
 
-        // Validações existentes para categoria...
+        // validações existentes para categoria...
 
         Swal.fire({
             title: 'Atualizando...',
@@ -656,7 +656,7 @@ async function salvarEdicaoReceita(evento) {
             }
         });
 
-        // CORREÇÃO: Encontrar o valor real da data, considerando a possibilidade de estar em um grupo personalizado
+        // encontra o valor real da data, considerando a possibilidade de estar em um grupo personalizado
         let valorData;
         const dateInputGroup = document.querySelector('#editExpenseForm .date-input-group');
         if (dateInputGroup) {
@@ -666,7 +666,7 @@ async function salvarEdicaoReceita(evento) {
             valorData = inputDataEdicao.value;
         }
 
-        // CORREÇÃO: Criar data corretamente a partir do valor no formato YYYY-MM-DD
+        // cria data corretamente a partir do valor no formato YYYY-MM-DD
         let dataSelecionada;
         if (valorData) {
             const [ano, mes, dia] = valorData.split('-').map(Number);
@@ -675,7 +675,7 @@ async function salvarEdicaoReceita(evento) {
             dataSelecionada = new Date();
         }
 
-        // Criar nova instância de receita com a data corrigida
+        // cria nova instância de receita com a data corrigida
         const receita = new Receita(
             inputDescricaoEdicao.value,
             parseFloat(inputValorEdicao.value),
@@ -687,7 +687,7 @@ async function salvarEdicaoReceita(evento) {
         const receitaAtual = receitas[indiceReceitaAtual];
         receita.id = receitaAtual.id;
 
-        // CORREÇÃO: Log para verificar a data que está sendo enviada
+        // log para verificar a data que está sendo enviada
         console.log("Data a ser salva:", receita.data);
 
         // atualiza no firestore
@@ -810,7 +810,7 @@ function alternarCampoNovaCategoria() {
 
 // função para configurar eventos dos filtros
 function setupFilters() {
-    // Botão e cabeçalho para mostrar/esconder filtros
+    // botão e cabeçalho para mostrar/esconder filtros
     const btnToggleFilter = document.querySelector('.btn-toggle-filter');
     const filterCardHeader = document.querySelector('.filter-container .card-header');
     const filterCollapse = document.getElementById('filterCollapse');
@@ -822,13 +822,13 @@ function setupFilters() {
     if (filterCardHeader) {
         filterCardHeader.style.cursor = 'pointer';
         filterCardHeader.addEventListener('click', (e) => {
-            // Evitar que o clique no botão da seta acione este evento duas vezes
+            // evita que o clique no botão da seta acione este evento duas vezes
             if (e.target.closest('.btn-toggle-filter')) {
                 return;
             }
             bsCollapse.toggle();
 
-            // Atualizar o ícone da seta
+            // atualiza o ícone da seta
             const icon = filterCardHeader.querySelector('.btn-toggle-filter i');
             if (icon) {
                 icon.classList.toggle('fa-chevron-down');
@@ -839,10 +839,10 @@ function setupFilters() {
 
     if (btnToggleFilter) {
         btnToggleFilter.addEventListener('click', (e) => {
-            e.stopPropagation(); // Impedir propagação para o card-header
+            e.stopPropagation(); // impede propagação para o card-header
             bsCollapse.toggle();
 
-            // Atualizar o ícone da seta
+            // atualiza o ícone da seta
             const icon = btnToggleFilter.querySelector('i');
             if (icon) {
                 icon.classList.toggle('fa-chevron-down');
@@ -851,7 +851,7 @@ function setupFilters() {
         });
     }
 
-    // popular select de categorias com as categorias disponíveis
+    // popula select de categorias com as categorias disponíveis
     atualizarFilterCategorias();
 
     // botões para limpar filtros individuais
@@ -874,7 +874,7 @@ function setupFilters() {
         applyFiltersBtn.addEventListener('click', aplicarFiltros);
     }
 
-    // aplicar filtros ao pressionar Enter no campo de texto
+    // aplica filtros ao pressionar Enter no campo de texto
     const filterTextInput = document.getElementById('filterText');
     if (filterTextInput) {
         filterTextInput.addEventListener('keypress', (e) => {
@@ -906,10 +906,10 @@ function limparFiltro(filtro) {
             break;
     }
 
-    // Atualizar o badge de filtros
+    // atualiza o badge de filtros
     atualizarBadgeFiltros();
 
-    // aplicar os filtros imediatamente ao limpar um filtro
+    // aplica os filtros imediatamente ao limpar um filtro
     aplicarFiltros();
 }
 
@@ -927,13 +927,13 @@ function limparTodosFiltros() {
         categoria: ''
     };
 
-    // aplicar os filtros (agora limpos)
+    // aplica os filtros (agora limpos)
     aplicarFiltros();
 }
 
 // função para aplicar os filtros
 function aplicarFiltros() {
-    // coletar valores dos campos de filtro
+    // coleta valores dos campos de filtro
     filtros.texto = document.getElementById('filterText').value.toLowerCase().trim();
 
     const startDateValue = document.getElementById('filterStartDate').value;
@@ -944,22 +944,22 @@ function aplicarFiltros() {
 
     filtros.categoria = document.getElementById('filterCategory').value;
 
-    // exibir receitas filtradas
+    // exibe receitas filtradas
     exibirReceitas();
 }
 
-// Função melhorada para converter inputs de data sem atraso visual
+// converte inputs de data sem atraso visual
 function melhorarInputsData() {
-    // Inserir CSS inicial para resolver o problema de visibilidade
+    // insere css inicial para resolver o problema de visibilidade
     const styleEl = document.createElement('style');
     styleEl.textContent = `
-        /* Ocultar inputs originais antes da substituição */
+        /* oculta inputs originais antes da substituição */
         #expenseForm input[type="date"], #editExpenseForm input[type="date"] {
             opacity: 0;
             position: absolute;
         }
         
-        /* Estilizar a versão personalizada */
+        /* estiliza a versão personalizada */
         .date-input-group {
             opacity: 1;
             position: relative;
@@ -967,7 +967,7 @@ function melhorarInputsData() {
             flex-wrap: nowrap;
         }
         
-        /* Garantir que os inputs dentro dos grupos sejam visíveis */
+        /* garante que os inputs dentro dos grupos sejam visíveis */
         .date-input-group input[type="date"] {
             opacity: 1 !important;
             position: relative !important;
@@ -975,27 +975,27 @@ function melhorarInputsData() {
     `;
     document.head.appendChild(styleEl);
     
-    // Selecionar todos os inputs de data dos formulários principais
+    // seleciona todos os inputs de data dos formulários principais
     const dateInputs = document.querySelectorAll('#expenseForm input[type="date"], #editExpenseForm input[type="date"]');
 
     dateInputs.forEach(input => {
-        // Preservar o ID, classes e outros atributos importantes
+        // preserva o ID, classes e outros atributos importantes
         const id = input.id;
         const name = input.name || '';
         const required = input.required;
         const value = input.value;
         const parentElement = input.parentElement;
 
-        // Criar container para o novo input
+        // cria container para o novo input
         const inputGroup = document.createElement('div');
         inputGroup.className = 'input-group date-input-group';
 
-        // Criar o ícone
+        // cria o ícone
         const iconSpan = document.createElement('span');
         iconSpan.className = 'input-group-text';
         iconSpan.innerHTML = '<i class="fas fa-calendar-alt fa-lg"></i>';
 
-        // Criar o novo input com as mesmas propriedades
+        // cria o novo input com as mesmas propriedades
         const newInput = document.createElement('input');
         newInput.type = 'date';
         newInput.id = id;
@@ -1004,15 +1004,15 @@ function melhorarInputsData() {
         newInput.required = required;
         if (value) newInput.value = value;
 
-        // Adicionar comportamento específico para controlar melhor o calendário
+        // add comportamento específico para controlar melhor o calendário
         newInput.addEventListener('click', function (e) {
-            // Evitando que o clique se propague para o documento
+            // evita que o clique se propague para o documento
             e.stopPropagation();
         });
 
-        // Melhorar o tratamento de blur e clique para dispositivos móveis também
+        // melhora o tratamento de blur e clique para dispositivos móveis também
         newInput.addEventListener('blur', function () {
-            // Forçar blur múltiplas vezes para garantir que o calendário feche
+            // força blur múltiplas vezes para garantir que o calendário feche
             this.blur();
             setTimeout(() => {
                 this.blur();
@@ -1022,37 +1022,34 @@ function melhorarInputsData() {
             }, 150);
         });
 
-        // Construir a estrutura
+        // constrói a estrutura
         inputGroup.appendChild(iconSpan);
         inputGroup.appendChild(newInput);
 
-        // Substituir o input original pelo grupo personalizado
+        // subtitui o input original pelo grupo personalizado
         parentElement.replaceChild(inputGroup, input);
     });
-
-    // Resto do código permanece igual...
 }
 
-// Substitua o atual event listener DOMContentLoaded por este:
 document.addEventListener('DOMContentLoaded', () => {
-    // Aplicar melhoria de campos de data imediatamente, antes de qualquer outra operação
+    // aplica melhoria de campos de data imediatamente, antes de qualquer outra operação
     melhorarInputsData();
     
-    // Continuar com o resto da inicialização
+    // continua com o resto da inicialização
     inicializarAplicacao();
 });
 
-// Função auxiliar para encapsular o resto do código de inicialização
+// função auxiliar para encapsular o resto do código de inicialização
 async function inicializarAplicacao() {
     try {
         await carregarDados();
 
-        // configurar filtros
+        // configura filtros
         setupFilters();
 
         exibirReceitas();
         
-        // Inicializar responsividade de tabelas
+        // inicializa responsividade de tabelas
         inicializarResponsividadeTabelas();
 
         // verifica se os elementos de nova categoria existem, caso contrário, cria
@@ -1119,12 +1116,12 @@ async function inicializarAplicacao() {
             formularioEdicaoReceita.addEventListener('submit', salvarEdicaoReceita);
         }
 
-        // expor funções necessárias globalmente
+        // expõe funções necessárias globalmente
         window.abrirModalEdicao = abrirModalEdicao;
         window.excluirReceita = excluirReceita;
         window.fecharModalEdicao = fecharModalEdicao;
-        window.limparTodosFiltros = limparTodosFiltros; // expor para uso no HTML
-        window.limparFiltro = limparFiltro; // expor para uso no HTML
+        window.limparTodosFiltros = limparTodosFiltros; // expõe para uso no HTML
+        window.limparFiltro = limparFiltro; // expõe para uso no HTML
     } catch (error) {
         console.error("Erro na inicialização:", error);
         Swal.fire({

@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>FinTracker - Receitas</title>
     <link rel="shortcut icon" href="/src/assets/favicon.ico" type="image/x-icon">
@@ -18,15 +19,6 @@
 </head>
 
 <body>
-    <!-- Adicionar este script para detecção imediata -->
-    <script>
-        (function() {
-            if (window.innerWidth < 768) document.documentElement.classList.add('mobile-view');
-            if (window.innerWidth < 576) document.documentElement.classList.add('small-mobile');
-            if (window.matchMedia('(orientation: portrait)').matches) document.documentElement.classList.add('portrait');
-        })();
-    </script>
-
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">FinTracker</a>
@@ -60,7 +52,7 @@
                                 alt="Avatar" class="user-avatar">
                             <span class="d-none d-md-inline">Usuário</span>
                         </a>
-                        <!-- Modificação para o menu usuário em todas as páginas -->
+                        <!-- modificação para o menu usuário em todas as páginas -->
                         <ul class="dropdown-menu dropdown-menu-end dropdown-menu-user" aria-labelledby="userMenu">
                             <li class="dropdown-header-user">
                                 <img src="https://ui-avatars.com/api/?name=Usuario&background=4e73df&color=fff&size=64&rounded=true"
@@ -146,7 +138,7 @@
         <div class="expense-list">
             <h2>Lista de Receitas</h2>
 
-            <!-- Componente de filtro -->
+            <!-- componente de filtro -->
             <div class="filter-container mb-4">
                 <div class="card">
                     <div class="card-header bg-light d-flex justify-content-between align-items-center">
@@ -161,7 +153,7 @@
                     <div class="collapse" id="filterCollapse">
                         <div class="card-body">
                             <div class="row">
-                                <!-- Filtro por texto - ocupará toda a largura -->
+                                <!-- filtro por texto - ocupará toda a largura -->
                                 <div class="col-12 mb-3">
                                     <label for="filterText" class="form-label">Buscar por descrição</label>
                                     <div class="input-group">
@@ -174,7 +166,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Filtro por data - agora vem depois do texto -->
+                                <!-- filtro por data - agora vem depois do texto -->
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Período - De</label>
                                     <div class="input-group date-input-group">
@@ -199,13 +191,13 @@
                                     </div>
                                 </div>
 
-                                <!-- Filtro por categoria -->
+                                <!-- filtro por categoria -->
                                 <div class="col-12 mb-3">
                                     <label for="filterCategory" class="form-label">Categoria</label>
                                     <div class="input-group">
                                         <select class="form-select" id="filterCategory">
                                             <option value="">Todas</option>
-                                            <!-- Categorias serão adicionadas dinamicamente -->
+                                            <!-- categorias serão adicionadas dinamicamente -->
                                         </select>
                                         <button class="btn btn-outline-secondary clear-filter" type="button"
                                             title="Limpar categoria" data-filter="category">
@@ -297,7 +289,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        // Tornando Firebase disponível globalmente para scripts não-modularizados
+        // tornando Firebase disponível globalmente para scripts não-modularizados
         window.firebase = {
             initializeApp,
             getFirestore

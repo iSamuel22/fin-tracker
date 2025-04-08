@@ -1,4 +1,4 @@
-/* Footer Styles - specific to modals and footer component */
+/* ========== FOOTER & MODAIS */
 .site-footer {
     background-color: #3a3a3a;
     color: #fff;
@@ -32,7 +32,7 @@
     color: #4e73df;
 }
 
-/* Modal Styles */
+/* modal styles */
 .modal-header {
     border-bottom: 2px solid #f0f0f0;
 }
@@ -41,7 +41,7 @@
     border-top: 1px solid #f0f0f0;
 }
 
-/* Responsive adjustments for footer and modals */
+/* ajustes responsivos para o rodapé e modais */
 @media (max-width: 768px) {
     .footer-content {
         flex-direction: column;

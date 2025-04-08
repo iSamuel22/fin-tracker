@@ -13,7 +13,7 @@ import {
 import { db } from "../config/firebase.js";
 import { Auth } from "./Auth.js";
 
-// Array para armazenar todas as inscrições (unsubscribe functions)
+// array para armazenar todas as inscrições (unsubscribe functions)
 const listeners = [];
 
 class FirestoreService {
@@ -44,7 +44,7 @@ class FirestoreService {
         }
     }
 
-    // Adicionar isso ao FirestoreService
+    // add isso ao FirestoreService
     static addListener(unsubscribeFunction) {
         if (typeof unsubscribeFunction === 'function') {
             listeners.push(unsubscribeFunction);

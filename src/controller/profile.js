@@ -1,11 +1,11 @@
 import { Auth } from "../services/Auth.js";
 
-// Verificação de autenticação
+// verificação de autenticação
 if (!Auth.isAuthenticated()) {
     window.location.href = 'login.html';
 }
 
-// Função para configurar o checkbox de alteração de senha
+// configura o checkbox de alteração de senha
 function setupPasswordToggle() {
     const changePasswordCheckbox = document.getElementById('changePassword');
     const passwordFields = document.getElementById('passwordFields');
@@ -15,15 +15,15 @@ function setupPasswordToggle() {
         document.getElementById('confirmPassword')
     ];
 
-    // Esconder os campos de senha inicialmente
+    // esconde os campos de senha inicialmente
     passwordFields.style.display = 'none';
 
-    // Desabilitar campos de senha inicialmente
+    // desabilita campos de senha inicialmente
     passwordInputs.forEach(field => {
         if (field) field.disabled = true;
     });
 
-    // Adicionar listener ao checkbox
+    // add listener ao checkbox
     if (changePasswordCheckbox) {
         changePasswordCheckbox.addEventListener('change', function () {
             passwordFields.style.display = this.checked ? 'block' : 'none';
@@ -36,7 +36,7 @@ function setupPasswordToggle() {
     }
 }
 
-// Função para configurar os botões de mostrar/ocultar senha
+// configura os botões de mostrar/ocultar senha
 function setupPasswordVisibilityTogglers() {
     const toggleButtons = document.querySelectorAll('.toggle-password');
 
@@ -46,11 +46,11 @@ function setupPasswordVisibilityTogglers() {
             const passwordField = document.getElementById(targetId);
 
             if (passwordField) {
-                // Toggle entre type="password" e type="text"
+                // toggle entre type="password" e type="text"
                 const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
                 passwordField.setAttribute('type', type);
 
-                // Alternar ícone entre eye e eye-slash
+                // alterna ícone entre eye e eye-slash
                 const icon = this.querySelector('i');
                 if (icon) {
                     icon.classList.toggle('fa-eye');
@@ -61,7 +61,7 @@ function setupPasswordVisibilityTogglers() {
     });
 }
 
-// Função para configurar o indicador de força da senha
+// configura o indicador de força da senha
 function setupPasswordStrengthIndicator() {
     const newPasswordInput = document.getElementById('newPassword');
     const progressBar = document.querySelector('.password-strength .progress-bar');
@@ -72,17 +72,17 @@ function setupPasswordStrengthIndicator() {
             const password = this.value;
             let strength = 0;
 
-            // Critérios de força da senha
+            // critérios de força da senha
             if (password.length >= 8) strength += 20;
             if (password.match(/[a-z]+/)) strength += 20;
             if (password.match(/[A-Z]+/)) strength += 20;
             if (password.match(/[0-9]+/)) strength += 20;
             if (password.match(/[^a-zA-Z0-9]+/)) strength += 20;
 
-            // Atualizar barra de progresso
+            // atualiza barra de progresso
             progressBar.style.width = strength + '%';
 
-            // Atualizar classe e texto conforme a força
+            // atualiza classe e texto conforme a força
             if (strength < 40) {
                 progressBar.className = 'progress-bar bg-danger';
                 strengthLabel.textContent = 'Fraca';
@@ -100,25 +100,25 @@ function setupPasswordStrengthIndicator() {
     }
 }
 
-// Função para atualizar os dados do usuário na UI
+// atualiza os dados do usuário na UI
 function updateUserDisplay(user) {
     if (!user) return;
 
-    // Atualizar os textos do perfil
+    // atualiza os textos do perfil
     document.getElementById('profileNameDisplay').textContent = user.name || 'Usuário';
     document.getElementById('profileEmailDisplay').textContent = user.email || '';
 
-    // Atualizar o avatar
+    // atualiza o avatar
     const userInitials = encodeURIComponent(user.name || 'Usuário');
     document.getElementById('profileAvatar').src = `https://ui-avatars.com/api/?name=${userInitials}&background=4e73df&color=fff&size=128&rounded=true`;
     document.getElementById('profileAvatar').alt = `Avatar de ${user.name || 'Usuário'}`;
 
-    // Atualizar os campos do formulário
+    // atualiza os campos do formulário
     document.getElementById('profileName').value = user.name || '';
     document.getElementById('profileEmail').value = user.email || '';
 }
 
-// Função para configurar o formulário de edição de perfil
+// configura o formulário de edição de perfil
 function setupProfileForm() {
     const form = document.getElementById('editProfileForm');
     if (!form) return;
@@ -157,7 +157,7 @@ function setupProfileForm() {
                 updatedAt: new Date()
             };
 
-            // Verificar se a senha deve ser alterada
+            // verifica se a senha deve ser alterada
             if (changePasswordCheckbox && changePasswordCheckbox.checked) {
                 const currentPasswordField = document.getElementById('currentPassword');
                 const newPasswordField = document.getElementById('newPassword');
@@ -184,23 +184,23 @@ function setupProfileForm() {
                     throw new Error('As senhas não conferem');
                 }
 
-                // Atualizar a senha
+                // atualiza a senha
                 try {
                     await Auth.updatePassword(currentPassword, newPassword);
                 } catch (passwordError) {
-                    // Fechar o SweetAlert de "Atualizando..."
+                    // fecha o SweetAlert de "Atualizando..."
                     Swal.close();
 
-                    // Verificar se é um erro de credenciais inválidas
+                    // verifica se é um erro de credenciais inválidas
                     if (passwordError.message.includes('Senha atual incorreta') ||
                         passwordError.message.includes('invalid-login-credentials') ||
                         passwordError.code === 'auth/invalid-login-credentials' ||
                         passwordError.code === 'auth/wrong-password') {
 
-                        // Adiciona a classe de erro ao campo de senha atual
+                        // add a classe de erro ao campo de senha atual
                         currentPasswordField.classList.add('is-invalid');
 
-                        // Cria ou atualiza elemento de feedback de erro
+                        // cria ou atualiza elemento de feedback de erro
                         let feedbackElement = document.getElementById('currentPassword-feedback');
                         if (!feedbackElement) {
                             feedbackElement = document.createElement('div');
@@ -209,13 +209,13 @@ function setupProfileForm() {
                             currentPasswordField.parentNode.appendChild(feedbackElement);
                         }
 
-                        // Foca no campo para correção
+                        // foca no campo para correção
                         currentPasswordField.focus();
 
-                        // Limpa o campo de senha atual
+                        // limpa o campo de senha atual
                         currentPasswordField.value = '';
 
-                        // Adiciona evento para remover o erro quando o usuário começa a digitar novamente
+                        // add evento para remover o erro quando o usuário começa a digitar novamente
                         currentPasswordField.addEventListener('input', function onInput() {
                             currentPasswordField.classList.remove('is-invalid');
                             if (feedbackElement) {
@@ -224,35 +224,35 @@ function setupProfileForm() {
                             currentPasswordField.removeEventListener('input', onInput);
                         });
 
-                        // Exibir notificação SweetAlert para senha incorreta
+                        // exibe notificação SweetAlert para senha incorreta
                         Swal.fire({
                             title: 'Senha Incorreta',
                             text: 'A senha atual que você digitou está incorreta. Por favor, tente novamente.',
                             icon: 'error',
-                            timer: 3000,                // Definir timer para 3 segundos
-                            timerProgressBar: true,     // Mostrar barra de progresso
-                            showConfirmButton: false    // Remover botão de confirmação
+                            timer: 3000,                // define timer para 3 segundos
+                            timerProgressBar: true,     // mostra barra de progresso
+                            showConfirmButton: false    // remove botão de confirmação
                         });
 
-                        // Retornar sem lançar erro
+                        // retorna sem lançar erro
                         return;
                     }
 
-                    // Se for outro tipo de erro, repassar
+                    // se for outro tipo de erro, repassar
                     throw passwordError;
                 }
             }
 
-            // Atualizar o perfil
+            // atualiza o perfil
             await Auth.updateUserProfile(userData);
 
-            // Atualizar a interface
+            // atualiza a interface
             updateUserDisplay({
                 ...Auth.getLoggedInUser(),
                 name: name
             });
 
-            // Atualizar os elementos da UI que exibem o nome do usuário
+            // atualiza os elementos da UI que exibem o nome do usuário
             document.querySelectorAll('.user-name').forEach(el => {
                 el.textContent = name;
             });
@@ -265,40 +265,40 @@ function setupProfileForm() {
                 timerProgressBar: true,
                 showConfirmButton: false
             }).then(() => {
-                // Verificar se há uma página para retornar
+                // verifica se há uma página para retornar
                 const returnPage = localStorage.getItem('returnPage');
                 if (returnPage && returnPage !== '/src/view/profile.html') {
-                    // Limpar o returnPage do localStorage
+                    // limpa o returnPage do localStorage
                     localStorage.removeItem('returnPage');
-                    // Redirecionar para a página de origem
+                    // redireciona para a página de origem
                     window.location.href = returnPage;
                 }
             });
 
         } catch (error) {
-            // Verificar se o SweetAlert ainda está aberto antes de fechá-lo
+            // verifica se o SweetAlert ainda está aberto antes de fechá-lo
             if (Swal.isVisible()) {
                 Swal.close();
             }
 
-            // Configuração padronizada para todos os alertas de erro
+            // configuração padronizada para todos os alertas de erro
             Swal.fire({
                 title: 'Erro',
                 text: error.message || 'Não foi possível atualizar o perfil. Tente novamente.',
                 icon: 'error',
-                timer: 3000,                // Definir timer para 3 segundos
-                timerProgressBar: true,     // Mostrar barra de progresso
-                showConfirmButton: false    // Remover botão de confirmação
+                timer: 3000,                // define timer para 3 segundos
+                timerProgressBar: true,     // mostra barra de progresso
+                showConfirmButton: false    // remove botão de confirmação
             });
         }
     });
 }
 
-// Configurar o botão de cancelar para voltar à página anterior
+// configura o botão de cancelar para voltar à página anterior
 function setupCancelButton() {
     const cancelButton = document.querySelector('a.btn-secondary[href="dashboard.html"]');
     if (cancelButton) {
-        // Adicionar classe para centralização específica
+        // add classe para centralização específica
         cancelButton.classList.add('profile-btn-back');
 
         cancelButton.addEventListener('click', function (e) {
@@ -312,20 +312,20 @@ function setupCancelButton() {
             }
         });
 
-        // Atualizar o texto do botão se houver uma página para retornar
+        // atualiza o texto do botão se houver uma página para retornar
         const returnPage = localStorage.getItem('returnPage');
         if (returnPage) {
             const pageName = returnPage.split('/').pop().replace('.html', '');
             if (pageName) {
-                // Check window width and set appropriate text
+                // verifica a largura da janela e define o texto apropriado
                 if (window.innerWidth < 576) {
-                    // Usar <span> para melhor controle de centralização
+                    // usa <span> para melhor controle de centralização
                     cancelButton.innerHTML = `<i class="fas fa-arrow-left"></i><span>Voltar</span>`;
                 } else {
                     cancelButton.textContent = `Voltar para ${pageName.charAt(0).toUpperCase() + pageName.slice(1)}`;
                 }
 
-                // Add resize listener to update text when screen size changes
+                // add um listener de redimensionamento para atualizar o texto quando o tamanho da tela mudar
                 window.addEventListener('resize', function () {
                     if (window.innerWidth < 576) {
                         cancelButton.innerHTML = `<i class="fas fa-arrow-left"></i><span>Voltar</span>`;
@@ -338,17 +338,17 @@ function setupCancelButton() {
     }
 }
 
-// Inicialização
+// inicialização
 document.addEventListener('DOMContentLoaded', () => {
     const user = Auth.getLoggedInUser();
     updateUserDisplay(user);
     setupPasswordToggle();
     setupPasswordVisibilityTogglers();
-    setupPasswordStrengthIndicator(); // Nova linha adicionada
+    setupPasswordStrengthIndicator();
     setupProfileForm();
     setupCancelButton();
 
-    // Se esta é a primeira vez que a página de perfil é carregada e não há página de retorno definida,
+    // se esta é a primeira vez que a página de perfil é carregada e não há página de retorno definida,
     // definir a página atual como página de retorno (dashboard)
     if (!localStorage.getItem('returnPage')) {
         localStorage.setItem('returnPage', '/src/view/dashboard.html');

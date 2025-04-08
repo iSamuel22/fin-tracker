@@ -459,7 +459,7 @@ function agruparPorMes(dados) {
 function agruparGastosPorCategoria(gastos) {
     const categorias = {};
     const hoje = new Date();
-    const futuro = new Date(hoje.getFullYear() + 1, hoje.getMonth(), hoje.getDate()); // Data limite: um ano no futuro
+    const futuro = new Date(hoje.getFullYear() + 1, hoje.getMonth(), hoje.getDate()); // data limite: um ano no futuro
 
     gastos.forEach(gasto => {
         const data = new Date(gasto.data);

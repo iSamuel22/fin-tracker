@@ -13,50 +13,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
         integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <style>
-        /* Estilos específicos para relatorios */
-        @media (max-width: 768px) {
-            .relatorio-card {
-                margin-bottom: 1rem;
-            }
-            
-            .chart-wrapper {
-                min-height: 250px;
-                position: relative;
-                margin-bottom: 1rem;
-            }
-            
-            .card-body {
-                padding: 1rem;
-            }
-            
-            .value-display {
-                font-size: 1.25rem;
-                font-weight: 600;
-            }
-            
-            .table-container {
-                margin: 0 -0.75rem;
-            }
-            
-            .table th {
-                white-space: nowrap;
-            }
-            
-            .data-field {
-                margin-bottom: 0.75rem;
-            }
-            
-            /* Espaçamento vertical entre cards */
-            .mb-mobile-2 {
-                margin-bottom: 0.5rem;
-            }
-            
-            .mb-mobile-3 {
-                margin-bottom: 1rem;
-            }
-        }
-    </style>
 </head>
 
 <body>
@@ -93,7 +49,7 @@
                                 alt="Avatar" class="user-avatar">
                             <span class="d-none d-md-inline">Usuário</span>
                         </a>
-                        <!-- Modificação para o menu usuário em todas as páginas -->
+                        <!-- modificação para o menu usuário em todas as páginas -->
                         <ul class="dropdown-menu dropdown-menu-end dropdown-menu-user" aria-labelledby="userMenu">
                             <li class="dropdown-header-user">
                                 <img src="https://ui-avatars.com/api/?name=Usuario&background=4e73df&color=fff&size=64&rounded=true"
@@ -296,7 +252,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        // Tornando Firebase disponível globalmente para scripts não-modularizados
+        // tornando Firebase disponível globalmente para scripts não-modularizados
         window.firebase = {
             initializeApp,
             getFirestore
@@ -312,15 +268,15 @@
     <script type="module" src="/src/controller/relatorio.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Configurações responsivas para gráficos
+            // configs. responsivas para gráficos
             Chart.defaults.responsive = true;
             Chart.defaults.maintainAspectRatio = false;
             
-            // Ajustes específicos para mobile
+            // ajustes específicos para mobile
             const isMobile = window.innerWidth < 768;
             
             if (isMobile) {
-                // Reduz o padding dos gráficos em dispositivos móveis
+                // reduz o padding dos gráficos em dispositivos móveis
                 Chart.defaults.layout = {
                     padding: {
                         top: 5,
@@ -330,7 +286,7 @@
                     }
                 };
                 
-                // Legendas menores em mobile
+                // legendas menores em mobile
                 Chart.defaults.plugins.legend.labels = {
                     boxWidth: 10,
                     font: {
@@ -338,7 +294,7 @@
                     }
                 };
                 
-                // Escala de eixo menor
+                // escala de eixo menor
                 Chart.defaults.scales = {
                     x: {
                         ticks: {
@@ -357,17 +313,17 @@
                 };
             }
             
-            // Função auxiliar para redimensionar gráficos
+            // função auxiliar para redimensionar gráficos
             function resizeCharts() {
                 const chartWrappers = document.querySelectorAll('.chart-wrapper');
                 chartWrappers.forEach(wrapper => {
-                    // Ajusta altura com base na largura para manter proporção
+                    // ajusta altura com base na largura para manter proporção
                     const width = wrapper.offsetWidth;
                     wrapper.style.height = (width < 400) ? '220px' : '300px';
                 });
             }
             
-            // Executar no carregamento e no redimensionamento
+            // executa no carregamento e no redimensionamento
             resizeCharts();
             window.addEventListener('resize', resizeCharts);
         });

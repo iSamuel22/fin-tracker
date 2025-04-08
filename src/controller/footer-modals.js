@@ -1459,7 +1459,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                    <a href="#" class="btn btn-info text-white" id="contact-team-btn"><i class="fas fa-envelope me-2"></i>Contatar Equipe</a>
                 </div>
             </div>
         </div>
@@ -1718,12 +1717,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
             document.getElementById(`${sectionToShow}-section`).style.display = 'block';
         });
-    });
-
-    // configura o botão de contato com a equipe
-    document.getElementById('contact-team-btn').addEventListener('click', function (e) {
-        e.preventDefault();
-        window.location.href = 'mailto:suporte@fintracker.com?subject=Contato%20FinTracker';
     });
 
     document.getElementById('privacy-accept-btn').addEventListener('click', function (e) {

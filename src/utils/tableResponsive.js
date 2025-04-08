@@ -6,7 +6,7 @@
  * - Melhora a acessibilidade com atributos ARIA
  */
 export function inicializarResponsividadeTabelas(options = {}) {
-    // Configurações padrão que podem ser sobrescritas
+    // configs padrão que podem ser sobrescritas
     const config = {
         delay: options.delay || 250,
         breakpointMobile: options.breakpointMobile || 576,
@@ -24,21 +24,21 @@ export function inicializarResponsividadeTabelas(options = {}) {
         'pesquisarItens'
     ];
 
-    // Aplicar imediatamente
+    // aplica imediatamente
     adaptarTabelasParaResponsividade(config);
 
-    // Configurar observador de DOM para detectar novas tabelas
+    // configura observador de DOM para detectar novas tabelas
     configurarObservadorDOM(config);
 
-    // Interceptar funções que alteram as tabelas
+    // intercepta funções que alteram as tabelas
     interceptarFuncoesVisualizacao(funcoesParaInterceptar, config);
 
-    // Adicionar listener para redimensionamento da janela
+    // add listener para redimensionamento da janela
     configurarRedimensionamento(config);
 }
 
 /**
- * Configura um observador para detectar quando novas tabelas são adicionadas ao DOM
+ * configura um observador para detectar quando novas tabelas são adicionadas ao DOM
  */
 function configurarObservadorDOM(config) {
     const observer = new MutationObserver((mutations) => {
@@ -57,7 +57,7 @@ function configurarObservadorDOM(config) {
         });
 
         if (tabelasAdicionadas) {
-            // Usar throttle para evitar múltiplas chamadas em sequência
+            // usa throttle para evitar múltiplas chamadas em sequência
             if (window.tableResponsiveThrottle) {
                 clearTimeout(window.tableResponsiveThrottle);
             }
@@ -75,7 +75,7 @@ function configurarObservadorDOM(config) {
 }
 
 /**
- * Intercepta funções de visualização para aplicar responsividade após execução
+ * intercepta funções de visualização para aplicar responsividade após execução
  */
 function interceptarFuncoesVisualizacao(funcoes, config) {
     funcoes.forEach(nomeFuncao => {
@@ -96,10 +96,10 @@ function interceptarFuncoesVisualizacao(funcoes, config) {
 }
 
 /**
- * Configura listener para redimensionamento da janela
+ * configura listener para redimensionamento da janela
  */
 function configurarRedimensionamento(config) {
-    // Usar ResizeObserver para ter melhor performance
+    // usa ResizeObserver para ter melhor performance
     if (window.ResizeObserver) {
         const resizeObserver = new ResizeObserver(throttle(() => {
             adaptarLayoutResponsivo(config);
@@ -115,7 +115,7 @@ function configurarRedimensionamento(config) {
 }
 
 /**
- * Adapta o layout com base no tamanho atual da tela
+ * adapta o layout com base no tamanho atual da tela
  */
 function adaptarLayoutResponsivo(config) {
     const larguraViewport = window.innerWidth;
@@ -130,43 +130,43 @@ function adaptarLayoutResponsivo(config) {
 }
 
 /**
- * Função principal para adaptar tabelas para layout responsivo
+ * função principal para adaptar tabelas para layout responsivo
  */
 function adaptarTabelasParaResponsividade(config) {
-    // Aplicar classe global para estilização CSS
+    // aplica classe global para estilização CSS
     document.body.classList.add('responsive-tables-enabled');
 
-    // Detectar tamanho de tela inicial
+    // detectr tamanho de tela inicial
     adaptarLayoutResponsivo(config);
 
-    // Processar cada tabela encontrada
+    // processa cada tabela encontrada
     document.querySelectorAll('table.table').forEach(table => {
-        // Evitar reprocessamento se já estiver adaptada
+        // evita reprocessamento se já estiver adaptada
         if (table.hasAttribute('data-responsive-processed')) {
             atualizarTabela(table, config);
             return;
         }
 
-        // Marcar como processada
+        // marca como processada
         table.setAttribute('data-responsive-processed', 'true');
 
-        // Adicionar wrappers para melhor controle de overflow
+        // add wrappers para melhor controle de overflow
         wrapTable(table);
 
-        // Identificar tipo de tabela e aplicar tratamento específico
+        // identifica tipo de tabela e aplicar tratamento específico
         identificarETratarTabela(table, config);
 
-        // Melhorar acessibilidade
+        // melhora acessibilidade
         melhorarAcessibilidade(table);
     });
 }
 
 /**
- * Envolve a tabela em um wrapper para melhor controle de scroll
+ * envolve a tabela em um wrapper para melhor controle de scroll
  */
 function wrapTable(table) {
     if (table.parentNode.classList.contains('table-responsive-wrapper')) {
-        return; // Já está envolvida
+        return; // já está envolvida
     }
 
     const wrapper = document.createElement('div');
@@ -177,7 +177,7 @@ function wrapTable(table) {
 }
 
 /**
- * Atualiza tabelas já processadas (para quando os dados mudam)
+ * atualiza tabelas já processadas (para quando os dados mudam)
  */
 function atualizarTabela(table, config) {
     // Identificar células que precisam ser atualizadas
@@ -189,42 +189,42 @@ function atualizarTabela(table, config) {
             const headerText = header.querySelector('.desktop-header-text')?.textContent ||
                 header.textContent.trim();
 
-            // Adicionar atributo data-label se não existir
+            // add atributo data-label se não existir
             if (!cell.hasAttribute('data-label')) {
                 cell.setAttribute('data-label', headerText);
             }
         });
     });
 
-    // Atualizar botões e ações se necessário
+    // atualiza botões e ações se necessário
     atualizarBotoesEAcoes(table);
 }
 
 /**
- * Identifica o tipo de tabela e aplica tratamento específico
+ * identifica o tipo de tabela e aplica tratamento específico
  */
 function identificarETratarTabela(table, config) {
     const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
 
-    // Determinar tipo de tabela
+    // determina tipo de tabela
     const tipoTabela = determinarTipoTabela(headers);
     table.setAttribute('data-table-type', tipoTabela);
 
-    // Aplicar mapeamentos específicos
+    // aplica mapeamentos específicos
     const headerMappings = obterMapeamentoCabecalhos(tipoTabela);
 
-    // Processar cabeçalhos
+    // processa cabeçalhos
     processarCabecalhos(table, headerMappings);
 
-    // Processar células de dados
+    // processa células de dados
     processarCelulas(table, headerMappings);
 
-    // Processar botões de ação
+    // processa botões de ação
     processarBotoes(table);
 }
 
 /**
- * Determina o tipo de tabela baseado nos cabeçalhos
+ * determina o tipo de tabela baseado nos cabeçalhos
  */
 function determinarTipoTabela(headers) {
     if (headers.includes('Nome') && headers.includes('Progresso')) {
@@ -237,7 +237,7 @@ function determinarTipoTabela(headers) {
 }
 
 /**
- * Retorna mapeamento de cabeçalhos com base no tipo de tabela
+ * retorna mapeamento de cabeçalhos com base no tipo de tabela
  */
 function obterMapeamentoCabecalhos(tipoTabela) {
     const mapeamentoBase = {
@@ -266,13 +266,13 @@ function obterMapeamentoCabecalhos(tipoTabela) {
 }
 
 /**
- * Processa os cabeçalhos da tabela
+ * processa os cabeçalhos da tabela
  */
 function processarCabecalhos(table, headerMappings) {
     table.querySelectorAll('thead th').forEach(th => {
         const textoOriginal = th.textContent.trim();
 
-        // Pular se já processado
+        // pula se já processado
         if (th.querySelector('.desktop-header-text')) return;
 
         const mapeamento = headerMappings[textoOriginal] || {
@@ -292,13 +292,13 @@ function processarCabecalhos(table, headerMappings) {
             </span>
         `;
 
-        // Adicionar atributos para acessibilidade
+        // add atributos para acessibilidade
         th.setAttribute('data-original-text', textoOriginal);
     });
 }
 
 /**
- * Processa as células de dados da tabela
+ * processa as células de dados da tabela
  */
 function processarCelulas(table, headerMappings) {
     table.querySelectorAll('tbody tr').forEach(row => {
@@ -310,10 +310,10 @@ function processarCelulas(table, headerMappings) {
                 header.querySelector('.desktop-header-text')?.textContent ||
                 header.textContent.trim();
 
-            // Adicionar atributo data-label para CSS responsivo
+            // add atributo data-label para CSS responsivo
             cell.setAttribute('data-label', headerText);
 
-            // Adicionar classes especiais para formatação
+            // add classes especiais para formatação
             if (headerText === 'Valor') {
                 cell.classList.add('cell-valor');
             } else if (headerText === 'Progresso') {
@@ -324,14 +324,14 @@ function processarCelulas(table, headerMappings) {
 }
 
 /**
- * Processa botões de ação para responsividade
+ * processa botões de ação para responsividade
  */
 function processarBotoes(table) {
     table.querySelectorAll('button.btn-sm, .btn-sm').forEach(btn => {
-        // Pular se já processado
+        // pula se já processado
         if (btn.querySelector('.btn-icon')) return;
 
-        // Extrair o texto atual e ícone (se houver)
+        // extrai o texto atual e ícone (se houver)
         const conteudoHTML = btn.innerHTML;
         const textoMatch = conteudoHTML.match(/<i class="fas (fa-[^"]+)"><\/i>\s*([^<]+)/);
 
@@ -351,12 +351,12 @@ function processarBotoes(table) {
 }
 
 /**
- * Atualiza os botões e ações após mudanças nos dados
+ * atualiza os botões e ações após mudanças nos dados
  */
 function atualizarBotoesEAcoes(table) {
-    // Garantir que novos botões sejam processados
+    // garante que novos botões sejam processados
     table.querySelectorAll('button.btn-sm:not(.btn-action), .btn-sm:not(.btn-action)').forEach(btn => {
-        // Extrair o texto atual e ícone (se houver)
+        // extrai o texto atual e ícone (se houver)
         const conteudoHTML = btn.innerHTML;
         const textoMatch = conteudoHTML.match(/<i class="fas (fa-[^"]+)"><\/i>\s*([^<]+)/);
 
@@ -376,13 +376,13 @@ function atualizarBotoesEAcoes(table) {
 }
 
 /**
- * Melhora acessibilidade da tabela
+ * melhora acessibilidade da tabela
  */
 function melhorarAcessibilidade(table) {
-    // Adicionar role para tabelas
+    // add role para tabelas
     table.setAttribute('role', 'table');
 
-    // Adicionar aria-labels em botões
+    // add aria-labels em botões
     table.querySelectorAll('button').forEach(btn => {
         const texto = btn.textContent.trim();
         if (!btn.hasAttribute('aria-label')) {
@@ -390,12 +390,12 @@ function melhorarAcessibilidade(table) {
         }
     });
 
-    // Adicionar ID único para a tabela
+    // add ID único para a tabela
     if (!table.id) {
         table.id = `tabela-${Math.random().toString(36).substring(2, 9)}`;
     }
 
-    // Adicionar caption se não existir
+    // add caption se não existir
     if (!table.querySelector('caption')) {
         const tipoTabela = table.getAttribute('data-table-type');
         const captionTexto = tipoTabela === 'metas' ? 'Lista de Metas' :
@@ -411,7 +411,7 @@ function melhorarAcessibilidade(table) {
 }
 
 /**
- * Função helper para throttle (limitar frequência de chamadas)
+ * função helper para throttle (limitar frequência de chamadas)
  */
 function throttle(func, limit) {
     let inThrottle;
@@ -427,35 +427,35 @@ function throttle(func, limit) {
 }
 
 /**
- * Inicializar quando o documento estiver pronto
+ * inicializa quando o documento estiver pronto
  */
 document.addEventListener('DOMContentLoaded', function () {
     setTimeout(() => {
         inicializarResponsividadeTabelas();
 
-        // Adicionar estilos CSS necessários para responsividade
+        // add estilos CSS necessários para responsividade
         adicionarEstilosCSS();
     }, 500);
 });
 
 /**
- * Adiciona estilos CSS necessários para responsividade
+ * add estilos CSS necessários para responsividade
  */
 function adicionarEstilosCSS() {
-    // Verificar se os estilos já foram adicionados
+    // verifica se os estilos já foram adicionados
     if (document.getElementById('responsive-tables-styles')) return;
 
     const estilos = document.createElement('style');
     estilos.id = 'responsive-tables-styles';
     estilos.textContent = `
-        /* Estilos para tabelas responsivas */
+        /* estilos para tabelas responsivas */
         .table-responsive-wrapper {
             width: 100%;
             overflow-x: auto;
             position: relative;
         }
         
-        /* Modos de visualização */
+        /* modos de visualização */
         table.table[data-view-mode="desktop"] .mobile-header-text,
         table.table[data-view-mode="desktop"] .tablet-header-text {
             display: none;
@@ -471,7 +471,7 @@ function adicionarEstilosCSS() {
             display: none;
         }
         
-        /* Botões responsivos */
+        /* botões responsivos */
         @media (max-width: 576px) {
             .btn-action .btn-text {
                 display: none;
@@ -490,7 +490,7 @@ function adicionarEstilosCSS() {
             }
         }
         
-        /* Display para dispositivos pequenos */
+        /* display para dispositivos pequenos */
         @media (max-width: 576px) {
             table.table tbody tr {
                 display: block;
@@ -525,14 +525,14 @@ function adicionarEstilosCSS() {
             }
         }
         
-        /* Animações */
+        /* animations */
         @media (min-width: 577px) {
             .table-responsive-wrapper {
                 transition: all 0.3s ease;
             }
         }
         
-        /* Acessibilidade */
+        /* acessibilidade */
         .visually-hidden {
             position: absolute;
             width: 1px;
