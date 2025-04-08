@@ -79,14 +79,23 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        // tornando Firebase disponível globalmente para scripts não-modularizados
+        window.firebase = {
+            initializeApp,
+            getFirestore
+        };
+    </script>
+
     <script>
-        // Validação do formulário de login
+        // validação do formulário de login
         document.addEventListener('DOMContentLoaded', function () {
-            // Elementos do formulário
+            // elementos do formulário
             const loginForm = document.getElementById('loginForm');
             const emailInput = document.getElementById('email');
             const passwordInput = document.getElementById('password');
@@ -105,20 +114,20 @@
                 }
             }
 
-            // Chamar a verificação quando a página carregar
+            // chama a verificação quando a página carregar
             checkSavedCredentials();
 
-            // Validação em tempo real para o email
+            // validação em tempo real para o email
             emailInput.addEventListener('blur', function () {
                 validateEmail();
             });
 
-            // Validação em tempo real para a senha
+            // validação em tempo real para a senha
             passwordInput.addEventListener('blur', function () {
                 validatePassword();
             });
 
-            // Função para validar email
+            // validando email
             function validateEmail() {
                 const email = emailInput.value.trim();
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -135,7 +144,7 @@
                 }
             }
 
-            // Função para validar senha
+            // validando senha
             function validatePassword() {
                 const password = passwordInput.value.trim();
 
@@ -151,7 +160,7 @@
                 }
             }
 
-            // Validação preventiva antes do submit (executada pelo controlador principal)
+            // validação preventiva antes do submit (executada pelo controlador principal)
             function validateForm() {
                 const isEmailValid = validateEmail();
                 const isPasswordValid = validatePassword();
@@ -159,18 +168,18 @@
                 return isEmailValid && isPasswordValid;
             }
 
-            // Mostrar erro genérico de login
+            // exibe erro genérico de login
             function showLoginError(message) {
                 loginErrorMessage.textContent = message || 'Ocorreu um erro ao fazer login. Tente novamente.';
                 loginError.style.display = 'block';
 
-                // Auto-hide depois de 5 segundos
+                // auto-hide depois de 5 segundos
                 setTimeout(() => {
                     loginError.style.display = 'none';
                 }, 5000);
             }
 
-            // Expor funções para o controller principal
+            // expõe funções para o controller principal
             window.loginUtils = {
                 validateForm,
 

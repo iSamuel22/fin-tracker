@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     // cria os modais dinamicamente
     const modalsHTML = `
-    <!-- Modal "Ajuda" -->
+   <!-- Modal "Ajuda" -->
     <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
@@ -10,13 +10,30 @@ document.addEventListener('DOMContentLoaded', function () {
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="d-flex justify-content-center mb-4">
-                        <div class="btn-group help-nav" role="group" aria-label="Navegação de ajuda">
-                            <button type="button" class="btn btn-outline-primary active" data-section="inicio">Início</button>
-                            <button type="button" class="btn btn-outline-primary" data-section="transacoes">Transações</button>
-                            <button type="button" class="btn btn-outline-primary" data-section="metas">Metas</button>
-                            <button type="button" class="btn btn-outline-primary" data-section="relatorios">Relatórios</button>
-                            <button type="button" class="btn btn-outline-primary" data-section="conta">Sua Conta</button>
+                    <div class="overflow-auto mb-4">
+                        <div class="help-nav d-flex justify-content-center">
+                            <div class="nav nav-pills flex-nowrap" role="group" aria-label="Navegação de ajuda">
+                                <button type="button" class="btn btn-outline-primary active flex-shrink-0" data-section="inicio">
+                                    <i class="fas fa-home d-block d-md-none"></i>
+                                    <span class="d-none d-md-inline">Início</span>
+                                </button>
+                                <button type="button" class="btn btn-outline-primary flex-shrink-0" data-section="transacoes">
+                                    <i class="fas fa-exchange-alt d-block d-md-none"></i>
+                                    <span class="d-none d-md-inline">Transações</span>
+                                </button>
+                                <button type="button" class="btn btn-outline-primary flex-shrink-0" data-section="metas">
+                                    <i class="fas fa-bullseye d-block d-md-none"></i>
+                                    <span class="d-none d-md-inline">Metas</span>
+                                </button>
+                                <button type="button" class="btn btn-outline-primary flex-shrink-0" data-section="relatorios">
+                                    <i class="fas fa-chart-pie d-block d-md-none"></i>
+                                    <span class="d-none d-md-inline">Relatórios</span>
+                                </button>
+                                <button type="button" class="btn btn-outline-primary flex-shrink-0" data-section="conta">
+                                    <i class="fas fa-user-circle d-block d-md-none"></i>
+                                    <span class="d-none d-md-inline">Sua Conta</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -1596,6 +1613,69 @@ document.addEventListener('DOMContentLoaded', function () {
     // add os modais ao final do body
     document.body.insertAdjacentHTML('beforeend', modalsHTML);
 
+    // Adicionar estilos específicos para navegação responsiva
+    const styleElement = document.createElement('style');
+    styleElement.textContent = `
+               .help-nav {
+                   overflow-x: auto;
+                   -webkit-overflow-scrolling: touch;
+                   scrollbar-width: thin;
+                   padding-bottom: 5px;
+               }
+               .help-nav::-webkit-scrollbar {
+                   height: 4px;
+               }
+               .help-nav::-webkit-scrollbar-thumb {
+                   background-color: rgba(13, 110, 253, 0.3);
+                   border-radius: 4px;
+               }
+               .help-nav .btn {
+                   margin: 0 3px;
+                   min-width: 40px;
+                   border-radius: 20px;
+                   padding: 0.375rem 0.6rem;
+               }
+               .help-nav .btn i {
+                   font-size: 1rem;
+               }
+               
+               /* Ajuste para melhor proporção em dispositivos móveis */
+               @media (max-width: 767.98px) {
+                   .help-nav .btn {
+                       width: 42px;
+                       height: 42px;
+                       padding: 0;
+                       display: flex;
+                       align-items: center;
+                       justify-content: center;
+                   }
+                   .help-nav .btn i {
+                       font-size: 1.1rem;
+                       margin: 0 !important;
+                   }
+               }
+               
+               /* Melhorias para os tabs internos */
+               #transaction-tabs {
+                   flex-wrap: nowrap;
+                   overflow-x: auto;
+                   scrollbar-width: thin;
+               }
+               #transaction-tabs::-webkit-scrollbar {
+                   height: 4px;
+               }
+               #transaction-tabs::-webkit-scrollbar-thumb {
+                   background-color: rgba(0,0,0,0.2);
+                   border-radius: 4px;
+               }
+               #transaction-tabs .nav-item {
+                   flex-shrink: 0;
+               }
+               #transaction-tabs .nav-link i {
+                   font-size: 0.95rem;
+               }
+           `;
+    document.head.appendChild(styleElement);
     // configura os event listeners para os links do footer
     document.querySelectorAll('.footer-links a').forEach(link => {
         link.addEventListener('click', function (e) {
@@ -1662,13 +1742,21 @@ document.addEventListener('DOMContentLoaded', function () {
             title: 'Obrigado!',
             text: 'Obrigado por aceitar nossa política de privacidade!',
             timer: 2000,
-            showConfirmButton: false         
+            showConfirmButton: false
         });
     });
 
     // inicializa os tabs dentro das seções de ajuda
     document.addEventListener('shown.bs.modal', function (e) {
         if (e.target.id === 'helpModal') {
+            // centraliza na navegação responsiva
+            const activeNavBtn = document.querySelector('.help-nav .active');
+            if (activeNavBtn) {
+                setTimeout(() => {
+                    activeNavBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }, 100);
+            }
+
             // tenta inicializar tabs Bootstrap manualmente se necessário
             const transactionTabEls = document.querySelectorAll('#transaction-tabs [data-bs-toggle="tab"]');
             if (transactionTabEls.length > 0) {
@@ -1687,7 +1775,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         // add classe active à aba clicada e seu conteúdo
                         this.classList.add('active');
-                        document.querySelector(targetId).classList.add('show', 'active');
+                        const targetElement = document.querySelector(targetId);
+                        targetElement.classList.add('show', 'active');
+
+                        // centraliza a aba selecionada na visualização
+                        setTimeout(() => {
+                            this.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                        }, 100);
                     });
                 });
             }

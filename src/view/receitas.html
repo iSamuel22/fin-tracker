@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>FinTracker - Receitas</title>
     <link rel="shortcut icon" href="/src/assets/favicon.ico" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -17,6 +18,15 @@
 </head>
 
 <body>
+    <!-- Adicionar este script para detecção imediata -->
+    <script>
+        (function() {
+            if (window.innerWidth < 768) document.documentElement.classList.add('mobile-view');
+            if (window.innerWidth < 576) document.documentElement.classList.add('small-mobile');
+            if (window.matchMedia('(orientation: portrait)').matches) document.documentElement.classList.add('portrait');
+        })();
+    </script>
+
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">FinTracker</a>

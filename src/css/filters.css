@@ -50,6 +50,28 @@
     border-color: #dc3545;
 }
 
+/* Versão menor para os botões de limpar em campos de data */
+.date-input-group .clear-filter {
+    padding: 0.25rem 0.4rem;
+    font-size: 0.75rem;
+}
+
+@media (max-width: 575.98px) {
+    .date-input-group .clear-filter {
+        padding: 0.15rem 0.3rem;
+        font-size: 0.7rem;
+    }
+    
+    .date-input-group .clear-filter i {
+        font-size: 0.7rem;
+    }
+    
+    /* Aumentar a área visível para o campo de data */
+    .date-input-group .form-control {
+        min-width: 60%;
+    }
+}
+
 /* Estilo específico para inputs de data com valores selecionados */
 input[type="date"]:not(:placeholder-shown) {
     background-color: #e8f4ff;
@@ -146,13 +168,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     background-color: #e9ecef;
 }
 
-/* Estilo para o botão de toggle */
+/* Estilo para o botão de toggle - MODIFICADO/REMOVIDO */
 .filter-container .btn-toggle-filter {
-    transition: transform 0.2s ease;
+    display: none; /* Oculta o botão de toggle com a seta */
 }
 
+/* Remover a rotação da seta (caso seja necessário manter o elemento no HTML) */
 .filter-container .btn-toggle-filter i.fa-chevron-up {
-    transform: rotate(180deg);
+    transform: none;
 }
 
 /* Animação suave para o collapse */
@@ -167,4 +190,154 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .filter-container .card-header:hover h5 {
     color: #0d6efd;
+}
+
+/* Melhorias para responsividade de filtros */
+
+/* Espaçamento adequado em dispositivos pequenos */
+@media (max-width: 767.98px) {
+    .filter-container .card-body {
+        padding: 0.75rem;
+    }
+    
+    .filter-container .form-label {
+        margin-bottom: 0.2rem;
+        font-size: 0.9rem;
+    }
+    
+    .date-input-group {
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Melhorar visualização da tabela em telas pequenas */
+    .table {
+        font-size: 0.9rem;
+    }
+    
+    /* Ajuste para botões de ação em linha */
+    .btn-sm {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* Adicionar rolagem horizontal para tabelas em telas pequenas */
+.expense-list {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Destacar linha da tabela quando hover em dispositivos touch */
+@media (hover: hover) {
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+}
+
+/* Melhorar visualização de botões de filtro em dispositivos pequenos */
+@media (max-width: 575.98px) {
+    #applyFilters, #clearAllFilters {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .filter-container .d-flex.justify-content-end {
+        flex-direction: column;
+    }
+    
+    .filter-container .btn {
+        margin-right: 0 !important;
+    }
+}
+
+/* Melhorar layout do cabeçalho de filtro em dispositivos pequenos */
+@media (max-width: 575.98px) {
+    .filter-container .card-header {
+        padding: 0.5rem;
+    }
+    
+    .filter-container .card-header h5 {
+        font-size: 1rem;
+    }
+    
+    .btn-toggle-filter {
+        padding: 0.15rem 0.3rem;
+    }
+}
+
+/* Garantir que os inputs de data tenham altura adequada em dispositivos móveis */
+.date-input-group .form-control {
+    min-height: 38px;
+}
+
+/* Melhorar responsividade do modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.modal-content {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 550px;
+    position: relative;
+    margin: 1.75rem auto;
+}
+
+/* Ajustes para dispositivos pequenos */
+@media (max-width: 575.98px) {
+    .modal-content {
+        padding: 15px;
+        margin: 0.5rem;
+    }
+    
+    .modal {
+        padding: 10px;
+    }
+    
+    .modal .close {
+        font-size: 1.5rem;
+        padding: 0.25rem;
+    }
+    
+    .modal h2 {
+        font-size: 1.25rem;
+        margin-bottom: 0.75rem;
+    }
+}
+
+/* Melhorar responsividade do formulário principal */
+@media (max-width: 767.98px) {
+    .form-container {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-container .form-label {
+        margin-bottom: 0.25rem;
+    }
+    
+    /* Melhorar visualização em telas pequenas */
+    .form-container .btn {
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+    
+    /* Ajustar campos de valor para melhor visualização */
+    .form-container .input-group {
+        width: 100%;
+    }
 }
