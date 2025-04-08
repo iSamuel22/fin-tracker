@@ -2,6 +2,7 @@ import { Meta } from "../model/Meta.js";
 import { Auth } from "../services/Auth.js";
 import { FirestoreService } from "../services/FirestoreService.js";
 import Swal from 'https://cdn.jsdelivr.net/npm/sweetalert2@11/+esm';
+import { inicializarResponsividadeTabelas } from '../utils/tableResponsive.js';
 
 // verifica autenticação
 if (!Auth.isAuthenticated()) {
@@ -365,6 +366,9 @@ function calcularEstimativas() {
     });
 
     container.appendChild(table);
+
+    // Adicione esta linha para aplicar responsividade às tabelas
+    inicializarResponsividadeTabelas();
 }
 
 // salva metas no localStorage e inclui ID do Firestore
@@ -530,6 +534,9 @@ function exibirMetas() {
     });
 
     listaMetas.appendChild(table);
+
+    // Adicione esta linha para aplicar responsividade às tabelas
+    inicializarResponsividadeTabelas();
 }
 
 // função para verificar se há filtros ativos
@@ -769,9 +776,26 @@ function setupFilters() {
     const filterCardHeader = document.querySelector('.filter-container .card-header');
     const filterCollapse = document.getElementById('filterCollapse');
 
-    const bsCollapse = new bootstrap.Collapse(filterCollapse, {
-        toggle: false
-    });
+    // Verificar se bootstrap está disponível antes de usá-lo
+    let bsCollapse;
+    if (window.bootstrap && window.bootstrap.Collapse) {
+        bsCollapse = new bootstrap.Collapse(filterCollapse, {
+            toggle: false
+        });
+    } else {
+        // Fallback para quando bootstrap não está disponível
+        bsCollapse = {
+            toggle: function() {
+                if (filterCollapse) {
+                    if (filterCollapse.classList.contains('show')) {
+                        filterCollapse.classList.remove('show');
+                    } else {
+                        filterCollapse.classList.add('show');
+                    }
+                }
+            }
+        };
+    }
 
     if (filterCardHeader) {
         filterCardHeader.style.cursor = 'pointer';
@@ -914,6 +938,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     exibirMetas();
     calcularEstimativas();
+    
+    // Inicializar responsividade de tabelas
+    inicializarResponsividadeTabelas();
 
     // eventos
     const formularioMeta = document.getElementById('goalForm');

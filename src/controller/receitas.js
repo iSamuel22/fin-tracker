@@ -3,6 +3,7 @@ import { CategoriaReceita } from "../model/CategoriaReceita.js";
 import { Auth } from "../services/Auth.js";
 import { FirestoreService } from "../services/FirestoreService.js";
 import Swal from 'https://cdn.jsdelivr.net/npm/sweetalert2@11/+esm';
+import { inicializarResponsividadeTabelas } from '../utils/tableResponsive.js';
 
 // verifica autenticação
 if (!Auth.isAuthenticated()) {
@@ -410,6 +411,9 @@ function exibirReceitas() {
     });
 
     listaReceitas.appendChild(table);
+
+    // Adicione esta linha para aplicar responsividade às tabelas
+    inicializarResponsividadeTabelas();
 }
 
 // função para verificar se há filtros ativos
@@ -1047,6 +1051,9 @@ async function inicializarAplicacao() {
         setupFilters();
 
         exibirReceitas();
+        
+        // Inicializar responsividade de tabelas
+        inicializarResponsividadeTabelas();
 
         // verifica se os elementos de nova categoria existem, caso contrário, cria
         // cria campo para nova categoria no formulário principal se não existir

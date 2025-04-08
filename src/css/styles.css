@@ -891,6 +891,74 @@ footer a:hover {
     }
 }
 
+/* estilos para tabelas responsivas em dispositivos móveis */
+@media (max-width: 768px) {
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* visualização alternativa para tabelas em telas muito pequenas */
+    @media (max-width: 576px) {
+        /* Texto abreviado para cabeçalhos em mobile */
+        table.table th .mobile-header-text {
+            display: inline;
+        }
+        
+        table.table th .desktop-header-text {
+            display: none;
+        }
+        
+        /* Ícones para ações em mobile */
+        .btn-sm .btn-text {
+            display: none;
+        }
+        
+        .btn-sm .btn-icon {
+            margin-right: 0;
+        }
+        
+        /* Reduzir espaçamento em células para economizar espaço */
+        table.table td, 
+        table.table th {
+            padding: 0.5rem;
+        }
+    }
+}
+
+/* Headers de tabela responsivos */
+@media (min-width: 577px) {
+    table.table th .mobile-header-text {
+        display: none;
+    }
+    
+    table.table th .desktop-header-text {
+        display: inline;
+    }
+    
+    .btn-sm .btn-icon {
+        margin-right: 0.25rem;
+    }
+}
+
+/* Ajustes para botões em tabelas */
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 576px) {
+    .table-responsive {
+        margin-bottom: 0;
+        border-radius: 0.5rem;
+    }
+    
+    table.table td:last-child {
+        white-space: nowrap;
+    }
+}
+
 /* componente informativo sobre moedas */
 .currency-info {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
