@@ -448,6 +448,9 @@ footer a:hover {
     margin-bottom: 1rem;
     border-radius: 0.75rem;
     box-shadow: var(--box-shadow);
+    transform: none !important;
+    position: static !important;
+    z-index: auto !important;
 }
 
 .table {
@@ -493,11 +496,14 @@ footer a:hover {
     box-shadow: var(--box-shadow);
     padding: 1.25rem;
     transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+    transform: none !important;
+    position: static !important;
+    z-index: auto !important;
 }
 
 .expense-list:hover, .goal-list:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--box-shadow-hover);
+    transform: none !important;
+    box-shadow: var(--box-shadow) !important;
 }
 
 .expense-item, .goal-item {
@@ -608,8 +614,8 @@ footer a:hover {
 /* modal de edição */
 .modal {
     display: none;
-    position: fixed;
-    z-index: 2000;
+    position: fixed !important;
+    z-index: 9999 !important; /* Valor muito alto para garantir que fique acima de tudo */
     left: 0;
     top: 0;
     width: 100%;
@@ -618,6 +624,15 @@ footer a:hover {
     background-color: rgba(0, 0, 0, 0.5);
     animation-name: fadeIn;
     animation-duration: 0.3s;
+}
+
+.modal-backdrop {
+    position: fixed !important;
+    z-index: 9990 !important; /* abaixo do modal, mas acima de outros elementos */
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
 }
 
 .modal-content {
@@ -671,6 +686,13 @@ footer a:hover {
     border-top: 1px solid var(--light-gray);
     display: flex;
     justify-content: flex-end;
+}
+
+/* ajuste para o footer modal funcionar em todas as páginas */
+#editModal, #addModal, #goalModal, [id$="Modal"] {
+    z-index: 9999 !important;
+    position: fixed !important;
+    inset: 0 !important;
 }
 
 /* dashboard */
