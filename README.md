@@ -53,7 +53,7 @@ O FinTracker é um aplicativo web de gestão financeira pessoal projetado para a
 ### Configuração
 1. Clone o repositório:
 ```
-git clone https://github.com/seu-usuario/FinTracker.git
+git clone https://github.com/iSamuel/FinTracker.git
 cd FinTracker
 ```
 
@@ -146,5 +146,5 @@ Este projeto está licenciado sob a licença MIT - veja o arquivo LICENSE para m
 
 ## **📞 Contato**
 Para qualquer dúvida sobre o projeto, entre em contato:
-* E-mail: seu.email@exemplo.com
-* GitHub: Seu nome de usuário
+* E-mail: samueljubim47@gmail.com
+* GitHub: iSamuel22
