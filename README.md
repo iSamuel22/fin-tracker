@@ -53,7 +53,7 @@ O FinTracker é um aplicativo web de gestão financeira pessoal projetado para a
 ### Configuração
 1. Clone o repositório:
 ```
-git clone https://github.com/iSamuel/FinTracker.git
+git clone https://github.com/iSamuel22/FinTracker.git
 cd FinTracker
 ```
 
@@ -112,6 +112,7 @@ FinTracker/
 │   │   ├── styles.css         # Estilo principal
 │   │   ├── filters.css        # Estilos de filtros
 │   │   └── footer.css         # Estilos do rodapé
+|   |   └── safe.css           # Estilo auxiliar
 │   ├── model/                 # Modelos de dados
 │   │   ├── CategoriaGasto.js  # Modelo de categoria de gasto
 │   │   ├── CategoriaReceita.js # Modelo de categoria de receita
