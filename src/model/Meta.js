@@ -64,17 +64,6 @@ export class Meta {
         return this.#dataCriacao;
     }
 
-    calcularTempoEstimado(rendaMensal) {
-        if (!rendaMensal || rendaMensal <= 0) {
-            throw new Error('Renda mensal deve ser um valor positivo');
-        }
-        return this.#valor / rendaMensal;
-    }
-
-    exibirTempoDeConclusao() {
-        console.log("Exibir tempo de conclusão");
-    }
-
     toJSON() {
         // verifica se a data é válida antes de converter
         let dataCriacaoString;
