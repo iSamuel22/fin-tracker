@@ -1,10 +1,8 @@
 export class CategoriaReceita {
   #nome;
-  #descricao;
 
-  constructor(nome, descricao) {
+  constructor(nome) {
     this.#nome = nome;
-    this.#descricao = descricao;
   }
 
   get nome() {
@@ -13,14 +11,6 @@ export class CategoriaReceita {
 
   set nome(value) {
     this.#nome = value;
-  }
-
-  get descricao() {
-    return this.#descricao;
-  }
-
-  set descricao(value) {
-    this.#descricao = value;
   }
   
 }

@@ -379,7 +379,7 @@ function salvarDados() {
         return;
     }
 
-    // Inclui os IDs do Firestore ao salvar no localStorage
+    // inclui os IDs do Firestore ao salvar no localStorage
     const metasData = metas.map(meta => {
         try {
             const metaObj = {
@@ -517,15 +517,21 @@ function exibirMetas() {
         // add tooltip com informações adicionais
         const tooltipInfo = `Criada em: ${dataCriacao}\nÚltima atualização: ${ultimaAtualizacao}`;
 
+        // o índice real na array metas original
+        const originalIndex = metas.findIndex(m => 
+            m.id === meta.id || 
+            (m.nome === meta.nome && m.valor === meta.valor)
+        );
+
         tr.innerHTML = `
             <td title="${tooltipInfo}">${meta.nome}</td>
             <td>${meta.descricao || '-'}</td>
             <td>R$ ${parseFloat(meta.valor).toFixed(2)}</td>
             <td>
-                <button class="btn btn-sm btn-outline-primary" onclick="window.abrirModalEdicao(${index})">
+                <button class="btn btn-sm btn-outline-primary" onclick="window.abrirModalEdicao(${originalIndex})">
                     <i class="fas fa-edit"></i> Editar
                 </button>
-                <button class="btn btn-sm btn-outline-danger ms-1" onclick="window.excluirMeta(${index})">
+                <button class="btn btn-sm btn-outline-danger ms-1" onclick="window.excluirMeta(${originalIndex})">
                     <i class="fas fa-trash"></i> Excluir
                 </button>
             </td>
@@ -628,13 +634,20 @@ const formularioEdicaoMeta = document.getElementById('editGoalForm');
 
 let indiceMetaAtual = -1;
 
-// abre o modal de edição
+// abre o modal de edição - usando ID ao invés de índice
 function abrirModalEdicao(indice) {
-    indiceMetaAtual = indice;
     const meta = metas[indice];
+    if (!meta) {
+        console.error('Meta não encontrada para o índice:', indice);
+        return;
+    }
+    
+    // salva o índice atual para uso posterior
+    indiceMetaAtual = indice;
 
+    // preenche os campos do formulário
     inputNomeEdicao.value = meta.nome;
-    inputDescricaoEdicao.value = meta.descricao;
+    inputDescricaoEdicao.value = meta.descricao || '';
     inputValorEdicao.value = meta.valor;
 
     modalEdicao.style.display = "block";
@@ -722,6 +735,12 @@ async function salvarEdicaoMeta(evento) {
 
 // exclui uma meta existente
 async function excluirMeta(indice) {
+    const meta = metas[indice];
+    if (!meta) {
+        console.error('Meta não encontrada para o índice:', indice);
+        return;
+    }
+
     Swal.fire({
         title: 'Tem certeza?',
         text: "Você não poderá reverter esta ação!",
@@ -734,8 +753,6 @@ async function excluirMeta(indice) {
     }).then(async (result) => {
         if (result.isConfirmed) {
             try {
-                const meta = metas[indice];
-
                 // verifica se a meta tem ID do Firestore antes de tentar excluir
                 if (meta.id) {
                     await FirestoreService.deleteMeta(meta.id);

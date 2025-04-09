@@ -1,39 +1,28 @@
 /* ========== CSS PRINCIPAL (TODAS AS PÁGINAS) ========== */
 
-/* Paleta de cores refinada com variáveis */
+/* paleta de cores em variáveis */
 :root {
-    /* Core colors - modernized palette */
-    --primary-color: #4361ee;
-    --primary-dark: #3a56d4;
-    --primary-light: #bdd0ff;
-    --secondary-color: #2b3a67;
-    --secondary-light: #485585;
-    
-    /* Status colors - more vibrant */
-    --success-color: #2ec4b6;
-    --success-light: #a9f0e6;
-    --danger-color: #e63946;
-    --danger-light: #ffccd5;
-    --warning-color: #ff9f1c;
-    --info-color: #4cc9f0;
-    
-    /* Neutrals - softer contrast */
+    --primary-color: #3498db;
+    --primary-dark: #2980b9;
+    --primary-light: #a9cce3;
+    --secondary-color: #34495e;
+    --secondary-light: #5d6d7e;
+    --success-color: #27ae60;
+    --success-light: #a9dfbf;
+    --danger-color: #e74c3c;
+    --danger-light: #f5b7b1;
+    --warning-color: #f39c12;
+    --info-color: #3498db;
     --light-color: #f8f9fa;
-    --light-gray: #edf2f7;
-    --medium-gray: #cbd5e0;
-    --dark-color: #1a202c;
-    
-    /* Effects */
-    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    --box-shadow-hover: 0 10px 20px rgba(0, 0, 0, 0.08);
+    --light-gray: #e9ecef;
+    --medium-gray: #ced4da;
+    --dark-color: #212529;
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+    --box-shadow-hover: 0 8px 15px rgba(0, 0, 0, 0.1);
     --transition-speed: 0.3s;
-    --border-radius-sm: 0.5rem;
-    --border-radius-md: 0.75rem;
-    --border-radius-lg: 1rem;
-    --border-radius-xl: 1.5rem;
 }
 
-/* Reset and general styles - improved typography */
+/* reset e estilos gerais */
 *, *::before, *::after {
     box-sizing: border-box;
 }
@@ -44,53 +33,51 @@ html {
 }
 
 body {
-    font-family: 'Inter', 'Roboto', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-family: 'Roboto', 'Segoe UI', system-ui, -apple-system, sans-serif;
     background-color: var(--light-color);
     color: var(--dark-color);
-    line-height: 1.7;
+    line-height: 1.6;
     margin: 0;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
     font-weight: 400;
-    letter-spacing: -0.01em;
 }
 
 .container {
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 1.5rem;
+    padding: 1.25rem;
 }
 
-/* Typography - improved readability and hierarchy */
+/* tipografia responsiva */
 h1, h2, h3, h4, h5, h6 {
     margin-top: 0;
-    margin-bottom: 0.75rem;
-    font-weight: 700;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
     line-height: 1.2;
     color: var(--secondary-color);
-    letter-spacing: -0.03em;
 }
 
 h1 {
-    font-size: clamp(2.25rem, 5vw, 3.5rem);
+    font-size: clamp(2rem, 5vw, 3rem);
 }
 
 h2 {
-    font-size: clamp(1.75rem, 4vw, 2.75rem);
+    font-size: clamp(1.6rem, 4vw, 2.5rem);
 }
 
 h3 {
-    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    font-size: clamp(1.4rem, 3vw, 2rem);
 }
 
 h4 {
-    font-size: clamp(1.25rem, 2.5vw, 1.875rem);
+    font-size: clamp(1.2rem, 2.5vw, 1.75rem);
 }
 
 h5 {
-    font-size: clamp(1.125rem, 2vw, 1.5rem);
+    font-size: clamp(1.1rem, 2vw, 1.5rem);
 }
 
 h6 {
@@ -99,20 +86,19 @@ h6 {
 
 p {
     margin-top: 0;
-    margin-bottom: 1.25rem;
-    line-height: 1.75;
+    margin-bottom: 1rem;
 }
 
-/* Links - better hover states */
+/* links */
 a {
     color: var(--primary-color);
     text-decoration: none;
-    transition: all var(--transition-speed) ease;
-    position: relative;
+    transition: color var(--transition-speed) ease;
 }
 
 a:hover {
     color: var(--primary-dark);
+    text-decoration: underline;
 }
 
 /* tela de introdução (index.html) */
@@ -147,44 +133,26 @@ a:hover {
 /* botões */
 .btn {
     display: inline-block;
-    font-weight: 600;
+    font-weight: 500;
     text-align: center;
     white-space: nowrap;
     vertical-align: middle;
     user-select: none;
-    padding: 0.75rem 2rem;
+    padding: 0.75rem 1.875rem;
     font-size: 1rem;
     line-height: 1.5;
-    border-radius: var(--border-radius-xl);
-    transition: all var(--transition-speed) cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border-radius: 2rem;
+    transition: all var(--transition-speed) ease;
     box-shadow: var(--box-shadow);
     cursor: pointer;
     border: none;
     outline: none;
     margin: 0.3125rem;
-    position: relative;
-    overflow: hidden;
-}
-
-.btn:after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255,255,255,0.2);
-    opacity: 0;
-    transition: all 0.3s ease;
-}
-
-.btn:hover:after {
-    opacity: 1;
 }
 
 .btn:focus {
     outline: 0;
-    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
 }
 
 .btn-primary {
@@ -233,8 +201,8 @@ a:hover {
 
 /* barra de navegação responsiva */
 .navbar {
-    background: linear-gradient(135deg, var(--secondary-color), var(--secondary-light));
-    padding: 1rem 1.5rem;
+    background-color: var(--secondary-color);
+    padding: 1rem;
     box-shadow: var(--box-shadow);
     position: sticky;
     top: 0;
@@ -248,16 +216,14 @@ a:hover {
 .navbar-brand {
     color: #fff;
     font-size: clamp(1.5rem, 4vw, 2rem);
-    font-weight: 800;
-    transition: transform var(--transition-speed) ease;
+    font-weight: bold;
+    transition: color var(--transition-speed) ease;
     text-decoration: none;
-    letter-spacing: -0.02em;
 }
 
 .navbar-brand:hover {
     color: var(--primary-light);
     text-decoration: none;
-    transform: translateY(-2px);
 }
 
 .navbar-toggler {
@@ -400,19 +366,18 @@ a:hover {
 .form-control {
     display: block;
     width: 100%;
-    border-radius: var(--border-radius-md);
-    border: 2px solid var(--light-gray);
-    padding: 1rem 1.25rem;
+    border-radius: 0.625rem;
+    border: 2px solid var(--medium-gray);
+    padding: 0.9375rem;
     font-size: 1rem;
-    transition: all var(--transition-speed) ease;
+    transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
     background-color: #fff;
     color: var(--dark-color);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05) inset;
 }
 
 .form-control:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.15);
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
     outline: 0;
 }
 
@@ -740,13 +705,12 @@ footer a:hover {
 }
 
 .card {
-    border-radius: var(--border-radius-lg);
+    border-radius: 1rem;
     box-shadow: var(--box-shadow);
     background-color: #fff;
     transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
     height: 100%;
     overflow: hidden;
-    border: none;
 }
 
 .card:hover {
@@ -1501,57 +1465,19 @@ footer a:hover {
 /* força da senha */
 
 .password-strength {
-    margin-top: 12px;
+    margin-top: 8px;
 }
 
 .password-strength .progress {
-    height: 6px;
-    border-radius: 3px;
-    background-color: var(--light-gray);
-    overflow: hidden;
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
-}
-
-.password-strength .progress-bar {
-    transition: width 0.5s ease, background-color 0.5s ease;
+    height: 5px;
+    border-radius: 2px;
 }
 
 .password-strength-label {
-    font-size: 13px;
-    font-weight: 500;
-    margin-top: 6px;
-    display: block;
+    font-size: 12px;
     transition: color 0.3s;
 }
 
 .password-requirements {
-    font-size: 13px;
-    color: var(--secondary-light);
-    margin-top: 10px;
-    padding-left: 5px;
-    border-left: 3px solid var(--light-gray);
-}
-
-.password-requirements ul {
-    list-style-type: none;
-    padding-left: 5px;
-    margin: 8px 0;
-}
-
-.password-requirements li {
-    margin-bottom: 6px;
-    display: flex;
-    align-items: center;
-}
-
-.password-requirements li::before {
-    content: "•";
-    color: var(--medium-gray);
-    font-weight: bold;
-    margin-right: 8px;
-}
-
-.password-requirements li.valid::before {
-    content: "✓";
-    color: var(--success-color);
+    font-size: 12px;
 }
