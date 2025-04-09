@@ -76,7 +76,7 @@ export class Meta {
     }
 
     toJSON() {
-        // Verificar se a data é válida antes de converter
+        // verifica se a data é válida antes de converter
         let dataCriacaoString;
         try {
             dataCriacaoString = this.#dataCriacao instanceof Date && !isNaN(this.#dataCriacao.getTime()) 
