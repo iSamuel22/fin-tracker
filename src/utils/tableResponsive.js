@@ -8,14 +8,14 @@
 export function inicializarResponsividadeTabelas(options = {}) {
     // configs padrão que podem ser sobrescritas
     const config = {
-        delay: options.delay || 250,
+        delay: options.delay || 100, // reduz para ser mais rápido
         breakpointMobile: options.breakpointMobile || 576,
         breakpointTablet: options.breakpointTablet || 768,
         animationSpeed: options.animationSpeed || 300,
         ...options
     };
 
-    // Funções para interceptar
+    // funções para interceptar
     const funcoesParaInterceptar = [
         'exibirReceitas',
         'exibirGastos',
@@ -24,8 +24,20 @@ export function inicializarResponsividadeTabelas(options = {}) {
         'pesquisarItens'
     ];
 
-    // aplica imediatamente
+    // detecta tipo de dispositivo antecipadamente
+    const modoVisualizacao = detectarModoVisualizacao(config);
+    document.body.setAttribute('data-view-mode', modoVisualizacao);
+    
+    // aplica classe de estado de carregamento
+    document.body.classList.add('responsive-tables-initializing');
+    
+    // aplica responsividade imediatamente
     adaptarTabelasParaResponsividade(config);
+    
+    // remove classe de carregamento após aplicar tudo
+    setTimeout(() => {
+        document.body.classList.remove('responsive-tables-initializing');
+    }, 50);
 
     // configura observador de DOM para detectar novas tabelas
     configurarObservadorDOM(config);
@@ -35,6 +47,15 @@ export function inicializarResponsividadeTabelas(options = {}) {
 
     // add listener para redimensionamento da janela
     configurarRedimensionamento(config);
+}
+
+/**
+ * detecta o modo de visualização com base na largura da tela
+ */
+function detectarModoVisualizacao(config) {
+    const larguraViewport = window.innerWidth;
+    return larguraViewport <= config.breakpointMobile ? 'mobile' :
+           larguraViewport <= config.breakpointTablet ? 'tablet' : 'desktop';
 }
 
 /**
@@ -57,14 +78,8 @@ function configurarObservadorDOM(config) {
         });
 
         if (tabelasAdicionadas) {
-            // usa throttle para evitar múltiplas chamadas em sequência
-            if (window.tableResponsiveThrottle) {
-                clearTimeout(window.tableResponsiveThrottle);
-            }
-
-            window.tableResponsiveThrottle = setTimeout(() => {
-                adaptarTabelasParaResponsividade(config);
-            }, 100);
+            // processa tabelas imediatamente
+            adaptarTabelasParaResponsividade(config);
         }
     });
 
@@ -82,12 +97,18 @@ function interceptarFuncoesVisualizacao(funcoes, config) {
         if (window[nomeFuncao]) {
             const funcaoOriginal = window[nomeFuncao];
             window[nomeFuncao] = function () {
+                // ativa classe de carregamento
+                document.body.classList.add('responsive-tables-updating');
+                
                 const resultado = funcaoOriginal.apply(this, arguments);
 
-                // Aguardar renderização completa antes de adaptar
+                // adapta imediatamente sem esperar
+                adaptarTabelasParaResponsividade(config);
+                
+                // remove classe de carregamento após um tempo curto
                 setTimeout(() => {
-                    adaptarTabelasParaResponsividade(config);
-                }, config.delay);
+                    document.body.classList.remove('responsive-tables-updating');
+                }, 50);
 
                 return resultado;
             };
@@ -99,18 +120,33 @@ function interceptarFuncoesVisualizacao(funcoes, config) {
  * configura listener para redimensionamento da janela
  */
 function configurarRedimensionamento(config) {
+    // variável para controlar o último modo visualizado
+    let ultimoModoVisualizacao = detectarModoVisualizacao(config);
+    
     // usa ResizeObserver para ter melhor performance
     if (window.ResizeObserver) {
         const resizeObserver = new ResizeObserver(throttle(() => {
-            adaptarLayoutResponsivo(config);
-        }, 200));
+            const novoModo = detectarModoVisualizacao(config);
+            
+            // só atualiza se o modo mudou
+            if (novoModo !== ultimoModoVisualizacao) {
+                ultimoModoVisualizacao = novoModo;
+                adaptarLayoutResponsivo(config);
+            }
+        }, 100)); // reduz para 100ms
 
         resizeObserver.observe(document.body);
     } else {
-        // Fallback para browsers sem ResizeObserver
+        // fallback para browsers sem ResizeObserver
         window.addEventListener('resize', throttle(() => {
-            adaptarLayoutResponsivo(config);
-        }, 200));
+            const novoModo = detectarModoVisualizacao(config);
+            
+            // só atualiza se o modo mudou
+            if (novoModo !== ultimoModoVisualizacao) {
+                ultimoModoVisualizacao = novoModo;
+                adaptarLayoutResponsivo(config);
+            }
+        }, 100)); // reduz para 100ms
     }
 }
 
@@ -118,10 +154,7 @@ function configurarRedimensionamento(config) {
  * adapta o layout com base no tamanho atual da tela
  */
 function adaptarLayoutResponsivo(config) {
-    const larguraViewport = window.innerWidth;
-    const modoVisualizacao = larguraViewport <= config.breakpointMobile ? 'mobile' :
-        larguraViewport <= config.breakpointTablet ? 'tablet' : 'desktop';
-
+    const modoVisualizacao = detectarModoVisualizacao(config);
     document.body.setAttribute('data-view-mode', modoVisualizacao);
 
     document.querySelectorAll('table.table').forEach(table => {
@@ -136,7 +169,7 @@ function adaptarTabelasParaResponsividade(config) {
     // aplica classe global para estilização CSS
     document.body.classList.add('responsive-tables-enabled');
 
-    // detectr tamanho de tela inicial
+    // detecta tamanho de tela inicial
     adaptarLayoutResponsivo(config);
 
     // processa cada tabela encontrada
@@ -147,6 +180,10 @@ function adaptarTabelasParaResponsividade(config) {
             return;
         }
 
+        // define view-mode antes de processar
+        const modoVisualizacao = detectarModoVisualizacao(config);
+        table.setAttribute('data-view-mode', modoVisualizacao);
+        
         // marca como processada
         table.setAttribute('data-responsive-processed', 'true');
 
@@ -180,7 +217,7 @@ function wrapTable(table) {
  * atualiza tabelas já processadas (para quando os dados mudam)
  */
 function atualizarTabela(table, config) {
-    // Identificar células que precisam ser atualizadas
+    // identifica células que precisam ser atualizadas
     table.querySelectorAll('tbody tr').forEach(row => {
         Array.from(row.cells).forEach((cell, index) => {
             const header = table.querySelector(`thead th:nth-child(${index + 1})`);
@@ -430,12 +467,11 @@ function throttle(func, limit) {
  * inicializa quando o documento estiver pronto
  */
 document.addEventListener('DOMContentLoaded', function () {
-    setTimeout(() => {
-        inicializarResponsividadeTabelas();
-
-        // add estilos CSS necessários para responsividade
-        adicionarEstilosCSS();
-    }, 500);
+    // inicializa imediatamente ao invés de esperar
+    inicializarResponsividadeTabelas();
+    
+    // add estilos CSS necessários para responsividade
+    adicionarEstilosCSS();
 });
 
 /**
@@ -455,20 +491,31 @@ function adicionarEstilosCSS() {
             position: relative;
         }
         
+        /* esconder elementos durante inicialização/atualização */
+        .responsive-tables-initializing table.table,
+        .responsive-tables-updating table.table {
+            opacity: 1; /* Mantém visível para evitar flash */
+        }
+        
         /* modos de visualização */
         table.table[data-view-mode="desktop"] .mobile-header-text,
         table.table[data-view-mode="desktop"] .tablet-header-text {
-            display: none;
+            display: none !important;
         }
         
         table.table[data-view-mode="tablet"] .mobile-header-text,
         table.table[data-view-mode="tablet"] .desktop-header-text {
-            display: none;
+            display: none !important;
         }
         
         table.table[data-view-mode="mobile"] .desktop-header-text,
         table.table[data-view-mode="mobile"] .tablet-header-text {
-            display: none;
+            display: none !important;
+        }
+        
+        /* esconder todas as opções que não são desktop imediatamente */
+        .mobile-header-text, .tablet-header-text {
+            display: none !important;
         }
         
         /* botões responsivos */
@@ -525,11 +572,9 @@ function adicionarEstilosCSS() {
             }
         }
         
-        /* animations */
-        @media (min-width: 577px) {
-            .table-responsive-wrapper {
-                transition: all 0.3s ease;
-            }
+        /* animations - só aplicar transições após inicialização completa */
+        .responsive-tables-enabled:not(.responsive-tables-initializing):not(.responsive-tables-updating) .table-responsive-wrapper {
+            transition: all 0.3s ease;
         }
         
         /* acessibilidade */
