@@ -1,6 +1,7 @@
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 import { doc, setDoc, getDoc, collection } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 import { db, auth } from "../config/firebase.js";
+import { Cliente } from '../model/Cliente.js';
 
 // carregamento dinâmico do SweetAlert2
 let Swal;
@@ -75,10 +76,19 @@ async function iniciarLogin() {
                 try {
                     const userDoc = await getDoc(doc(db, "users", user.uid));
                     if (userDoc.exists()) {
+                        // cria instância de Cliente com os dados do usuário
+                        const userData = userDoc.data();
+                        const cliente = new Cliente(
+                            userData.name,
+                            user.email,
+                            '' // não armazenamos a senha, apenas seu hash no Firebase
+                        );
+                        
+                        // armazena dados do cliente no localStorage
                         localStorage.setItem('loggedInUser', JSON.stringify({
                             uid: user.uid,
-                            email: user.email,
-                            name: userDoc.data().name
+                            email: cliente.email,
+                            name: cliente.nome
                         }));
 
                         // inicializa coleções silenciosamente
@@ -209,10 +219,13 @@ async function iniciarRegistro() {
 
                 console.log("Usuário criado com sucesso:", user.uid);
 
+                // Criar um cliente
+                const cliente = new Cliente(nameInput.value, emailInputRegister.value, passwordInputRegister.value);
+
                 // dados do usuário para Firestore
                 const userData = {
-                    name: nameInput.value,
-                    email: emailInputRegister.value,
+                    name: cliente.nome,
+                    email: cliente.email,
                     createdAt: new Date()
                 };
 

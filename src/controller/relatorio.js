@@ -1,4 +1,5 @@
 import { Auth } from "../services/Auth.js";
+import { Cliente } from '../model/Cliente.js';
 
 // verifica autenticação
 if (!Auth.isAuthenticated()) {
@@ -82,9 +83,22 @@ function calcularTotaisPeriodo(dataInicio, dataFim) {
     const gastosFiltrados = useAllData ? gastos : filtrarDadosPorPeriodo(gastos, dataInicio, dataFim);
     const receitasFiltradas = useAllData ? receitas : filtrarDadosPorPeriodo(receitas, dataInicio, dataFim);
 
+    // obtém dados do usuário atual
+    const userData = Auth.getLoggedInUser();
+    
+    // cria uma instância de Cliente com os dados do usuário
+    const cliente = new Cliente(
+        userData.name,
+        userData.email,
+        '' // não armazenamos a senha, apenas referência no Firebase
+    );
+    
+    // usa o método calcularSaldo da classe Cliente
+    const saldo = cliente.calcularSaldo(receitasFiltradas, gastosFiltrados);
+    
+    // para manter compatibilidade com o código existente
     const totalGastos = gastosFiltrados.reduce((total, gasto) => total + parseFloat(gasto.valor), 0);
     const totalReceitas = receitasFiltradas.reduce((total, receita) => total + parseFloat(receita.valor), 0);
-    const saldo = totalReceitas - totalGastos;
 
     // calcula economia média mensal
     // se não tiver período definido, considerar a média simples

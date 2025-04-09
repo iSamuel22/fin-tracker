@@ -1,4 +1,5 @@
 import { Auth } from "../services/Auth.js";
+import { Cliente } from '../model/Cliente.js';
 
 // verifica autenticação
 if (!Auth.isAuthenticated()) {
@@ -51,10 +52,23 @@ function formatarMoeda(valor, formatoCompleto = false) {
 // calcula totais
 function calcularTotais() {
     const { gastos, receitas } = obterDados();
-
+    
+    // obtém dados do usuário atual
+    const userData = Auth.getLoggedInUser();
+    
+    // cria uma instância de Cliente com os dados do usuário
+    const cliente = new Cliente(
+        userData.name,
+        userData.email,
+        '' // não armazenamos a senha, apenas referência no Firebase
+    );
+    
+    // usa o método calcularSaldo da classe Cliente
+    const saldo = cliente.calcularSaldo(receitas, gastos);
+    
+    // calcula os totais para uso em outros lugares
     const totalGastos = gastos.reduce((total, gasto) => total + parseFloat(gasto.valor), 0);
     const totalReceitas = receitas.reduce((total, receita) => total + parseFloat(receita.valor), 0);
-    const saldo = totalReceitas - totalGastos;
 
     // atualiza elementos HTML com tooltip
     atualizarElementoComTooltip('totalGastos', totalGastos);

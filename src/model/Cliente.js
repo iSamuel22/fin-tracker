@@ -33,7 +33,23 @@ export class Cliente {
         this.#senha = senha;
     }
 
-    calcularSaldo() {
-        return 0.0;
+    calcularSaldo(receitas, gastos) {
+        // se não receber arrays válidos, retorna 0
+        if (!Array.isArray(receitas) || !Array.isArray(gastos)) {
+            return 0;
+        }
+        
+        // soma todas as receitas
+        const totalReceitas = receitas.reduce((total, receita) => {
+            return total + parseFloat(receita.valor || 0);
+        }, 0);
+        
+        // soma todos os gastos
+        const totalGastos = gastos.reduce((total, gasto) => {
+            return total + parseFloat(gasto.valor || 0);
+        }, 0);
+        
+        // retorna a diferença (saldo)
+        return totalReceitas - totalGastos;
     }
 }
