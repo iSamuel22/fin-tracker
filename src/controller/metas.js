@@ -347,6 +347,8 @@ function calcularEstimativas() {
             progressClass += ' bg-success';
         }
 
+        const textoPercentagem = Math.min(100, porcentagemMensal).toFixed(1);
+
         tr.innerHTML = `
             <td>${meta.nome}</td>
             <td>R$ ${meta.valor.toFixed(2)}</td>
@@ -354,9 +356,9 @@ function calcularEstimativas() {
             <td>
                 <div class="progress" style="height: 20px;">
                     <div class="progress-bar ${progressClass}" role="progressbar" 
-                         style="width: ${porcentagemProgress}%;" 
-                         aria-valuenow="${porcentagemProgress}" aria-valuemin="0" aria-valuemax="100">
-                        ${porcentagemMensal.toFixed(1)}% por mês
+                        style="width: ${porcentagemProgress}%;" 
+                        aria-valuenow="${porcentagemProgress}" aria-valuemin="0" aria-valuemax="100">
+                        ${textoPercentagem}% por mês
                     </div>
                 </div>
             </td>
@@ -518,8 +520,8 @@ function exibirMetas() {
         const tooltipInfo = `Criada em: ${dataCriacao}\nÚltima atualização: ${ultimaAtualizacao}`;
 
         // o índice real na array metas original
-        const originalIndex = metas.findIndex(m => 
-            m.id === meta.id || 
+        const originalIndex = metas.findIndex(m =>
+            m.id === meta.id ||
             (m.nome === meta.nome && m.valor === meta.valor)
         );
 
@@ -641,7 +643,7 @@ function abrirModalEdicao(indice) {
         console.error('Meta não encontrada para o índice:', indice);
         return;
     }
-    
+
     // salva o índice atual para uso posterior
     indiceMetaAtual = indice;
 
@@ -802,7 +804,7 @@ function setupFilters() {
     } else {
         // fallback para quando bootstrap não está disponível
         bsCollapse = {
-            toggle: function() {
+            toggle: function () {
                 if (filterCollapse) {
                     if (filterCollapse.classList.contains('show')) {
                         filterCollapse.classList.remove('show');
@@ -954,7 +956,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     exibirMetas();
     calcularEstimativas();
-    
+
     // inicializa responsividade de tabelas
     inicializarResponsividadeTabelas();
 
