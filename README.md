@@ -147,5 +147,5 @@ Este projeto está licenciado sob a licença MIT - veja o arquivo LICENSE para m
 
 ## **📞 Contato**
 Para qualquer dúvida sobre o projeto, entre em contato:
-* E-mail: samueljubim47@gmail.com
+* E-mail: ipsamdev@gmail.com  
 * GitHub: iSamuel22
